@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Statecharts.NET.XState\Statecharts.NET.XState.csproj" />
+    <ProjectReference Include="..\Statecharts.NET\Statecharts.NET.csproj" />
+  </ItemGroup>
+
+</Project>

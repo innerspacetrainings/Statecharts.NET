@@ -1,0 +1,105 @@
+﻿const machine = Machine({
+  id: "M2U1",
+  type: 'parallel',
+  states: {
+    cleaning: {
+      initial: "locked",
+      states: {
+        locked: {},
+        allowed: {
+          initial: "points",
+          states: {
+            points: {
+              initial: "pending",
+              states: {
+                pending: {
+                  on: {
+                    "": {
+                      target: "linefinished",
+                      cond: "IsLineFinished"
+                    }
+                  }
+                },
+                linefinished: {
+                  on: {
+                    "": "pending"
+                  },
+                  entry: ['FinishLine']
+                }
+              }
+            },
+            alllinescleaned: {
+              type: "final"
+            }
+          }
+        }
+      },
+      on: {
+        "": [{
+          target: ".allowed",
+          cond: (_, __, {state}) => state && state.matches("error.none") && !state.matches("cleaning.allowed")
+        },
+        {
+          target: ".locked",
+          cond: (_, __, {state}) => state && !state.matches("error.none") && !state.matches("cleaning.locked")
+        }],
+      }
+    },
+    speed: {
+      initial: "correct",
+      states: {
+        correct: {
+          on: {
+            movedtoofast: "toofast"
+          }
+        },
+        toofast: {
+          on: {
+            sloweddown: "correct"
+          }
+        }
+      }
+    },
+    error: {
+      initial: "none",
+      states: {
+        none: {
+          on: {
+            overcleanlane: "overcleanlane",
+            "": [{
+              target: "wrongstartlane",
+              cond: "IsWrongStartlane"
+            },
+            {
+              target: "wrongorder",
+              cond: "IsWrongOrder"
+            },
+            {
+              target: "wrongdirection",
+              cond: "IsWrongDirection"
+            }]
+          }
+        },
+        overcleanlane: {
+          type: "final"
+        },
+        wrongstartlane: {
+          "type": "final"
+        },
+        wrongorder: {
+          "type": "final"
+        },
+        wrongdirection: {
+          "type": "final"
+        }
+      }
+    }
+  }
+}, { guards: {
+  IsWrongStartlane: () => false,
+  IsWrongOrder: () => false,
+  IsWrongDirection: () => false,
+  WereAllLinesCleaned: () => false,
+  IsLineFinished: () => false
+}
+})
