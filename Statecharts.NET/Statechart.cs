@@ -21,26 +21,26 @@ namespace Statecharts.NET
         public static ParsedStatechart<TContext> Parse<TContext>(this StatechartDefinition<TContext> stateChartDefinition)
             where TContext : IEquatable<TContext>
             => new ExecutableStatechart<TContext>(
-                stateChartDefinition.StateNodeDefinition.Parse(null),
+                stateChartDefinition.StateNodeDefinition.Parse<TContext>(null),
                 stateChartDefinition.InitialContext);
 
         private static BaseStateNode<TContext> Parse<TContext>(
-            this BaseStateNodeDefinition<TContext> stateNodeDefinition,
+            this IBaseStateNodeDefinition stateNodeDefinition,
             BaseStateNode<TContext> parent)
             where TContext : IEquatable<TContext>
         {
             IEnumerable<BaseStateNode<TContext>> ParseSubstateNodes(
-                IEnumerable<BaseStateNodeDefinition<TContext>> substateNodeDefinitions,
+                IEnumerable<IBaseStateNodeDefinition> substateNodeDefinitions,
                 BaseStateNode<TContext> recursedParent) =>
                 substateNodeDefinitions.Select(substateDefinition => substateDefinition.Parse(recursedParent));
 
             switch (stateNodeDefinition)
             {
-                case AtomicStateNodeDefinition<TContext> definition:
+                case IAtomicStateNodeDefinition definition:
                     return new AtomicStateNode<TContext>(parent, definition);
-                case FinalStateNodeDefinition<TContext> definition:
+                case IFinalStateNodeDefinition definition:
                     return new FinalStateNode<TContext>(parent, definition);
-                case CompoundStateNodeDefinition<TContext> definition:
+                case ICompoundStateNodeDefinition definition:
                     var compound = new CompoundStateNode<TContext>(parent, definition);
                     compound.StateNodes = ParseSubstateNodes(definition.States, compound);
                     compound.InitialTransition = new InitialTransition<TContext>(
@@ -48,7 +48,7 @@ namespace Statecharts.NET
                         compound.ResolveTarget(definition.InitialTransition.Target),
                         definition.InitialTransition.Actions);
                     return compound;
-                case OrthogonalStateNodeDefinition<TContext> definition:
+                case IOrthogonalStateNodeDefinition definition:
                     var orthogonal = new OrthogonalStateNode<TContext>(parent, definition);
                     orthogonal.StateNodes = ParseSubstateNodes(definition.States, orthogonal);
                     return orthogonal;

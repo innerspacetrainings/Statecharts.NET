@@ -14,7 +14,7 @@ namespace Statecharts.NET.Interpreter
 
         public CompoundStateNode(
             BaseStateNode<TContext> parent,
-            CompoundStateNodeDefinition<TContext> definition) : base(parent, definition)
+            ICompoundStateNodeDefinition definition) : base(parent, definition)
         {
         }
 

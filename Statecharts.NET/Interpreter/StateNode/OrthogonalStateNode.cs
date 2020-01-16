@@ -12,7 +12,7 @@ namespace Statecharts.NET.Interpreter
 
         public OrthogonalStateNode(
             BaseStateNode<TContext> parent,
-            OrthogonalStateNodeDefinition<TContext> definition) : base(parent, definition)
+            IOrthogonalStateNodeDefinition definition) : base(parent, definition)
         {
         }
 

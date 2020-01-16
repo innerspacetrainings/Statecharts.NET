@@ -6,52 +6,53 @@ namespace Statecharts.NET.Definition
 {
     public static class StateNodeDefinitionFunctions
     {
-        public static TResult CataFold<TContext, TResult>(
-            this BaseStateNodeDefinition<TContext> stateNodeDefinition,
-            Func<AtomicStateNodeDefinition<TContext>, TResult> fAtomic,
-            Func<FinalStateNodeDefinition<TContext>, TResult> fFinal,
-            Func<CompoundStateNodeDefinition<TContext>, IEnumerable<TResult>, TResult> fCompound,
-            Func<OrthogonalStateNodeDefinition<TContext>, IEnumerable<TResult>, TResult> fOrthogonal)
-            where TContext : IEquatable<TContext>
+        public static TResult CataFold<TResult>(
+            this IBaseStateNodeDefinition stateNodeDefinition,
+            Func<IAtomicStateNodeDefinition, TResult> fAtomic,
+            Func<IFinalStateNodeDefinition, TResult> fFinal,
+            Func<ICompoundStateNodeDefinition, IEnumerable<TResult>, TResult> fCompound,
+            Func<IOrthogonalStateNodeDefinition, IEnumerable<TResult>, TResult> fOrthogonal)
         {
-            TResult Recurse(BaseStateNodeDefinition<TContext> recursedStateNodeDefinition) =>
+            TResult Recurse(IBaseStateNodeDefinition recursedStateNodeDefinition) =>
                 recursedStateNodeDefinition.CataFold(fAtomic, fFinal, fCompound, fOrthogonal);
 
             switch (stateNodeDefinition)
             {
-                case AtomicStateNodeDefinition<TContext> atomic:
+                case IAtomicStateNodeDefinition atomic:
                     return fAtomic(atomic);
-                case FinalStateNodeDefinition<TContext> final:
+                case IFinalStateNodeDefinition final:
                     return fFinal(final);
-                case CompoundStateNodeDefinition<TContext> compound:
+                case ICompoundStateNodeDefinition compound:
                     return fCompound(compound, compound.States.Select(Recurse));
-                case OrthogonalStateNodeDefinition<TContext> orthogonal:
+                case IOrthogonalStateNodeDefinition orthogonal:
                     return fOrthogonal(orthogonal, orthogonal.States.Select(Recurse));
                 default: throw new Exception("NON EXHAUSTIVE SWITCH");
             }
         }
     }
 
-    public abstract class BaseStateNodeDefinition<TContext>
+    public interface IBaseStateNodeDefinition
     {
-        public string Name { get; set; }
-        public IEnumerable<BaseEventDefinition> Events { get; set; }
-        public IEnumerable<Action> EntryActions { get; set; }
-        public IEnumerable<Action> ExitActions { get; set; }
+        string Name { get; }
+        IEnumerable<IEventDefinition> Events { get; }
+        IEnumerable<Action> EntryActions { get; }
+        IEnumerable<Action> ExitActions { get; }
+        IEnumerable<IActivity> Activities { get; }
     }
 
-    public class CompoundStateNodeDefinition<TContext> : BaseStateNodeDefinition<TContext>
+    public interface INonFinalStateNodeDefinition : IBaseStateNodeDefinition
     {
-        public InitialTransitionDefinition InitialTransition { get; set; }
-        public IEnumerable<BaseStateNodeDefinition<TContext>> States { get; set; }
+        IEnumerable<IBaseServiceDefinition> Services { get; }
     }
-
-    public class OrthogonalStateNodeDefinition<TContext> : BaseStateNodeDefinition<TContext>
+    public interface IAtomicStateNodeDefinition : INonFinalStateNodeDefinition {}
+    public interface INonAtomicStateNodeDefinition : INonFinalStateNodeDefinition
     {
-        public IEnumerable<BaseStateNodeDefinition<TContext>> States { get; set; }
+        IEnumerable<IBaseStateNodeDefinition> States { get; }
     }
-
-    public class FinalStateNodeDefinition<TContext> : BaseStateNodeDefinition<TContext> { }
-
-    public class AtomicStateNodeDefinition<TContext> : BaseStateNodeDefinition<TContext> { }
+    public interface ICompoundStateNodeDefinition : INonAtomicStateNodeDefinition
+    {
+        InitialTransitionDefinition InitialTransition { get; }
+    }
+    public interface IOrthogonalStateNodeDefinition : INonAtomicStateNodeDefinition {}
+    public interface IFinalStateNodeDefinition : IBaseStateNodeDefinition {}
 }

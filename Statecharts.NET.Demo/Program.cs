@@ -22,8 +22,8 @@ namespace Statecharts.NET.Demo
 
     internal static class Program
     {
-        private static readonly StatechartDefinition<FetchContext> FetchDefinition =
-            new StatechartDefinition<FetchContext>()
+        private static readonly StatechartDefinition<FetchContext> FetchDefinition = null;
+            /*new StatechartDefinition<FetchContext>()
             {
                 InitialContext = new FetchContext() { Retries = 0 },
                 StateNodeDefinition = new CompoundStateNodeDefinition<FetchContext>()
@@ -181,7 +181,7 @@ namespace Statecharts.NET.Demo
                         }
                     }
                 }
-            };
+            };*/
 
         private static void Main()
         {

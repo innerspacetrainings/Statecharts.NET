@@ -8,7 +8,7 @@ namespace Statecharts.NET
 
     public abstract class BaseAction { }
     public abstract class Action : BaseAction { }
-    public abstract class EventAction : BaseAction { }
+    public abstract class ActionWithData : BaseAction { }
 
     class SendAction<TContext> : Action, PureAction { }
     class RaiseAction<TContext> : Action, PureAction { }
@@ -16,7 +16,7 @@ namespace Statecharts.NET
     {
         public string Label { get; set; }
     }
-    class LogEventAction<TContext> : EventAction, PureAction
+    class LogEventAction<TContext> : ActionWithData, PureAction
     {
         public string Label { get; set; }
     }
@@ -24,16 +24,16 @@ namespace Statecharts.NET
     {
         public Action<TContext> Mutation { get; set; }
     }
-    public class AssignEventAction<TContext, TResult> : EventAction, PureAction
+    public class AssignActionWithData<TContext, TData> : ActionWithData, PureAction
     {
-        public Action<TContext, BaseEvent> Mutation { get; set; }
+        public Action<TContext, TData> Mutation { get; set; }
     }
     public class SideEffectAction<TContext> : Action, MutatingAction
     {
         public Action<TContext> Function { get; set; }
     }
-    public class SideEffectEventAction<TContext> : EventAction, MutatingAction
+    public class SideEffectActionWithData<TContext, TData> : ActionWithData, MutatingAction
     {
-        public Action<TContext, BaseEvent> Function { get; set; }
+        public Action<TContext, TData> Function { get; set; }
     }
 }

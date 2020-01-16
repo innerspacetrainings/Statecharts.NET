@@ -22,10 +22,10 @@ namespace Statecharts.NET.XState
             => $"const {prefix}Machine = Machine({@object.AsString()})";
 
         private static JSProperty AsJSProperty<TContext>(
-            this BaseStateNodeDefinition<TContext> stateNodeDefinition,
+            this IBaseStateNodeDefinition stateNodeDefinition,
             StatechartDefinition<TContext> statechartDefinition)
             where TContext : IEquatable<TContext>
-            => stateNodeDefinition.CataFold<TContext, JSProperty>( // TODO: add actions, transitions
+            => stateNodeDefinition.CataFold<JSProperty>( // TODO: add actions, transitions
                 atomic => (atomic.Name, atomic.Properties(statechartDefinition)),
                 final => (final.Name, final.Properties(statechartDefinition).With(("type", "final"))),
                 (compound, subDefinitions) => (compound.Name, compound.Properties(statechartDefinition).With(
@@ -36,7 +36,7 @@ namespace Statecharts.NET.XState
                     ("states", subDefinitions))));
 
         private static ObjectValue Properties<TContext>(
-            this BaseStateNodeDefinition<TContext> definition,
+            this IBaseStateNodeDefinition definition,
             StatechartDefinition<TContext> statechartDefinition)
             where TContext : IEquatable<TContext>
         {

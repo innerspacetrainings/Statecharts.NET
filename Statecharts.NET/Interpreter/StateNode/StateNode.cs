@@ -146,7 +146,7 @@ namespace Statecharts.NET.Interpreter
         public bool HasParent => Parent != null;
         public string Name => Key.Map(_ => null, named => named.StateName);
 
-        protected BaseStateNode(BaseStateNode<TContext> parent, BaseStateNodeDefinition<TContext> definition)
+        protected BaseStateNode(BaseStateNode<TContext> parent, IBaseStateNodeDefinition definition)
         {
             if (definition is null) throw new ArgumentNullException(nameof(definition));
             Parent = parent;

@@ -75,20 +75,20 @@ namespace Statecharts.NET.Definition
         BaseGuard Guard { get; set; }
     }
 
-    public abstract class ImmediateTransitionDefinition : BaseTransitionDefinition
+    public abstract class TransitionDefinition : BaseTransitionDefinition
     {
         public IEnumerable<Action> Actions { get; set; }
     }
-    public class UnguardedImmediateTransitionDefinition : ImmediateTransitionDefinition, UnguardedTransitionDefinition
+    public class UnguardedImmediateTransitionDefinition : TransitionDefinition, UnguardedTransitionDefinition
     {
     }
-    public class GuardedImmediateTransitionDefinition : ImmediateTransitionDefinition, GuardedTransitionDefinition
+    public class GuardedImmediateTransitionDefinition : TransitionDefinition, GuardedTransitionDefinition
     {
         public BaseGuard Guard { get; set; } // TODO: Guard without Event
     }
     public abstract class EventTransitionDefinition : BaseTransitionDefinition
     {
-        public IEnumerable<EventAction> Actions { get; set; }
+        public IEnumerable<ActionWithData> Actions { get; set; }
     }
     public class UnguardedEventTransitionDefinition : EventTransitionDefinition, UnguardedTransitionDefinition
     {

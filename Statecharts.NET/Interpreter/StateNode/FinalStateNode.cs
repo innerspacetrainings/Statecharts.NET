@@ -6,6 +6,6 @@ namespace Statecharts.NET.Interpreter
     class FinalStateNode<TContext> : BaseStateNode<TContext>
         where TContext : IEquatable<TContext>
     {
-        public FinalStateNode(BaseStateNode<TContext> parent, FinalStateNodeDefinition<TContext> definition) : base(parent, definition) { }
+        public FinalStateNode(BaseStateNode<TContext> parent, IFinalStateNodeDefinition definition) : base(parent, definition) { }
     }
 }

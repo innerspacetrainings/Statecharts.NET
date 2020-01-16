@@ -109,6 +109,10 @@ return state_for.children
 ```
 
 
+## Activities vs. Invoked Services
+- https://github.com/davidkpiano/xstate/issues/418
+- https://github.com/davidkpiano/xstate/issues/268#issuecomment-520243978
+
 
 
 

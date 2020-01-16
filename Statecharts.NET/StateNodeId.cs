@@ -62,16 +62,13 @@ namespace Statecharts.NET
             RootstateName = statechartName ?? throw new ArgumentNullException(nameof(statechartName));
         }
 
-        public override bool Equals(object other) => other is RootStateNodeKey;
+        public override bool Equals(object other) => other is RootStateNodeKey; // TODO: statechartName
         public override int GetHashCode() => 3189;
     }
 
     public class NamedStateNodeKey : StateNodeKey
     {
-        public NamedStateNodeKey(string stateName)
-        {
-            StateName = stateName ?? throw new ArgumentNullException(nameof(stateName));
-        }
+        public NamedStateNodeKey(string stateName) => StateName = stateName ?? throw new ArgumentNullException(nameof(stateName));
 
         public string StateName { get; }
 

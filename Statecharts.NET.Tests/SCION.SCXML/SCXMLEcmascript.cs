@@ -38,7 +38,7 @@ namespace Statecharts.NET.SCION.SCXML.Tests
             return new StatechartDefinition<EcmaScriptContext>() { InitialContext = context, StateNodeDefinition = GetStateNodeDefinition(definition, engine, NSd) };
         }
 
-        private static BaseStateNodeDefinition<EcmaScriptContext> GetRootStateNodeDefinition(
+        private static IBaseStateNodeDefinition GetRootStateNodeDefinition(
             XElement definition,
             Engine engine,
             Func<string, XName> NSd)
@@ -52,7 +52,7 @@ namespace Statecharts.NET.SCION.SCXML.Tests
                 : GetStateNodeDefinition(parallel, engine, NSd);
         }
 
-        private static BaseStateNodeDefinition<EcmaScriptContext> GetStateNodeDefinition(XElement definition, Engine engine, Func<string, XName> NSd)
+        private static IBaseStateNodeDefinition GetStateNodeDefinition(XElement definition, Engine engine, Func<string, XName> NSd)
         {
             var events = definition.Elements(NSd("transition")).Select(e => new EventDefinition<Statecharts.NET.Event>()
             {
@@ -74,7 +74,7 @@ namespace Statecharts.NET.SCION.SCXML.Tests
             switch (definition)
             {
                 case { } when definition.Name == NSd("scxml"):
-                    return new CompoundStateNodeDefinition<EcmaScriptContext>()
+                    return new ICompoundStateNodeDefinition()
                     {
                         Name = definition.Attribute("name")?.Value ?? "root",
                         InitialTransition = new InitialTransitionDefinition()
@@ -88,21 +88,21 @@ namespace Statecharts.NET.SCION.SCXML.Tests
                         Events = events
                     };
                 case { } when definition.Name == NSd("state") && definition.Substates(NSd).Any():
-                    return new CompoundStateNodeDefinition<EcmaScriptContext>()
+                    return new ICompoundStateNodeDefinition()
                     {
                         Name = definition.Attribute("id")?.Value ?? "FUCK",
                         Events = events
                     };
                 case { } when definition.Name == NSd("state") && !definition.Substates(NSd).Any():
-                    return new AtomicStateNodeDefinition<EcmaScriptContext>()
+                    return new IAtomicStateNodeDefinition()
                     {
                         Name = definition.Attribute("id")?.Value ?? "FUCK",
                         Events = events
                     };
                 case { } when definition.Name == NSd("parallel"):
-                    return new OrthogonalStateNodeDefinition<EcmaScriptContext>();
+                    return new IOrthogonalStateNodeDefinition();
                 case { } when definition.Name == NSd("final"):
-                    return new FinalStateNodeDefinition<EcmaScriptContext>();
+                    return new IFinalStateNodeDefinition();
                 default:
                     return null; // TODO: error handling
             }

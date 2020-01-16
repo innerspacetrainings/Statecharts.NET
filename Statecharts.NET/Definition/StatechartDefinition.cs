@@ -7,6 +7,6 @@ namespace Statecharts.NET.Definition
     {
         public string Id => StateNodeDefinition.Name;
         public TContext InitialContext { get; set; }
-        public BaseStateNodeDefinition<TContext> StateNodeDefinition { get; set; }
+        public IBaseStateNodeDefinition StateNodeDefinition { get; set; }
     }
 }

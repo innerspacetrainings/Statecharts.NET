@@ -43,15 +43,23 @@ namespace Statecharts.NET.Definition
 
     public class AbsoluteTargetDefinition : BaseTargetDefinition
     {
-        public StateNodeId Id { get; set; }
+        public StateNodeId Id { get; }
+
+        public AbsoluteTargetDefinition(StateNodeId id) => Id = id;
     }
 
     public abstract class RelativeTargetDefinition : BaseTargetDefinition
     {
-        public NamedStateNodeKey Key { get; set; }
+        public NamedStateNodeKey Key { get; }
+
+        internal RelativeTargetDefinition(string stateNodeName) => Key = new NamedStateNodeKey(stateNodeName);
     }
 
-    public class SiblingTargetDefinition : RelativeTargetDefinition { }
+    public class SiblingTargetDefinition : RelativeTargetDefinition {
+        public SiblingTargetDefinition(string stateNodeName) : base(stateNodeName) { }
+    }
 
-    public class ChildTargetDefinition : RelativeTargetDefinition { }
+    public class ChildTargetDefinition : RelativeTargetDefinition {
+        public ChildTargetDefinition(string stateNodeName) : base(stateNodeName) { }
+    }
 }
