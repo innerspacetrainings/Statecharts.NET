@@ -54,55 +54,55 @@ namespace Statecharts.NET.SCION.SCXML.Tests
 
         private static IBaseStateNodeDefinition GetStateNodeDefinition(XElement definition, Engine engine, Func<string, XName> NSd)
         {
-            var events = definition.Elements(NSd("transition")).Select(e => new EventDefinition<Statecharts.NET.Event>()
-            {
-                Event = new NET.Event(e.Attribute("event")?.Value),
-                Transitions = new[]
-                {
-                    new UnguardedEventTransitionDefinition()
-                    {
-                        Targets = new[]
-                        {
-                            new SiblingTargetDefinition()
-                            {
-                                Key = new NamedStateNodeKey(e.Attribute("target")?.Value)
-                            }
-                        }
-                    }
-                }
-            });
+            ////var events = definition.Elements(NSd("transition")).Select(e => new EventDefinition<Statecharts.NET.Event>()
+            ////{
+            ////    Event = new NET.Event(e.Attribute("event")?.Value),
+            ////    Transitions = new[]
+            ////    {
+            ////        new UnguardedEventTransitionDefinition()
+            ////        {
+            ////            Targets = new[]
+            ////            {
+            ////                new SiblingTargetDefinition()
+            ////                {
+            ////                    Key = new NamedStateNodeKey(e.Attribute("target")?.Value)
+            ////                }
+            ////            }
+            ////        }
+            ////    }
+            ////});
             switch (definition)
             {
-                case { } when definition.Name == NSd("scxml"):
-                    return new ICompoundStateNodeDefinition()
-                    {
-                        Name = definition.Attribute("name")?.Value ?? "root",
-                        InitialTransition = new InitialTransitionDefinition()
-                        {
-                            Target = new ChildTargetDefinition()
-                            {
-                                Key = new NamedStateNodeKey(definition.Attribute("initial")?.Value ?? definition.Substates(NSd).FirstOrDefault()?.Attribute("id")?.Value)
-                            }
-                        },
-                        States = definition.Substates(NSd).Select(element => GetStateNodeDefinition(element, engine, NSd)),
-                        Events = events
-                    };
-                case { } when definition.Name == NSd("state") && definition.Substates(NSd).Any():
-                    return new ICompoundStateNodeDefinition()
-                    {
-                        Name = definition.Attribute("id")?.Value ?? "FUCK",
-                        Events = events
-                    };
-                case { } when definition.Name == NSd("state") && !definition.Substates(NSd).Any():
-                    return new IAtomicStateNodeDefinition()
-                    {
-                        Name = definition.Attribute("id")?.Value ?? "FUCK",
-                        Events = events
-                    };
-                case { } when definition.Name == NSd("parallel"):
-                    return new IOrthogonalStateNodeDefinition();
-                case { } when definition.Name == NSd("final"):
-                    return new IFinalStateNodeDefinition();
+                ////case { } when definition.Name == NSd("scxml"):
+                ////    return new ICompoundStateNodeDefinition()
+                ////    {
+                ////        Name = definition.Attribute("name")?.Value ?? "root",
+                ////        InitialTransition = new InitialTransitionDefinition()
+                ////        {
+                ////            Target = new ChildTargetDefinition()
+                ////            {
+                ////                Key = new NamedStateNodeKey(definition.Attribute("initial")?.Value ?? definition.Substates(NSd).FirstOrDefault()?.Attribute("id")?.Value)
+                ////            }
+                ////        },
+                ////        States = definition.Substates(NSd).Select(element => GetStateNodeDefinition(element, engine, NSd)),
+                ////        Events = events
+                ////    };
+                ////case { } when definition.Name == NSd("state") && definition.Substates(NSd).Any():
+                ////    return new ICompoundStateNodeDefinition()
+                ////    {
+                ////        Name = definition.Attribute("id")?.Value ?? "FUCK",
+                ////        Events = events
+                ////    };
+                ////case { } when definition.Name == NSd("state") && !definition.Substates(NSd).Any():
+                ////    return new IAtomicStateNodeDefinition()
+                ////    {
+                ////        Name = definition.Attribute("id")?.Value ?? "FUCK",
+                ////        Events = events
+                ////    };
+                ////case { } when definition.Name == NSd("parallel"):
+                ////    return new IOrthogonalStateNodeDefinition();
+                ////case { } when definition.Name == NSd("final"):
+                ////    return new IFinalStateNodeDefinition();
                 default:
                     return null; // TODO: error handling
             }

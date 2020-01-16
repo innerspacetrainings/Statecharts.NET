@@ -27,7 +27,8 @@ namespace Statecharts.NET.Language.Transition
         public UnguardedTransitionTo TransitionTo =>
             new UnguardedTransitionTo();
 
-        public Guarded If(BaseGuard guard) =>
+        public Guarded If<TContext>(Guard<TContext> guard)
+            where TContext : IEquatable<TContext> =>
             new Guarded();
     }
     public class WithEventDefinition<TEventData>
@@ -39,7 +40,8 @@ namespace Statecharts.NET.Language.Transition
         public UnguardedTransitionTo TransitionTo =>
             new UnguardedTransitionTo();
 
-        public Guarded If(BaseGuard guard) =>
+        public Guarded If<TContext>(DataGuard<TContext, TEventData> guard)
+            where TContext : IEquatable<TContext> =>
             new Guarded();
     }
 
@@ -104,10 +106,12 @@ namespace Statecharts.NET.Language.Transition
     {
         public WithActions WithActions(Action action, params Action[] actions) =>
             new WithActions();
+        public WithActions WithActions<TContext>(Action<TContext> action, params Action<TContext>[] actions) =>
+            new WithActions();
     }
     public class WithTarget<TEventData> : IEventDefinition
     {
-        public WithActions WithActions(DataAction<TEventData> action, params DataAction<TEventData>[] actions) =>
+        public WithActions WithActions<TContext>(Action<TContext, TEventData> action, params Action<TContext, TEventData>[] actions) =>
             new WithActions();
     }
 

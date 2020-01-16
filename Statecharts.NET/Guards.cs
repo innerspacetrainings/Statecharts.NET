@@ -1,49 +1,32 @@
 ﻿using System;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET
 {
-    public static class BaseGuardFunctions
-    {
-        public static TResult Map<TResult, TContext, TData>(
-            this BaseGuard baseGuard,
-            Func<Guard<TContext>, TResult> fGuard,
-            Func<GuardWithData<TContext, TData>, TResult> fGuardWithData,
-            Func<InStateGuard<TContext>, TResult> fInState)
-            where TContext : IEquatable<TContext>
-        {
-            switch (baseGuard)
-            {
-                case Guard<TContext> guard:
-                    return fGuard(guard);
-                case GuardWithData<TContext, TData> guardWithData:
-                    return fGuardWithData(guardWithData);
-                case InStateGuard<TContext> inState:
-                    return fInState(inState);
-                default: throw new Exception("NON EXHAUSTIVE SWITCH");
-            }
-        }
-    }
+    public abstract class Guard<TContext> : OneOfBase<ConditionGuard<TContext>, InStateGuard<TContext>>
+        where TContext : IEquatable<TContext> { }
 
-    public interface IGuard { }
-    public interface IDataGuard { }
+    public abstract class Guard<TContext, TData> : OneOfBase<ConditionDataGuard<TContext, TData>, InStateGuard<TContext>>
+        where TContext : IEquatable<TContext> { }
 
-    public class BaseGuard { }
-
-    public class Guard<TContext> : BaseGuard, IGuard
+    public class ConditionGuard<TContext>
         where TContext : IEquatable<TContext>
     {
-        public Func<TContext, bool> Condition { get; set; }
+        public Func<TContext, bool> Condition { get; }
+        public ConditionGuard(Func<TContext, bool> condition) => Condition = condition;
     }
 
-    public class DataGuard<TContext, TData> : BaseGuard, 
+    public class ConditionDataGuard<TContext, TData>
         where TContext : IEquatable<TContext>
     {
-            public Func<TContext, TData, bool> Condition { get; set; }
+        public Func<TContext, TData, bool> Condition { get; }
+        public ConditionDataGuard(Func<TContext, TData, bool> condition) => Condition = condition;
     }
 
-    public class InStateGuard<TContext> : BaseGuard
+    public class InStateGuard<TContext>
         where TContext : IEquatable<TContext>
     {
-            public StateConfiguration State { get; set; }
+        public StateConfiguration State { get; }
+        public InStateGuard(StateConfiguration state) => State = state;
     }
 }

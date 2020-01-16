@@ -3,56 +3,38 @@ using System.Collections.Generic;
 
 namespace Statecharts.NET.Definition
 {
-    public static class BaseEventDefinitionFunctions
+    public interface IEvent : IEquatable<IEvent> { }
+    public interface IEvent<out TData> : IEvent
     {
-        public static TResult Map<TResult>(
-            this BaseEventDefinition eventDefinition,
-            Func<ImmediateEventDefinition, TResult> fImmediateEvent,
-            Func<EventDefinition, TResult> fEvent,
-            Func<ForbiddenEventDefinition, TResult> fForbiddenEvent)
+        TData Data { get; }
+    }
+
+    public class CustomEvent : IEvent
+    {
+        public string EventName { get; }
+        public CustomEvent(string eventName) => EventName = eventName;
+
+        public virtual bool Equals(IEvent other) => other is CustomEvent @event && @event.EventName == EventName;
+
+        public override bool Equals(object obj)
         {
-            switch(eventDefinition)
-            {
-                case ImmediateEventDefinition immediateEvent:
-                    return fImmediateEvent(immediateEvent);
-                case EventDefinition @event:
-                    return fEvent(@event);
-                case ForbiddenEventDefinition forbiddenEvent:
-                    return fForbiddenEvent(forbiddenEvent);
-                default: throw new Exception("NON EXHAUSTIVE SWITCH");
-            }
+            if (obj is null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((CustomEvent) obj);
         }
-    }
 
-    public interface IEventDefinition { }
-    
-    public abstract class BaseEventDefinition : IEventDefinition
+        public override int GetHashCode() => EventName != null ? EventName.GetHashCode() : 0;
+    }
+    public class CustomEvent<TData> : CustomEvent, IEvent<TData>
+        where TData : IEquatable<TData>
     {
+        public TData Data { get; }
+        public CustomEvent(string eventName, TData data) : base(eventName) => Data = data;
     }
-
-    public class EventDefinition : BaseEventDefinition
-    {
-        public BaseEvent Event { get; }
-        public IEnumerable<EventTransitionDefinition> Transitions { get; set; }
-
-        public EventDefinition(BaseEvent @event) => Event = @event;
+    public class ImmediateEvent : IEvent {
+        public bool Equals(IEvent other) => other is ImmediateEvent;
     }
-    public class ImmediateEventDefinition : BaseEventDefinition
-    {
-        public IEnumerable<ImmediateTransitionDefinition> Transitions { get; set; }
-    }
-    public class DoneEventDefinition : BaseEventDefinition
-    {
-        public IEnumerable<BaseTransitionDefinition> Transitions { get; set; } // TODO: correct generic type
-    }
-    public class DelayedEventDefinition : BaseEventDefinition
-    {
-        public TimeSpan Delay { get; }
-        public IEnumerable<BaseTransitionDefinition> Transitions { get; set; } // TODO: correct generic type
-
-        public DelayedEventDefinition(TimeSpan delay) => Delay = delay;
-    }
-    public class ForbiddenEventDefinition : BaseEventDefinition {
-        public Event Event { get; set; }
-    }
+    public class ServiceDoneEvent<TResult> : IEvent<TResult> { }
+    public class CompoundDoneEvent : IEvent { }
+    public class DelayedEvent : IEvent { }
 }

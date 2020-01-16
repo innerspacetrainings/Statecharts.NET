@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Statecharts.NET.Definition;
-using Statecharts.NET.Internal.Extensions;
 using Statecharts.NET.Language.Service;
-using Statecharts.NET.Utils;
+using Statecharts.NET.Utilities;
+using static Statecharts.NET.Language.Keywords;
 
 namespace Statecharts.NET.Language.StateNode
 {
@@ -124,7 +121,7 @@ namespace Statecharts.NET.Language.StateNode
 
         public CompoundWithInitialState WithInitialState(string stateName)
         {
-            DefinitionData.InitialTransition = new InitialTransitionDefinition { Target = new ChildTargetDefinition { Key = new NamedStateNodeKey(stateName) } }; // TODO: change to builder pattern or ctor
+            DefinitionData.InitialTransition = new InitialTransitionDefinition { Target = Child(stateName) }; // TODO: change to builder pattern or ctor
             return new CompoundWithInitialState(this);
         }
     }

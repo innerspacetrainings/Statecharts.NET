@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using Statecharts.NET.Extensions;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
 {
@@ -116,7 +114,7 @@ namespace Statecharts.NET.Interpreter
                 switch (action)
                 {
                     // TODO: execute the Actions
-                    case LogAction<TContext> logAction:
+                    case LogAction logAction:
                         Debug.WriteLine(logAction.Label);
                         break;
                     case SideEffectAction<TContext> sideEffectAction:

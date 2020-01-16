@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Statecharts.NET.Builders;
 using Statecharts.NET.Definition;
-using Statecharts.NET.Internal.Extensions;
 using Statecharts.NET.Language.Service;
 using Statecharts.NET.Language.StateNode;
 using Statecharts.NET.Language.Transition;
-using Statecharts.NET.Utils;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Language
 {

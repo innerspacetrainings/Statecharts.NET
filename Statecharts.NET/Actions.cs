@@ -1,39 +1,66 @@
 ﻿using System;
-using System.Linq.Expressions;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET
 {
-    public interface PureAction { }
-    public interface MutatingAction { }
+    public interface IPureAction { }
+    public interface IMutatingAction { }
 
-    public abstract class BaseAction { }
-    public abstract class Action : BaseAction { }
-    public abstract class ActionWithData : BaseAction { }
+    public abstract class Action : OneOfBase<
+        SendAction,
+        RaiseAction,
+        LogAction>
+    { }
+    public abstract class Action<TContext> : OneOfBase<
+        Action,
+        AssignAction<TContext>,
+        SideEffectAction<TContext>>
+    { }
+    public abstract class Action<TContext, TData> : OneOfBase<
+        Action<TContext>,
+        AssignAction<TContext, TData>,
+        SideEffectAction<TContext, TData>>
+    { }
 
-    class SendAction<TContext> : Action, PureAction { }
-    class RaiseAction<TContext> : Action, PureAction { }
-    class LogAction<TContext> : Action, PureAction
+    public class SendAction : IPureAction { }
+
+    public class RaiseAction : IPureAction { }
+
+    public class LogAction : IPureAction
     {
-        public string Label { get; set; }
+        public string Label { get; }
+        public LogAction(string label) => Label = label;
     }
-    class LogEventAction<TContext> : ActionWithData, PureAction
+    public class LogAction<TContext> : IPureAction
     {
-        public string Label { get; set; }
+        public Func<TContext, string> Message { get; }
+        public LogAction(Func<TContext, string> message) => Message = message;
     }
-    public class AssignAction<TContext, TResult> : Action, PureAction
+    public class LogAction<TContext, TData> : IPureAction
     {
-        public Action<TContext> Mutation { get; set; }
+        public Func<TContext, TData, string> Message { get; }
+        public LogAction(Func<TContext, TData, string> message) => Message = message;
     }
-    public class AssignActionWithData<TContext, TData> : ActionWithData, PureAction
+
+    public class AssignAction<TContext> : IPureAction
     {
-        public Action<TContext, TData> Mutation { get; set; }
+        public Action<TContext> Mutation { get; }
+        public AssignAction(Action<TContext> mutation) => Mutation = mutation;
     }
-    public class SideEffectAction<TContext> : Action, MutatingAction
+    public class AssignAction<TContext, TData> : IPureAction
     {
-        public Action<TContext> Function { get; set; }
+        public Action<TContext, TData> Mutation { get; }
+        public AssignAction(Action<TContext, TData> mutation) => Mutation = mutation;
     }
-    public class SideEffectActionWithData<TContext, TData> : ActionWithData, MutatingAction
+
+    public class SideEffectAction<TContext> : IMutatingAction
     {
-        public Action<TContext, TData> Function { get; set; }
+        public Action<TContext> Function { get; }
+        public SideEffectAction(Action<TContext> function) => Function = function;
+    }
+    public class SideEffectAction<TContext, TData> : IMutatingAction
+    {
+        public Action<TContext, TData> Function { get; }
+        public SideEffectAction(Action<TContext, TData> function) => Function = function;
     }
 }
