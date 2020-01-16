@@ -29,6 +29,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="_Utilities\OneOf\OneOf.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OneOf.tt</DependentUpon>
+    </Compile>
+    <Compile Update="_Utilities\OneOf\OneOfBase.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OneOfBase.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="_Utilities\OneOf\OneOf.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>OneOf.cs</LastGenOutput>

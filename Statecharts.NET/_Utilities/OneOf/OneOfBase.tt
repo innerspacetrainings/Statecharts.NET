@@ -16,12 +16,11 @@ using System;
 
 namespace Statecharts.NET.Utilities
 {
-<#foreach(var arity in Enumerable.Range(2, maxGenerics))
-{#>
+<#foreach(var arity in Enumerable.Range(2, maxGenerics)){#>
     public class OneOfBase<<#= Generics(arity) #>>
     {
-        readonly int _index;
-        <#= GenerateForArity(arity, "readonly T{0} _value{0};", $"{Environment.NewLine}        ") #>
+        internal readonly int _index;
+        <#= GenerateForArity(arity, "internal readonly T{0} _value{0};", $"{Environment.NewLine}        ") #>
 
         protected OneOfBase(int index, <#= GenerateForArity(arity, "T{0} value{0} = default", ", ") #>)
         {
@@ -38,24 +37,6 @@ namespace Statecharts.NET.Utilities
         }
 
         <#= GenerateForArity(arity, $"public static implicit operator OneOfBase<{Generics(arity)}>(T{{0}} t) => new OneOfBase<{Generics(arity)}>({{0}}, value{{0}}: t);", $"{Environment.NewLine}        ") #>
-
-        public TResult Match<TResult>(<#= GenerateForArity(arity, "Func<T{0}, TResult> f{0}", ", ") #>)
-        {
-            switch (_index)
-            {
-                <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: return f{{0}}(_value{{0}});", $"{Environment.NewLine}                ") #>
-                default: throw new InvalidOperationException();
-            }
-        }
-
-        public void Switch(<#= GenerateForArity(arity, "Action<T{0}> f{0}", ", ") #>)
-        {
-            switch (_index)
-            {
-                <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: f{{0}}(_value{{0}}); return;", $"{Environment.NewLine}                ") #>
-                default: throw new InvalidOperationException();
-            }
-        }
 
         private bool Equals(OneOfBase<<#= Generics(arity) #>> other)
         {
@@ -92,6 +73,26 @@ namespace Statecharts.NET.Utilities
             }
         }
     }
-    
 <#}#>
+    public static class OneOfBaseExtensions {
+<#foreach(var arity in Enumerable.Range(2, maxGenerics)){#>
+        public static TResult Match<<#= Generics(arity) #>, TResult>(this OneOfBase<<#= Generics(arity) #>> oneOf, <#= GenerateForArity(arity, "Func<T{0}, TResult> f{0}", ", ") #>)
+        {
+            switch (oneOf._index)
+            {
+                <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: return f{{0}}(oneOf._value{{0}});", $"{Environment.NewLine}                ") #>
+                default: throw new InvalidOperationException();
+            }
+        }
+        public static void Switch<<#= Generics(arity) #>>(this OneOfBase<<#= Generics(arity) #>> oneOf, <#= GenerateForArity(arity, "Action<T{0}> f{0}", ", ") #>)
+        {
+            switch (oneOf._index)
+            {
+                <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: f{{0}}(oneOf._value{{0}}); return;", $"{Environment.NewLine}                ") #>
+                default: throw new InvalidOperationException();
+            }
+        }
+
+<#}#>
+    }
 }
