@@ -14,22 +14,30 @@ string Generics(int arity) =>
 #>
 using System;
 
-namespace Statecharts.NET.Utils
+namespace Statecharts.NET.Utilities
 {
 <#foreach(var arity in Enumerable.Range(2, maxGenerics))
 {#>
-    public struct OneOf<<#= Generics(arity) #>>
+    public class OneOfBase<<#= Generics(arity) #>>
     {
         readonly int _index;
         <#= GenerateForArity(arity, "readonly T{0} _value{0};", $"{Environment.NewLine}        ") #>
 
-        private OneOf(int index, <#= GenerateForArity(arity, "T{0} value{0} = default", ", ") #>)
+        protected OneOfBase(int index, <#= GenerateForArity(arity, "T{0} value{0} = default", ", ") #>)
         {
             _index = index;
             <#= GenerateForArity(arity, "_value{0} = value{0};", $"{Environment.NewLine}            ") #>
         }
 
-        <#= GenerateForArity(arity, $"public static implicit operator OneOf<{Generics(arity)}>(T{{0}} t) => new OneOf<{Generics(arity)}>({{0}}, value{{0}}: t);", $"{Environment.NewLine}        ") #>
+        protected OneOfBase()
+        {
+            switch (this)
+            {
+                <#= GenerateForArity(arity, $"case T{{0}} _: _index = {{0}}; _value{{0}} = (T{{0}})(object)this; return;", $"{Environment.NewLine}                ") #>
+            }
+        }
+
+        <#= GenerateForArity(arity, $"public static implicit operator OneOfBase<{Generics(arity)}>(T{{0}} t) => new OneOfBase<{Generics(arity)}>({{0}}, value{{0}}: t);", $"{Environment.NewLine}        ") #>
 
         public TResult Match<TResult>(<#= GenerateForArity(arity, "Func<T{0}, TResult> f{0}", ", ") #>)
         {
@@ -49,7 +57,7 @@ namespace Statecharts.NET.Utils
             }
         }
 
-        private bool Equals(OneOf<<#= Generics(arity) #>> other)
+        private bool Equals(OneOfBase<<#= Generics(arity) #>> other)
         {
             if (_index != other._index) return false;
             switch (_index)
@@ -60,7 +68,7 @@ namespace Statecharts.NET.Utils
         }
 
         public override bool Equals(object obj) =>
-            !(obj is null) && obj is OneOf<<#= Generics(arity) #>> other && Equals(other);
+            ReferenceEquals(this, obj) || (!(obj is null) && obj is OneOfBase<<#= Generics(arity) #>> other && Equals(other));
 
         public override string ToString()
         {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statecharts.NET.Utils
+namespace Statecharts.NET.Utilities
 {
     public struct OneOf<T0, T1>
     {

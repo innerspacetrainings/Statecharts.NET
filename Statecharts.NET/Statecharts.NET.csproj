@@ -11,4 +11,32 @@
     <Folder Include="Interpreter\Statechart\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="_Utilities\OneOf\OneOf.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OneOf.tt</DependentUpon>
+    </None>
+    <None Include="_Utilities\OneOf\OneOfBase.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OneOfBase.tt</DependentUpon>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="_Utilities\OneOf\OneOf.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>OneOf.cs</LastGenOutput>
+    </None>
+    <None Update="_Utilities\OneOf\OneOfBase.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>OneOfBase.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
 </Project>

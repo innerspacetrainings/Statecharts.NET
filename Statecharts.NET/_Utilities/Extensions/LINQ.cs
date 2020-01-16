@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Statecharts.NET.Extensions
+namespace Statecharts.NET.Utilities
 {
-    static class LINQ
+    public static class LINQ
     {
         public static (IEnumerable<T>, IEnumerable<T>) Segment<T>(this IEnumerable<T> source, Func<T, bool> predicate)
         {

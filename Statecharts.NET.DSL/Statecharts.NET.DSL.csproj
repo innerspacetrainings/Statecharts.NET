@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Statecharts.NET.Internal.Extensions\Statecharts.NET.Internal.Extensions.csproj" />
     <ProjectReference Include="..\Statecharts.NET\Statecharts.NET.csproj" />
   </ItemGroup>
 
@@ -14,30 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="OneOf.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>OneOf.tt</DependentUpon>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="OneOf.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>OneOf.tt</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="OneOf.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>OneOf.cs</LastGenOutput>
-    </None>
   </ItemGroup>
 
 </Project>
