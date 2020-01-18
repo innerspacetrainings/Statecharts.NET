@@ -13,7 +13,7 @@ namespace Statecharts.NET.Language.StateNode
         public string Name { get; }
         public IEnumerable<Action> EntryActions { get; set; }
         public IEnumerable<Action> ExitActions { get; set; }
-        public IEnumerable<IEventDefinition> Events { get; set; }
+        public IEnumerable<TransitionDefinition> Transitions { get; set; }
         public IEnumerable<IActivity> Activities { get; set; }
         public IEnumerable<IBaseServiceDefinition> Services { get; set; }
         public InitialTransitionDefinition InitialTransition { get; set; }
@@ -42,19 +42,19 @@ namespace Statecharts.NET.Language.StateNode
             return this;
         }
     }
-    public class WithExitActions : WithEvents
+    public class WithExitActions : WithTransitions
     {
         internal WithExitActions(string name) : base(name) { }
 
-        public WithEvents WithEvents(IEventDefinition eventDefinition, params IEventDefinition[] eventDefinitions)
+        public WithTransitions WithTransitions(TransitionDefinition transitionDefinition, params TransitionDefinition[] transitionDefinitions)
         {
-            DefinitionData.Events = eventDefinition.Append(eventDefinitions);
+            DefinitionData.Transitions = transitionDefinition.Append(transitionDefinitions);
             return this;
         }
     }
-    public class WithEvents : WithActivities
+    public class WithTransitions : WithActivities
     {
-        internal WithEvents(string name) : base(name) { }
+        internal WithTransitions(string name) : base(name) { }
 
         public WithActivities WithActivities(IActivity activity, params IActivity[] activities)
         {
@@ -85,7 +85,7 @@ namespace Statecharts.NET.Language.StateNode
         internal WithServices(string name) => DefinitionData = new DefinitionData(name);
 
         public string Name => DefinitionData.Name;
-        public IEnumerable<IEventDefinition> Events => DefinitionData.Events;
+        public IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
         public IEnumerable<Action> EntryActions => DefinitionData.EntryActions;
         public IEnumerable<Action> ExitActions => DefinitionData.ExitActions;
         public IEnumerable<IActivity> Activities => DefinitionData.Activities;
@@ -106,7 +106,7 @@ namespace Statecharts.NET.Language.StateNode
             => DefinitionData = data;
 
         public string Name => DefinitionData.Name;
-        public IEnumerable<IEventDefinition> Events => DefinitionData.Events;
+        public IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
         public IEnumerable<Action> EntryActions => DefinitionData.EntryActions;
         public IEnumerable<Action> ExitActions => DefinitionData.ExitActions;
         public IEnumerable<IActivity> Activities => DefinitionData.Activities;
@@ -173,7 +173,7 @@ namespace Statecharts.NET.Language.StateNode
             => DefinitionData = compoundWithInitialActions.DefinitionData;
 
         public string Name => DefinitionData.Name;
-        public IEnumerable<IEventDefinition> Events => DefinitionData.Events;
+        public IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
         public IEnumerable<Action> EntryActions => DefinitionData.EntryActions;
         public IEnumerable<Action> ExitActions => DefinitionData.ExitActions;
         public IEnumerable<IActivity> Activities => DefinitionData.Activities;
@@ -206,7 +206,7 @@ namespace Statecharts.NET.Language.StateNode
             => DefinitionData = orthogonal.DefinitionData;
 
         public string Name => DefinitionData.Name;
-        public IEnumerable<IEventDefinition> Events => DefinitionData.Events;
+        public IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
         public IEnumerable<Action> EntryActions => DefinitionData.EntryActions;
         public IEnumerable<Action> ExitActions => DefinitionData.ExitActions;
         public IEnumerable<IActivity> Activities => DefinitionData.Activities;

@@ -957,7 +957,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<T0, T1>(this OneOfBase<T0, T1> oneOf, Action<T0> f0, Action<T1> f1)
+        public static void Switch<T0, T1>(this OneOfBase<T0, T1> oneOf, System.Action<T0> f0, System.Action<T1> f1)
         {
             switch (oneOf._index)
             {
@@ -977,7 +977,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<T0, T1, T2>(this OneOfBase<T0, T1, T2> oneOf, Action<T0> f0, Action<T1> f1, Action<T2> f2)
+        public static void Switch<T0, T1, T2>(this OneOfBase<T0, T1, T2> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2)
         {
             switch (oneOf._index)
             {
@@ -999,7 +999,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<T0, T1, T2, T3>(this OneOfBase<T0, T1, T2, T3> oneOf, Action<T0> f0, Action<T1> f1, Action<T2> f2, Action<T3> f3)
+        public static void Switch<T0, T1, T2, T3>(this OneOfBase<T0, T1, T2, T3> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3)
         {
             switch (oneOf._index)
             {
@@ -1023,7 +1023,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<T0, T1, T2, T3, T4>(this OneOfBase<T0, T1, T2, T3, T4> oneOf, Action<T0> f0, Action<T1> f1, Action<T2> f2, Action<T3> f3, Action<T4> f4)
+        public static void Switch<T0, T1, T2, T3, T4>(this OneOfBase<T0, T1, T2, T3, T4> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4)
         {
             switch (oneOf._index)
             {
@@ -1049,7 +1049,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<T0, T1, T2, T3, T4, T5>(this OneOfBase<T0, T1, T2, T3, T4, T5> oneOf, Action<T0> f0, Action<T1> f1, Action<T2> f2, Action<T3> f3, Action<T4> f4, Action<T5> f5)
+        public static void Switch<T0, T1, T2, T3, T4, T5>(this OneOfBase<T0, T1, T2, T3, T4, T5> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5)
         {
             switch (oneOf._index)
             {
@@ -1077,7 +1077,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<T0, T1, T2, T3, T4, T5, T6>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6> oneOf, Action<T0> f0, Action<T1> f1, Action<T2> f2, Action<T3> f3, Action<T4> f4, Action<T5> f5, Action<T6> f6)
+        public static void Switch<T0, T1, T2, T3, T4, T5, T6>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6)
         {
             switch (oneOf._index)
             {
@@ -1107,7 +1107,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7> oneOf, Action<T0> f0, Action<T1> f1, Action<T2> f2, Action<T3> f3, Action<T4> f4, Action<T5> f5, Action<T6> f6, Action<T7> f7)
+        public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7)
         {
             switch (oneOf._index)
             {
@@ -1139,7 +1139,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7, T8>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7, T8> oneOf, Action<T0> f0, Action<T1> f1, Action<T2> f2, Action<T3> f3, Action<T4> f4, Action<T5> f5, Action<T6> f6, Action<T7> f7, Action<T8> f8)
+        public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7, T8>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7, T8> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7, System.Action<T8> f8)
         {
             switch (oneOf._index)
             {
@@ -1173,7 +1173,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> oneOf, Action<T0> f0, Action<T1> f1, Action<T2> f2, Action<T3> f3, Action<T4> f4, Action<T5> f5, Action<T6> f6, Action<T7> f7, Action<T8> f8, Action<T9> f9)
+        public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7, System.Action<T8> f8, System.Action<T9> f9)
         {
             switch (oneOf._index)
             {
@@ -1209,7 +1209,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> oneOf, Action<T0> f0, Action<T1> f1, Action<T2> f2, Action<T3> f3, Action<T4> f4, Action<T5> f5, Action<T6> f6, Action<T7> f7, Action<T8> f8, Action<T9> f9, Action<T10> f10)
+        public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7, System.Action<T8> f8, System.Action<T9> f9, System.Action<T10> f10)
         {
             switch (oneOf._index)
             {

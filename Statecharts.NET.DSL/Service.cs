@@ -34,7 +34,7 @@ namespace Statecharts.NET.Language.Service
     {
         internal WithId(ServiceLogic task) : base(task) { }
 
-        public WithOnSuccessHandler OnSuccess(UnguardedEventTransitionDefinition transitionDefinition)
+        public WithOnSuccessHandler OnSuccess(UnguardedTransitionDefinition transitionDefinition)
         {
             DefinitionData.OnSuccessDefinition = transitionDefinition;
             return this;
@@ -44,7 +44,7 @@ namespace Statecharts.NET.Language.Service
     {
         internal WithOnSuccessHandler(ServiceLogic task) : base(task) { }
 
-        public WithOnErrorHandler OnError(UnguardedEventTransitionDefinition transitionDefinition)
+        public WithOnErrorHandler OnError(UnguardedTransitionDefinition transitionDefinition)
         {
             DefinitionData.OnErrorTransition = transitionDefinition;
             return this;

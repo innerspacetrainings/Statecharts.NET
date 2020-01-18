@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Definition
 {
@@ -9,38 +10,39 @@ namespace Statecharts.NET.Definition
         public IEnumerable<Action> Actions { get; set; }
     }
 
-    public class ForbiddenTransitionDefinition
+    public class TransitionDefinition :
+        OneOfBase<
+            ForbiddenTransitionDefinition,
+            UnguardedTransitionDefinition,
+            GuardedTransitionDefinition>
     {
-        public CustomEvent Event { get; set; }
+        public TResult Match<TResult>(
+            Func<ForbiddenTransitionDefinition, TResult> fForbidden,
+            Func<IAllowedTransitionDefinition, TResult> fAllowed)
+            => this.Match(fForbidden, fAllowed, fAllowed);
     }
 
-    public class UnguardedTransitionDefinition
+    public class ForbiddenTransitionDefinition
     {
+        public CustomEvent Event { get; }
+        public ForbiddenTransitionDefinition(string eventName) => Event = new CustomEvent(eventName);
+    }
+    public interface IAllowedTransitionDefinition
+    {
+        Event Event { get; }
+        IEnumerable<BaseTargetDefinition> Targets { get; }
+    }
+    public class UnguardedTransitionDefinition : IAllowedTransitionDefinition
+    {
+        public Event Event { get; set; }
         public IEnumerable<BaseTargetDefinition> Targets { get; set; }
         public IEnumerable<Action> Actions { get; set; }
     }
-    public class UnguardedTransitionDefinition<TContext>
+    public class GuardedTransitionDefinition : IAllowedTransitionDefinition
     {
+        public Event Event { get; set; }
+        public Guard Guard { get; set; }
         public IEnumerable<BaseTargetDefinition> Targets { get; set; }
-        public IEnumerable<Action<TContext>> Actions { get; set; }
-    }
-    public class UnguardedTransitionDefinition<TContext, TData>
-    {
-        public IEnumerable<BaseTargetDefinition> Targets { get; set; }
-        public IEnumerable<Action<TContext, TData>> Actions { get; set; }
-    }
-    public class GuardedTransitionDefinition<TContext>
-        where TContext : IEquatable<TContext>
-    {
-        public Guard<TContext> Guard { get; set; }
-        public IEnumerable<BaseTargetDefinition> Targets { get; set; }
-        public IEnumerable<Action<TContext>> Actions { get; set; }
-    }
-    public class GuardedTransitionDefinition<TContext, TData>
-        where TContext : IEquatable<TContext>
-    {
-        public Guard<TContext, TData> Guard { get; set; }
-        public IEnumerable<BaseTargetDefinition> Targets { get; set; }
-        public IEnumerable<Action<TContext, TData>> Actions { get; set; }
+        public IEnumerable<Action> Actions { get; set; }
     }
 }

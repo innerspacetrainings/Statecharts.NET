@@ -154,7 +154,7 @@ namespace Statecharts.NET.Interpreter
             Id = Parent == null ? new StateNodeId(new RootStateNodeKey(definition.Name)) : new StateNodeId(Parent.Id, Key);
             Depth = Parent?.Depth + 1 ?? 0;
 
-            EventDefinitions = definition.Events ?? Enumerable.Empty<BaseEventDefinition>();
+            EventDefinitions = definition.Transitions ?? Enumerable.Empty<BaseEventDefinition>();
             EntryActions = definition.EntryActions ?? Enumerable.Empty<Action>();
             ExitActions = definition.ExitActions ?? Enumerable.Empty<Action>();
         }

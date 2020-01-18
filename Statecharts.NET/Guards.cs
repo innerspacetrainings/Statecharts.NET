@@ -3,6 +3,7 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET
 {
+    public abstract class Guard { }
     public abstract class Guard<TContext> : OneOfBase<ConditionGuard<TContext>, InStateGuard<TContext>>
         where TContext : IEquatable<TContext> { }
 

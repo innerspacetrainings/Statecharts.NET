@@ -34,7 +34,7 @@ namespace Statecharts.NET.Definition
     public interface IBaseStateNodeDefinition
     {
         string Name { get; }
-        IEnumerable<IEventDefinition> Events { get; }
+        IEnumerable<TransitionDefinition> Transitions { get; }
         IEnumerable<Action> EntryActions { get; }
         IEnumerable<Action> ExitActions { get; }
         IEnumerable<IActivity> Activities { get; }

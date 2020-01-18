@@ -52,9 +52,9 @@ namespace Statecharts.NET.XState
 
             List <JSProperty> properties = new List<JSProperty>();
 
-            if (definition.Events != null && definition.Events.Any()) // TODO: probably do this null check somewhere else
+            if (definition.Transitions != null && definition.Transitions.Any()) // TODO: probably do this null check somewhere else
                 properties.Add(("on", ObjectValue(
-                    definition.Events.Select(
+                    definition.Transitions.Select(
                         e => e.Map<JSProperty>(
                             immediateEventDefinition => ("\"\"", ArrayValue(
                                 immediateEventDefinition.Transitions.Select(

@@ -22,8 +22,8 @@ namespace Statecharts.NET.Language
                 }
             };
 
-        public static ForbiddenEventDefinition Ignore(string eventName) =>
-            new ForbiddenEventDefinition {Event = new Event(eventName)}; // TODO: constructor + naming (Event Type vs. Event Name)
+        public static ForbiddenTransitionDefinition Ignore(string eventName) =>
+            new ForbiddenTransitionDefinition(eventName);
         
         public static WithEventDefinition On(string eventType)
             => WithEventDefinition.OfEventType(eventType);
@@ -54,8 +54,8 @@ namespace Statecharts.NET.Language
             => new WithName(name).WithEntryActions(action, entryActions);
         public static WithExitActions WithExitActions(this string name, Action action, params Action[] exitActions)
             => new WithName(name).WithExitActions(action, exitActions);
-        public static WithEvents WithEvents(this string name, BaseEventDefinition @event, params BaseEventDefinition[] events)
-            => new WithName(name).WithEvents(@event, events);
+        public static WithTransitions WithTransitions(this string name, TransitionDefinition transitionDefinition, params TransitionDefinition[] transitionDefinitions)
+            => new WithName(name).WithTransitions(transitionDefinition, transitionDefinitions);
         public static WithActivities WithActivities(this string name, IActivity activity, params IActivity[] activities)
             => new WithName(name).WithActivities(activity, activities);
         public static WithServices WithServices(
@@ -73,9 +73,9 @@ namespace Statecharts.NET.Language
         #region Service
         public static WithId WithId(this ServiceLogic task, string id)
             => new WithLogic(task).WithId(id);
-        public static WithOnSuccessHandler OnSuccess(this ServiceLogic task, UnguardedEventTransitionDefinition transitionDefinition)
+        public static WithOnSuccessHandler OnSuccess(this ServiceLogic task, UnguardedTransitionDefinition transitionDefinition)
             => new WithLogic(task).OnSuccess(transitionDefinition);
-        public static WithOnErrorHandler OnError(this ServiceLogic task, UnguardedEventTransitionDefinition transitionDefinition)
+        public static WithOnErrorHandler OnError(this ServiceLogic task, UnguardedTransitionDefinition transitionDefinition)
             => new WithLogic(task).OnError(transitionDefinition);
 
         // TODO: Generics

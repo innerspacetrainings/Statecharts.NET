@@ -84,7 +84,7 @@ namespace Statecharts.NET.Utilities
                 default: throw new InvalidOperationException();
             }
         }
-        public static void Switch<<#= Generics(arity) #>>(this OneOfBase<<#= Generics(arity) #>> oneOf, <#= GenerateForArity(arity, "Action<T{0}> f{0}", ", ") #>)
+        public static void Switch<<#= Generics(arity) #>>(this OneOfBase<<#= Generics(arity) #>> oneOf, <#= GenerateForArity(arity, "System.Action<T{0}> f{0}", ", ") #>)
         {
             switch (oneOf._index)
             {
