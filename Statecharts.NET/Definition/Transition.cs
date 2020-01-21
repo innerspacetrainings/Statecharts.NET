@@ -40,7 +40,7 @@ namespace Statecharts.NET.Definition
     }
     public class UnguardedContextDataTransition : Transition
     {
-        public OneOf<Event, CustomDataEvent> Event { get; set; } // TODO: DataEvent
+        public OneOf<Event, CustomDataEvent> Event { get; set; }
         public IEnumerable<Target> Targets { get; set; }
         public IEnumerable<OneOf<Action, ContextAction, ContextDataAction>> Actions { get; set; }
     }
@@ -60,7 +60,7 @@ namespace Statecharts.NET.Definition
     }
     public class GuardedContextDataTransition
     {
-        public OneOf<Event, CustomDataEvent> Event { get; set; } // TODO: DataEvent
+        public OneOf<Event, CustomDataEvent> Event { get; set; }
         public OneOf<InStateGuard, ConditionContextGuard, ConditionContextDataGuard> Guard { get; set; }
         public IEnumerable<Target> Targets { get; set; }
         public IEnumerable<OneOf<Action, ContextAction, ContextDataAction>> Actions { get; set; }
