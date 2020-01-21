@@ -28,28 +28,28 @@ namespace Statecharts.NET.Definition
     public abstract class StateNode :
         OneOfBase<AtomicStateNode, FinalStateNode, CompoundStateNode, OrthogonalStateNode>
     {
-        public string Name { get; }
-        public IEnumerable<Transition> Transitions { get; }
-        public IEnumerable<OneOf<Action, ContextAction, ContextDataAction>> EntryActions { get; }
-        public IEnumerable<OneOf<Action, ContextAction, ContextDataAction>> ExitActions { get; }
-        public IEnumerable<Activity> Activities { get; }
+        public abstract string Name { get; }
+        public abstract IEnumerable<Transition> Transitions { get; }
+        public abstract IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
+        public abstract IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
+        public abstract IEnumerable<Activity> Activities { get; }
     }
 
-    public class AtomicStateNode : StateNode
+    public abstract class AtomicStateNode : StateNode
     {
-        public IEnumerable<Service> Services { get; }
+        public abstract IEnumerable<Service> Services { get; }
     }
-    public class FinalStateNode : StateNode {}
-    public class CompoundStateNode : StateNode
+    public abstract class FinalStateNode : StateNode {}
+    public abstract class CompoundStateNode : StateNode
     {
-        public IEnumerable<Service> Services { get; }
-        public IEnumerable<StateNode> States { get; }
-        public InitialTransition InitialTransition { get; }
+        public abstract IEnumerable<Service> Services { get; }
+        public abstract IEnumerable<StateNode> States { get; }
+        public abstract InitialTransition InitialTransition { get; }
     }
 
-    public class OrthogonalStateNode : StateNode
+    public abstract class OrthogonalStateNode : StateNode
     {
-        public IEnumerable<Service> Services { get; }
-        public IEnumerable<StateNode> States { get; }
+        public abstract IEnumerable<Service> Services { get; }
+        public abstract IEnumerable<StateNode> States { get; }
     }
 }

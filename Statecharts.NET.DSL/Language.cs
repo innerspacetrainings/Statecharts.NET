@@ -59,8 +59,8 @@ namespace Statecharts.NET.Language
     {
         public static StateNode.WithEntryActions WithEntryActions(
             this string name,
-            Definition.Action action,
-            params Definition.Action[] entryActions)
+            OneOf<Definition.Action, Definition.ContextAction> action,
+            params OneOf<Definition.Action, Definition.ContextAction>[] entryActions)
             => new StateNode.WithName(name).WithEntryActions(action, entryActions);
         public static StateNode.WithExitActions WithExitActions(
             this string name, Definition.Action action,

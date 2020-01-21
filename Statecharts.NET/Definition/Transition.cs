@@ -7,7 +7,7 @@ namespace Statecharts.NET.Definition
     public class InitialTransition
     {
         public ChildTarget Target { get; set; }
-        public IEnumerable<Action> Actions { get; set; }
+        public IEnumerable<OneOf<Action, ContextAction>> Actions { get; set; }
     }
 
     public class Transition :

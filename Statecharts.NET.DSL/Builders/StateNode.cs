@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Statecharts.NET.Definition;
 using Statecharts.NET.Language.Service;
 using Statecharts.NET.Utilities;
 using static Statecharts.NET.Language.Keywords;
@@ -11,13 +10,13 @@ namespace Statecharts.NET.Language.StateNode
     internal class DefinitionData
     {
         public string Name { get; }
-        public IEnumerable<Action> EntryActions { get; set; }
-        public IEnumerable<Action> ExitActions { get; set; }
-        public IEnumerable<TransitionDefinition> Transitions { get; set; }
-        public IEnumerable<IActivity> Activities { get; set; }
-        public IEnumerable<IBaseServiceDefinition> Services { get; set; }
-        public InitialTransitionDefinition InitialTransition { get; set; }
-        public IEnumerable<IBaseStateNodeDefinition> States { get; set; }
+        public IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions { get; set; }
+        public IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions { get; set; }
+        public IEnumerable<Definition.Transition> Transitions { get; set; }
+        public IEnumerable<Definition.Activity> Activities { get; set; }
+        public IEnumerable<Definition.Service> Services { get; set; }
+        public Definition.InitialTransition InitialTransition { get; set; }
+        public IEnumerable<Definition.StateNode> States { get; set; }
 
         public DefinitionData(string name) => Name = name ?? throw new ArgumentNullException(nameof(name));
     }
@@ -26,7 +25,9 @@ namespace Statecharts.NET.Language.StateNode
     {
         public WithName(string name) : base(name) { }
 
-        public WithEntryActions WithEntryActions(Action action, params Action[] actions)
+        public WithEntryActions WithEntryActions(
+            OneOf<Definition.Action, Definition.ContextAction> action,
+            params OneOf<Definition.Action, Definition.ContextAction>[] actions)
         {
             DefinitionData.EntryActions = action.Append(actions);
             return this;
@@ -36,7 +37,9 @@ namespace Statecharts.NET.Language.StateNode
     {
         internal WithEntryActions(string name) : base(name) { }
 
-        public WithExitActions WithExitActions(Action action, params Action[] actions)
+        public WithExitActions WithExitActions(
+            OneOf<Definition.Action, Definition.ContextAction> action,
+            params OneOf<Definition.Action, Definition.ContextAction>[] actions)
         {
             DefinitionData.ExitActions = action.Append(actions);
             return this;
@@ -46,7 +49,9 @@ namespace Statecharts.NET.Language.StateNode
     {
         internal WithExitActions(string name) : base(name) { }
 
-        public WithTransitions WithTransitions(TransitionDefinition transitionDefinition, params TransitionDefinition[] transitionDefinitions)
+        public WithTransitions WithTransitions(
+            Definition.Transition transitionDefinition,
+            params Definition.Transition[] transitionDefinitions)
         {
             DefinitionData.Transitions = transitionDefinition.Append(transitionDefinitions);
             return this;
@@ -56,7 +61,9 @@ namespace Statecharts.NET.Language.StateNode
     {
         internal WithTransitions(string name) : base(name) { }
 
-        public WithActivities WithActivities(IActivity activity, params IActivity[] activities)
+        public WithActivities WithActivities(
+            Definition.Activity activity,
+            params Definition.Activity[] activities)
         {
             DefinitionData.Activities = activity.Append(activities);
             return this;
@@ -68,8 +75,8 @@ namespace Statecharts.NET.Language.StateNode
         internal WithActivities(string name) : base(name) { }
 
         public WithServices WithServices(
-            OneOf<ServiceLogic, IBaseServiceDefinition> service,
-            params OneOf<ServiceLogic, IBaseServiceDefinition>[] services)
+            OneOf<ServiceLogic, Definition.Service> service,
+            params OneOf<ServiceLogic, Definition.Service>[] services)
         {
             DefinitionData.Services = service.Append(services).Select(
                 definition => definition.Match(
@@ -78,38 +85,36 @@ namespace Statecharts.NET.Language.StateNode
             return this;
         }
     }
-    public class WithServices : IAtomicStateNodeDefinition
+    public class WithServices : Definition.AtomicStateNode
     {
         private protected DefinitionData DefinitionData { get; }
 
         internal WithServices(string name) => DefinitionData = new DefinitionData(name);
 
-        public string Name => DefinitionData.Name;
-        public IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public IEnumerable<Action> EntryActions => DefinitionData.EntryActions;
-        public IEnumerable<Action> ExitActions => DefinitionData.ExitActions;
-        public IEnumerable<IActivity> Activities => DefinitionData.Activities;
-        public IEnumerable<IBaseServiceDefinition> Services => DefinitionData.Services;
-        public InitialTransitionDefinition InitialTransition => DefinitionData.InitialTransition;
-        public IEnumerable<IBaseStateNodeDefinition> States => DefinitionData.States;
+        public override string Name => DefinitionData.Name;
+        public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
+        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<Definition.Activity> Activities => DefinitionData.Activities;
+        public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
 
         public Final AsFinal() => new Final(DefinitionData);
         public Compound AsCompound() => new Compound(DefinitionData);
         public Orthogonal AsOrthogonal() => new Orthogonal(DefinitionData);
     }
 
-    public class Final : IFinalStateNodeDefinition
+    public class Final : Definition.FinalStateNode
     {
         private DefinitionData DefinitionData { get; }
 
         internal Final(DefinitionData data)
             => DefinitionData = data;
 
-        public string Name => DefinitionData.Name;
-        public IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public IEnumerable<Action> EntryActions => DefinitionData.EntryActions;
-        public IEnumerable<Action> ExitActions => DefinitionData.ExitActions;
-        public IEnumerable<IActivity> Activities => DefinitionData.Activities;
+        public override string Name => DefinitionData.Name;
+        public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
+        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<Definition.Activity> Activities => DefinitionData.Activities;
     }
 
     public class Compound
@@ -121,7 +126,7 @@ namespace Statecharts.NET.Language.StateNode
 
         public CompoundWithInitialState WithInitialState(string stateName)
         {
-            DefinitionData.InitialTransition = new InitialTransitionDefinition { Target = Child(stateName) }; // TODO: change to builder pattern or ctor
+            DefinitionData.InitialTransition = new Definition.InitialTransition { Target = Child(stateName) }; // TODO: change to builder pattern or ctor
             return new CompoundWithInitialState(this);
         }
     }
@@ -132,15 +137,17 @@ namespace Statecharts.NET.Language.StateNode
         internal CompoundWithInitialState(Compound compound)
             => DefinitionData = compound.DefinitionData;
 
-        public CompoundWithInitialActions WithInitialActions(Action action, params Action[] actions)
+        public CompoundWithInitialActions WithInitialActions(
+            OneOf<Definition.Action, Definition.ContextAction> action,
+            params OneOf<Definition.Action, Definition.ContextAction>[] actions)
         {
             DefinitionData.InitialTransition.Actions = action.Append(actions);
             return new CompoundWithInitialActions(this);
         }
 
         public CompoundWithStates WithStates(
-            OneOf<string, IBaseStateNodeDefinition> state,
-            params OneOf<string, IBaseStateNodeDefinition>[] states)
+            OneOf<string, Definition.StateNode> state,
+            params OneOf<string, Definition.StateNode>[] states)
         {
             DefinitionData.States = state.Append(states).Select(
                 definition => definition.Match(name => new WithName(name), valid => valid));
@@ -155,15 +162,15 @@ namespace Statecharts.NET.Language.StateNode
             => DefinitionData = compound.DefinitionData;
 
         public CompoundWithStates WithStates(
-            OneOf<string, IBaseStateNodeDefinition> state,
-            params OneOf<string, IBaseStateNodeDefinition>[] states)
+            OneOf<string, Definition.StateNode> state,
+            params OneOf<string, Definition.StateNode>[] states)
         {
             DefinitionData.States = state.Append(states).Select(
                 definition => definition.Match(name => new WithName(name), valid => valid));
             return new CompoundWithStates(this);
         }
     }
-    public class CompoundWithStates : ICompoundStateNodeDefinition
+    public class CompoundWithStates : Definition.CompoundStateNode
     {
         private DefinitionData DefinitionData { get; }
 
@@ -172,14 +179,14 @@ namespace Statecharts.NET.Language.StateNode
         internal CompoundWithStates(CompoundWithInitialActions compoundWithInitialActions)
             => DefinitionData = compoundWithInitialActions.DefinitionData;
 
-        public string Name => DefinitionData.Name;
-        public IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public IEnumerable<Action> EntryActions => DefinitionData.EntryActions;
-        public IEnumerable<Action> ExitActions => DefinitionData.ExitActions;
-        public IEnumerable<IActivity> Activities => DefinitionData.Activities;
-        public IEnumerable<IBaseServiceDefinition> Services => DefinitionData.Services;
-        public InitialTransitionDefinition InitialTransition => DefinitionData.InitialTransition;
-        public IEnumerable<IBaseStateNodeDefinition> States => DefinitionData.States;
+        public override string Name => DefinitionData.Name;
+        public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
+        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<Definition.Activity> Activities => DefinitionData.Activities;
+        public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
+        public override Definition.InitialTransition InitialTransition => DefinitionData.InitialTransition;
+        public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
     }
 
     public class Orthogonal
@@ -190,27 +197,27 @@ namespace Statecharts.NET.Language.StateNode
             => DefinitionData = data;
 
         public OrthogonalWithStates WithStates(
-            OneOf<string, IBaseStateNodeDefinition> state,
-            params OneOf<string, IBaseStateNodeDefinition>[] states)
+            OneOf<string, Definition.StateNode> state,
+            params OneOf<string, Definition.StateNode>[] states)
         {
             DefinitionData.States = state.Append(states).Select(
                 definition => definition.Match(name => new WithName(name), valid => valid));
             return new OrthogonalWithStates(this);
         }
     }
-    public class OrthogonalWithStates : IOrthogonalStateNodeDefinition
+    public class OrthogonalWithStates : Definition.OrthogonalStateNode
     {
         private DefinitionData DefinitionData { get; }
 
         internal OrthogonalWithStates(Orthogonal orthogonal)
             => DefinitionData = orthogonal.DefinitionData;
 
-        public string Name => DefinitionData.Name;
-        public IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public IEnumerable<Action> EntryActions => DefinitionData.EntryActions;
-        public IEnumerable<Action> ExitActions => DefinitionData.ExitActions;
-        public IEnumerable<IActivity> Activities => DefinitionData.Activities;
-        public IEnumerable<IBaseServiceDefinition> Services => DefinitionData.Services;
-        public IEnumerable<IBaseStateNodeDefinition> States => DefinitionData.States;
+        public override string Name => DefinitionData.Name;
+        public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
+        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<Definition.Activity> Activities => DefinitionData.Activities;
+        public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
+        public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
     }
 }
