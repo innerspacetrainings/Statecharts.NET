@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Statecharts.NET.DSL\Statecharts.NET.DSL.csproj" />
+    <ProjectReference Include="..\Statecharts.NET.DSL\Statecharts.NET.Language.csproj" />
     <ProjectReference Include="..\Statecharts.NET.XState\Statecharts.NET.XState.csproj" />
     <ProjectReference Include="..\Statecharts.NET\Statecharts.NET.csproj" />
   </ItemGroup>

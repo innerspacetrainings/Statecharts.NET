@@ -8,7 +8,7 @@ namespace Statecharts.NET.Definition
 
     public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction> { }
     public abstract class ContextAction : OneOfBase<LogContextAction, AssignContextAction, SideEffectContextAction> { }
-    public abstract class ContextDataAction : OneOfBase<LogContextDataAction, AssignContextDataAction, SideEffectContextAction> { }
+    public abstract class ContextDataAction : OneOfBase<LogContextDataAction, AssignContextDataAction, SideEffectContextDataAction> { }
 
     public class SendAction : IPureAction { }
 
