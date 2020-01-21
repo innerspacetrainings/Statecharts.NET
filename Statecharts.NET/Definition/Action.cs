@@ -1,7 +1,7 @@
 ﻿using System;
 using Statecharts.NET.Utilities;
 
-namespace Statecharts.NET
+namespace Statecharts.NET.Definition
 {
     public interface IPureAction { }
     public interface IMutatingAction { }
@@ -11,12 +11,12 @@ namespace Statecharts.NET
         RaiseAction,
         LogAction>
     { }
-    public abstract class Action<TContext> : OneOfBase<
+    public abstract class Action<> : OneOfBase<
         Action,
         AssignAction<TContext>,
         SideEffectAction<TContext>>
     { }
-    public abstract class Action<TContext, TData> : OneOfBase<
+    public abstract class Action<> : OneOfBase<
         Action<TContext>,
         AssignAction<TContext, TData>,
         SideEffectAction<TContext, TData>>

@@ -5,6 +5,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 <#
+var minGenerics = 1;
 var maxGenerics = 10;
 
 string GenerateForArity(int arity, string template, string separator) =>
@@ -16,7 +17,7 @@ using System;
 
 namespace Statecharts.NET.Utilities
 {
-<#foreach(var arity in Enumerable.Range(2, maxGenerics)){#>
+<#foreach(var arity in Enumerable.Range(minGenerics, maxGenerics)){#>
     public class OneOfBase<<#= Generics(arity) #>>
     {
         internal readonly int _index;
@@ -75,7 +76,7 @@ namespace Statecharts.NET.Utilities
     }
 <#}#>
     public static class OneOfBaseExtensions {
-<#foreach(var arity in Enumerable.Range(2, maxGenerics)){#>
+<#foreach(var arity in Enumerable.Range(minGenerics, maxGenerics)){#>
         public static TResult Match<<#= Generics(arity) #>, TResult>(this OneOfBase<<#= Generics(arity) #>> oneOf, <#= GenerateForArity(arity, "Func<T{0}, TResult> f{0}", ", ") #>)
         {
             switch (oneOf._index)

@@ -5,7 +5,12 @@ namespace Statecharts.NET.Definition
 {
     public interface IEvent : IEquatable<IEvent> { }
 
-    public class Event : OneOfBase<CustomEvent, CustomDataEvent, ImmediateEvent, DelayedEvent, ServiceDoneEvent, CompoundDoneEvent>, IEvent {
+    public class Event : OneOfBase<CustomEvent, ImmediateEvent, DelayedEvent, ServiceDoneEvent, CompoundDoneEvent>, IEvent
+    {
+        public bool Equals(IEvent other) => this.Match(Equals, Equals, Equals, Equals, Equals);
+    }
+    public class Event<> : OneOfBase<CustomEvent, CustomEvent<TData>, ImmediateEvent, DelayedEvent, ServiceDoneEvent, CompoundDoneEvent>, IEvent
+    {
         public bool Equals(IEvent other) => this.Match(Equals, Equals, Equals, Equals, Equals, Equals);
     }
 
@@ -25,10 +30,10 @@ namespace Statecharts.NET.Definition
 
         public override int GetHashCode() => EventName != null ? EventName.GetHashCode() : 0;
     }
-    public class CustomDataEvent : CustomEvent
+    public class CustomEvent<TData> : CustomEvent
     {
-        public object Data { get; }
-        public CustomDataEvent(string eventName, object data) : base(eventName) => Data = data;
+        public TData Data { get; }
+        public CustomEvent(string eventName, TData data) : base(eventName) => Data = data;
     }
     public class ImmediateEvent : IEvent {
         public bool Equals(IEvent other) => other is ImmediateEvent;
@@ -39,6 +44,10 @@ namespace Statecharts.NET.Definition
 
         public bool Equals(IEvent other) => other == this; // TODO: think of this
     }
-    public class ServiceDoneEvent : IEvent { }
-    public class CompoundDoneEvent : IEvent { }
+    public class ServiceDoneEvent : IEvent {
+        public bool Equals(IEvent other) => throw new NotImplementedException();
+    }
+    public class CompoundDoneEvent : IEvent {
+        public bool Equals(IEvent other) => throw new NotImplementedException();
+    }
 }
