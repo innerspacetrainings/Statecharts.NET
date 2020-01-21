@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Statecharts.NET.Definition;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Language.Service
 {
@@ -11,8 +13,8 @@ namespace Statecharts.NET.Language.Service
     {
         public ServiceLogic Task { get; }
         public string Id { get; set; }
-        public UnguardedEventTransitionDefinition OnErrorTransition { get; set; }
-        public UnguardedEventTransitionDefinition OnSuccessDefinition { get; set; }
+        public UnguardedTransition OnErrorTransition { get; set; }
+        public OneOf<UnguardedTransition, UnguardedContextTransition> OnSuccessDefinition { get; set; }
 
         public DefinitionData(ServiceLogic task) => Task = task ?? throw new ArgumentNullException(nameof(task));
     }
@@ -31,9 +33,9 @@ namespace Statecharts.NET.Language.Service
     {
         internal WithId(ServiceLogic task) : base(task) { }
 
-        public WithOnSuccessHandler OnSuccess(UnguardedTransitionDefinition transitionDefinition)
+        public WithOnSuccessHandler OnSuccess(OneOf<UnguardedTransition, UnguardedContextTransition> transition)
         {
-            DefinitionData.OnSuccessDefinition = transitionDefinition;
+            DefinitionData.OnSuccessDefinition = transition;
             return this;
         }
     }
@@ -41,21 +43,21 @@ namespace Statecharts.NET.Language.Service
     {
         internal WithOnSuccessHandler(ServiceLogic task) : base(task) { }
 
-        public WithOnErrorHandler OnError(UnguardedTransitionDefinition transitionDefinition)
+        public WithOnErrorHandler OnError(UnguardedTransition transition)
         {
-            DefinitionData.OnErrorTransition = transitionDefinition;
+            DefinitionData.OnErrorTransition = transition;
             return this;
         }
     }
-    public class WithOnErrorHandler : IServiceDefinition
+    public class WithOnErrorHandler : Definition.TaskService
     {
         private protected DefinitionData DefinitionData { get; }
 
         internal WithOnErrorHandler(ServiceLogic logic) => DefinitionData = new DefinitionData(logic);
 
-        public Func<CancellationToken, Task> Task => async token => await DefinitionData.Task(token); // TODO: Types
-        public string Id => DefinitionData.Id;
-        public UnguardedEventTransitionDefinition OnErrorTransition => DefinitionData.OnErrorTransition;
-        public UnguardedEventTransitionDefinition OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
+        public override Func<CancellationToken, Task> Task => async token => await DefinitionData.Task(token);
+        public override string Id => DefinitionData.Id;
+        public override UnguardedTransition OnErrorTransition => DefinitionData.OnErrorTransition;
+        public override OneOf<UnguardedTransition, UnguardedContextTransition> OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
     }
 }

@@ -7,19 +7,19 @@ namespace Statecharts.NET.Definition
 {
     public abstract class Service : OneOfBase<TaskService, TaskDataService>
     {
-        string Id { get; }
-        UnguardedTransition OnErrorTransition { get; }
+        public abstract string Id { get; }
+        public abstract UnguardedTransition OnErrorTransition { get; }
     }
 
-    public class TaskService : Service
+    public abstract class TaskService : Service
     {
-        Func<CancellationToken, Task> Task { get; }
-        UnguardedTransition OnSuccessDefinition { get; }
+        public abstract Func<CancellationToken, Task> Task { get; }
+        public abstract OneOf<UnguardedTransition, UnguardedContextTransition> OnSuccessDefinition { get; }
     }
 
-    public class TaskDataService : Service
+    public abstract class TaskDataService : Service
     {
-        Func<CancellationToken, Task<object>> Task { get; }
-        UnguardedContextDataTransition OnSuccessDefinition { get; }
+        public abstract Func<CancellationToken, Task<object>> Task { get; }
+        public abstract OneOf<UnguardedTransition, UnguardedContextTransition, UnguardedContextTransition> OnSuccessDefinition { get; }
     }
 }
