@@ -5,7 +5,7 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Definition
 {
-    public abstract class Service : OneOfBase<TaskService, TaskService>
+    public abstract class Service : OneOfBase<TaskService, TaskDataService>
     {
         string Id { get; }
         UnguardedTransition OnErrorTransition { get; }
@@ -17,9 +17,9 @@ namespace Statecharts.NET.Definition
         UnguardedTransition OnSuccessDefinition { get; }
     }
 
-    public class TaskService<> : Service where TContext : IEquatable<TContext>
+    public class TaskDataService : Service
     {
-        Func<CancellationToken, Task<TResult>> Task { get; }
-        UnguardedTransition<TContext, TResult> OnSuccessDefinition { get; }
+        Func<CancellationToken, Task<object>> Task { get; }
+        UnguardedContextDataTransition OnSuccessDefinition { get; }
     }
 }

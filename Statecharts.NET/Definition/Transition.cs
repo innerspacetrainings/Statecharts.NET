@@ -14,25 +14,11 @@ namespace Statecharts.NET.Definition
         OneOfBase<
             ForbiddenTransition,
             UnguardedTransition,
-            GuardedTransition>
-    { }
-    public class Transition<> :
-        OneOfBase<
-            ForbiddenTransition,
-            UnguardedTransition,
-            UnguardedTransition<TContext>,
+            UnguardedContextTransition,
+            UnguardedContextDataTransition,
             GuardedTransition,
-            GuardedTransition<TContext>> where TContext : IEquatable<TContext>
-    { }
-    public class Transition<> :
-        OneOfBase<
-            ForbiddenTransition,
-            UnguardedTransition,
-            UnguardedTransition<TContext>,
-            UnguardedTransition<TContext, TData>,
-            GuardedTransition,
-            GuardedTransition<TContext>,
-            GuardedTransition<TContext, TData>> where TContext : IEquatable<TContext>
+            GuardedContextTransition,
+            GuardedContextDataTransition>
     { }
 
     public class ForbiddenTransition : Transition
@@ -46,17 +32,17 @@ namespace Statecharts.NET.Definition
         public IEnumerable<Target> Targets { get; set; }
         public IEnumerable<Action> Actions { get; set; }
     }
-    public class UnguardedTransition<TContext> : Transition<TContext> where TContext : IEquatable<TContext>
+    public class UnguardedContextTransition : Transition
     {
         public Event Event { get; set; }
         public IEnumerable<Target> Targets { get; set; }
-        public IEnumerable<Action<TContext>> Actions { get; set; }
+        public IEnumerable<OneOf<Action, ContextAction>> Actions { get; set; }
     }
-    public class UnguardedTransition<TContext, TData> : Transition<TContext, TData> where TContext : IEquatable<TContext>
+    public class UnguardedContextDataTransition : Transition
     {
-        public Event<TData> Event { get; set; }
+        public OneOf<Event, CustomDataEvent> Event { get; set; } // TODO: DataEvent
         public IEnumerable<Target> Targets { get; set; }
-        public IEnumerable<Action<TContext, TData>> Actions { get; set; }
+        public IEnumerable<OneOf<Action, ContextAction, ContextDataAction>> Actions { get; set; }
     }
     public class GuardedTransition : Transition
     {
@@ -65,18 +51,18 @@ namespace Statecharts.NET.Definition
         public IEnumerable<Target> Targets { get; set; }
         public IEnumerable<Action> Actions { get; set; }
     }
-    public class GuardedTransition<TContext> : Transition<TContext> where TContext : IEquatable<TContext>
+    public class GuardedContextTransition
     {
         public Event Event { get; set; }
-        public Guard<TContext> Guard { get; set; }
+        public OneOf<InStateGuard, ConditionContextGuard> Guard { get; set; }
         public IEnumerable<Target> Targets { get; set; }
-        public IEnumerable<Action<TContext>> Actions { get; set; }
+        public IEnumerable<OneOf<Action, ContextAction>> Actions { get; set; }
     }
-    public class GuardedTransition<TContext, TData> : Transition<TContext, TData> where TContext : IEquatable<TContext>
+    public class GuardedContextDataTransition
     {
-        public Event<TData> Event { get; set; }
-        public Guard<TContext, TData> Guard { get; set; }
+        public OneOf<Event, CustomDataEvent> Event { get; set; } // TODO: DataEvent
+        public OneOf<InStateGuard, ConditionContextGuard, ConditionContextDataGuard> Guard { get; set; }
         public IEnumerable<Target> Targets { get; set; }
-        public IEnumerable<Action<TContext, TData>> Actions { get; set; }
+        public IEnumerable<OneOf<Action, ContextAction, ContextDataAction>> Actions { get; set; }
     }
 }

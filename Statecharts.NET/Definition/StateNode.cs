@@ -25,13 +25,13 @@ namespace Statecharts.NET.Definition
         }
     }
 
-    public class StateNode :
+    public abstract class StateNode :
         OneOfBase<AtomicStateNode, FinalStateNode, CompoundStateNode, OrthogonalStateNode>
     {
         public string Name { get; }
         public IEnumerable<Transition> Transitions { get; }
-        public IEnumerable<Action> EntryActions { get; }
-        public IEnumerable<Action> ExitActions { get; }
+        public IEnumerable<OneOf<Action, ContextAction, ContextDataAction>> EntryActions { get; }
+        public IEnumerable<OneOf<Action, ContextAction, ContextDataAction>> ExitActions { get; }
         public IEnumerable<Activity> Activities { get; }
     }
 

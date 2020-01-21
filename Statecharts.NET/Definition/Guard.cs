@@ -3,25 +3,18 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET
 {
-    public abstract class Guard : OneOfBase<InStateGuard> { }
-    public abstract class Guard<> : OneOfBase<ConditionGuard<TContext>, InStateGuard>
-        where TContext : IEquatable<TContext> { }
+    public abstract class Guard : OneOfBase<InStateGuard, ConditionContextGuard, ConditionContextDataGuard> { }
 
-    public abstract class Guard<> : OneOfBase<ConditionDataGuard<TContext, TData>, InStateGuard>
-        where TContext : IEquatable<TContext> { }
-
-    public class ConditionGuard<TContext> : Guard<TContext>
-        where TContext : IEquatable<TContext>
+    public class ConditionContextGuard : Guard
     {
-        public Func<TContext, bool> Condition { get; }
-        public ConditionGuard(Func<TContext, bool> condition) => Condition = condition;
+        public Func<object, bool> Condition { get; }
+        public ConditionContextGuard(Func<object, bool> condition) => Condition = condition;
     }
 
-    public class ConditionDataGuard<TContext, TData> : Guard<TContext, TData>
-        where TContext : IEquatable<TContext>
+    public class ConditionContextDataGuard : Guard
     {
-        public Func<TContext, TData, bool> Condition { get; }
-        public ConditionDataGuard(Func<TContext, TData, bool> condition) => Condition = condition;
+        public Func<object, object, bool> Condition { get; }
+        public ConditionContextDataGuard(Func<object, object, bool> condition) => Condition = condition;
     }
 
     public class InStateGuard : Guard
