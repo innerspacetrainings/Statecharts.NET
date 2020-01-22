@@ -92,7 +92,7 @@ namespace Statecharts.NET
 
     public class ExecutableStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
     {
-        private IDictionary<StateNodeId, Interpreter.StateNode> stateNodes;
+        private readonly IDictionary<StateNodeId, Interpreter.StateNode> _stateNodes;
         public TContext InitialContext { get; }
         public IEnumerable<Interpreter.Transition> Transitions { get; }
 
@@ -112,7 +112,7 @@ namespace Statecharts.NET
                         definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions)));
 
             InitialContext = initialContext;
-            stateNodes = rootNode.Append(rootNode.GetDescendants().ToArray())
+            _stateNodes = rootNode.Append(rootNode.GetDescendants().ToArray())
                 .ToDictionary(stateNode => stateNode.Id, stateNode => stateNode);
             Transitions = rootNode.CataFold(
                 GetTransitions,
@@ -124,10 +124,10 @@ namespace Statecharts.NET
         public IEnumerable<Interpreter.StateNode> GetStateNodes(StateConfiguration configuration)
             => GetStateNodes(configuration.StateNodeIds);
         public IEnumerable<Interpreter.StateNode> GetStateNodes(IEnumerable<StateNodeId> stateNodeIds)
-            => stateNodeIds.Select(id => stateNodes[id]);
+            => stateNodeIds.Select(id => _stateNodes[id]);
 
         public Interpreter.StateNode GetStateNode(StateNodeId id)
-            => stateNodes[id];
+            => _stateNodes[id];
 
         private Interpreter.StateNode ResolveTarget(
             Interpreter.StateNode fromStateNode,
