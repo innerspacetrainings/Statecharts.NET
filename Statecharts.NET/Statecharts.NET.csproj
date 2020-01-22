@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <Folder Include="Interpreter\Statechart\" />
-    <Folder Include="Parser\" />
   </ItemGroup>
 
   <ItemGroup>
