@@ -29,6 +29,9 @@ namespace Statecharts.NET
 
         public bool Equals(StateNodeId other)
             => other != null && CachedAsString == other.CachedAsString;
+
+        internal static StateNodeId Make(Interpreter.StateNode stateNode, NamedStateNodeKey key)
+            => new StateNodeId(stateNode.Id, key);
     }
 
     public static class StateNodeKeyFunctions

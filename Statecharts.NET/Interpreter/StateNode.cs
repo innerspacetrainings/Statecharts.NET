@@ -61,27 +61,23 @@ namespace Statecharts.NET.Interpreter
                 ? stateNode.Parent.Append(stateNode.Parent.GetParents())
                 : Enumerable.Empty<StateNode>();
 
-        internal static StateNode LeastCommonAncestor<TContext>(
+        internal static StateNode LeastCommonAncestor(
             this (StateNode first, StateNode second) pair)
-            where TContext : IEquatable<TContext>
             => Enumerable.Intersect(
                 pair.first.GetParents(),
                 pair.second.GetParents()).FirstOrDefault();
 
-        internal static StateNode OneBeneath<TContext>(
+        internal static StateNode OneBeneath(
             this StateNode stateNode, StateNode beneath)
-            where TContext : IEquatable<TContext>
             => stateNode.Append(stateNode.GetParents())
                 .FirstOrDefault(parentStateNode => parentStateNode.Parent == beneath);
 
-        internal static IEnumerable<StateNode> AncestorsUntil<TContext>(
+        internal static IEnumerable<StateNode> AncestorsUntil(
             this StateNode stateNode, StateNode until)
-            where TContext : IEquatable<TContext>
             => stateNode.GetParents().TakeWhile(parentStateNode => parentStateNode != until);
 
-        internal static IEnumerable<StateNode> GetDescendants<TContext>(
+        internal static IEnumerable<StateNode> GetDescendants(
             this StateNode stateNode)
-            where TContext : IEquatable<TContext>
             => stateNode.CataFold(
                 atomic => atomic.Yield() as IEnumerable<StateNode>,
                 final => final.Yield() as IEnumerable<StateNode>,
@@ -90,9 +86,8 @@ namespace Statecharts.NET.Interpreter
                 (orthogonal, subStates) =>
                     orthogonal.Append(subStates.SelectMany(a => a))).Except(stateNode.Yield());
 
-        public static IEnumerable<StateNode> GetUnstableStateNodes<TContext>(
+        public static IEnumerable<StateNode> GetUnstableStateNodes(
             this IEnumerable<StateNode> stateNodes)
-            where TContext : IEquatable<TContext>
         {
             var stateNodesList = stateNodes.ToList();
             return stateNodesList
@@ -100,15 +95,13 @@ namespace Statecharts.NET.Interpreter
                 .Where(stateNode => !(stateNode is AtomicStateNode));
         }
 
-        public static IEnumerable<StateNodeId> Ids<TContext>(
+        public static IEnumerable<StateNodeId> Ids(
             this IEnumerable<StateNode> stateNodes)
-            where TContext : IEquatable<TContext>
             => stateNodes.Select(stateNode => stateNode.Id);
 
-        internal static StateNode ResolveTarget<TContext>(
+        internal static StateNode ResolveTarget(
             this StateNode sourceStateNode,
             OneOf<Model.SiblingTarget, Model.ChildTarget> target)
-            where TContext : IEquatable<TContext>
         {
             StateNode GetStateNode(StateNode stateNode, NamedStateNodeKey key)
                 => stateNode.Match(
@@ -133,7 +126,7 @@ namespace Statecharts.NET.Interpreter
     }
     public class CompoundStateNode : StateNode
     {
-        public Definition.InitialTransition InitialTransition { get; internal set; }
+        public InitialTransition InitialTransition { get; internal set; }
         public IEnumerable<StateNode> StateNodes { get; internal set; }
 
         public CompoundStateNode(StateNode parent, Definition.CompoundStateNode definition) : base(parent, definition) { }

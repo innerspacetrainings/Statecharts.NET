@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Definition;
-using Statecharts.NET.Extensions;
 using Statecharts.NET.Interpreter;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET
 {
@@ -13,58 +12,59 @@ namespace Statecharts.NET
         public static Service<TContext> Interpret<TContext>(
             this ExecutableStatechart<TContext> statechart)
             where TContext : IEquatable<TContext>
-            => new Service<TContext> {StateChart = statechart};
+            => new Service<TContext> {StateChart = statechart}; // TODO: use ctor
     }
 
     public static class ParsedStatechartFunctions
     {
-        public static ParsedStatechart<TContext> Parse<TContext>(this StatechartDefinition<TContext> stateChartDefinition)
+        public static ParsedStatechart<TContext> Parse<TContext>(this Definition.Statechart<TContext> stateChartDefinition)
             where TContext : IEquatable<TContext>
             => new ExecutableStatechart<TContext>(
-                stateChartDefinition.StateNodeDefinition.Parse<TContext>(null),
+                stateChartDefinition.RootStateNode.Parse(null),
                 stateChartDefinition.InitialContext);
 
-        private static BaseStateNode<TContext> Parse<TContext>(
-            this IBaseStateNodeDefinition stateNodeDefinition,
-            BaseStateNode<TContext> parent)
-            where TContext : IEquatable<TContext>
+        private static Interpreter.StateNode Parse(
+            this Definition.StateNode stateNodeDefinition,
+            Interpreter.StateNode parent)
         {
-            IEnumerable<BaseStateNode<TContext>> ParseSubstateNodes(
-                IEnumerable<IBaseStateNodeDefinition> substateNodeDefinitions,
-                BaseStateNode<TContext> recursedParent) =>
+            IEnumerable<Interpreter.StateNode> ParseSubstateNodes(
+                IEnumerable<Definition.StateNode> substateNodeDefinitions,
+                Interpreter.StateNode recursedParent) =>
                 substateNodeDefinitions.Select(substateDefinition => substateDefinition.Parse(recursedParent));
 
-            switch (stateNodeDefinition)
+            Interpreter.CompoundStateNode CreateCompoundStateNode(Definition.CompoundStateNode definition)
             {
-                case IAtomicStateNodeDefinition definition:
-                    return new AtomicStateNode<TContext>(parent, definition);
-                case IFinalStateNodeDefinition definition:
-                    return new FinalStateNode<TContext>(parent, definition);
-                case ICompoundStateNodeDefinition definition:
-                    var compound = new CompoundStateNode<TContext>(parent, definition);
-                    compound.StateNodes = ParseSubstateNodes(definition.States, compound);
-                    compound.InitialTransition = new InitialTransition<TContext>(
-                        compound,
-                        compound.ResolveTarget(definition.InitialTransition.Target),
-                        definition.InitialTransition.Actions);
-                    return compound;
-                case IOrthogonalStateNodeDefinition definition:
-                    var orthogonal = new OrthogonalStateNode<TContext>(parent, definition);
-                    orthogonal.StateNodes = ParseSubstateNodes(definition.States, orthogonal);
-                    return orthogonal;
-                default: throw new Exception("NON EXHAUSTIVE SWITCH");
+                var compound = new Interpreter.CompoundStateNode(parent, definition);
+                compound.StateNodes = ParseSubstateNodes(definition.States, compound);
+                compound.InitialTransition = new Interpreter.InitialTransition(
+                    compound,
+                    compound.ResolveTarget(definition.InitialTransition.Target),
+                    definition.InitialTransition.Actions);
+                return compound;
             }
+            Interpreter.OrthogonalStateNode CreateOrthogonalStateNode(Definition.OrthogonalStateNode definition)
+            {
+                var orthogonal = new Interpreter.OrthogonalStateNode(parent, definition);
+                orthogonal.StateNodes = ParseSubstateNodes(definition.States, orthogonal);
+                return orthogonal;
+            }
+
+            return stateNodeDefinition.Match<Definition.AtomicStateNode, Definition.FinalStateNode, Definition.CompoundStateNode, Definition.OrthogonalStateNode, Interpreter.StateNode>(
+                definition => new Interpreter.AtomicStateNode(parent, definition),
+                definition => new Interpreter.FinalStateNode(parent, definition),
+                CreateCompoundStateNode,
+                CreateOrthogonalStateNode);
         }
     }
 
     public abstract class ParsedStatechart<TContext>
         where TContext : IEquatable<TContext>
     {
-        public BaseStateNode<TContext> RootNode { get; set; }
+        public Interpreter.StateNode RootNode { get; set; }
 
         public string Id => RootNode.Key.GetType().Name; // TODO: get real name here
 
-        public ParsedStatechart(BaseStateNode<TContext> rootNode)
+        public ParsedStatechart(Interpreter.StateNode rootNode)
         {
             RootNode = rootNode ?? throw new ArgumentNullException(nameof(rootNode));
         }
@@ -74,7 +74,7 @@ namespace Statecharts.NET
     {
         public IEnumerable<StatechartDefinitionError> Errors { get; }
 
-        public InvalidStatechart(BaseStateNode<TContext> rootNode, IEnumerable<StatechartDefinitionError> errors) : base(rootNode)
+        public InvalidStatechart(Interpreter.StateNode rootNode, IEnumerable<StatechartDefinitionError> errors) : base(rootNode)
         {
             Errors = errors;
         }
@@ -84,7 +84,7 @@ namespace Statecharts.NET
     {
         public IEnumerable<StatechartHole> Holes { get; }
 
-        public ValidStatechart(BaseStateNode<TContext> rootNode, IEnumerable<StatechartHole> holes) : base(rootNode)
+        public ValidStatechart(Interpreter.StateNode rootNode, IEnumerable<StatechartHole> holes) : base(rootNode)
         {
             Holes = holes;
         }
@@ -92,42 +92,24 @@ namespace Statecharts.NET
 
     public class ExecutableStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
     {
-        private IDictionary<StateNodeId, BaseStateNode<TContext>> stateNodes;
+        private IDictionary<StateNodeId, Interpreter.StateNode> stateNodes;
         public TContext InitialContext { get; }
-        public IEnumerable<BaseTransition<TContext>> Transitions { get; }
+        public IEnumerable<Interpreter.Transition> Transitions { get; }
 
-        public ExecutableStatechart(BaseStateNode<TContext> rootNode, TContext initialContext) : base(rootNode)
+        public ExecutableStatechart(Interpreter.StateNode rootNode, TContext initialContext) : base(rootNode)
         {
             T Identity<T>(T t) => t;
 
-            IEnumerable<BaseTransition<TContext>> GetTransitions(BaseStateNode<TContext> stateNode)
-                => stateNode.EventDefinitions.SelectMany(eventDefinition =>
-                    eventDefinition.Map<IEnumerable<BaseTransition<TContext>>>(
-                        immediate => immediate.Transitions.Select(
-                            transitionDefinition => transitionDefinition.Map(
-                                unguarded => new UnguardedImmediateTransition<TContext>(
-                                    stateNode,
-                                    transitionDefinition.Targets.Select(target => ResolveTarget(stateNode, target)),
-                                    unguarded.Actions) as BaseTransition<TContext>,
-                                guarded => new GuardedImmediateTransition<TContext>(
-                                    guarded.Guard,
-                                    stateNode,
-                                    transitionDefinition.Targets.Select(target => ResolveTarget(stateNode, target)),
-                                    guarded.Actions) as BaseTransition<TContext>)),
-                        @event => @event.Transitions.Select(
-                                transitionDefinition => transitionDefinition.Map(
-                                    unguarded => new UnguardedEventTransition<TContext>(
-                                        stateNode,
-                                        @event.Event,
-                                        transitionDefinition.Targets.Select(target => ResolveTarget(stateNode, target)),
-                                        unguarded.Actions) as BaseTransition<TContext>,
-                                    guarded => new GuardedEventTransition<TContext>(
-                                        stateNode,
-                                        guarded.Guard,
-                                        @event.Event,
-                                        transitionDefinition.Targets.Select(target => ResolveTarget(stateNode, target)),
-                                        guarded.Actions) as BaseTransition<TContext>)),
-                        guarded => Enumerable.Empty<BaseTransition<TContext>>()));
+            IEnumerable<Interpreter.Transition> GetTransitions(Interpreter.StateNode stateNode)
+                => stateNode.Transitions.Select(
+                    transition => transition.Match<Definition.ForbiddenTransition, Definition.UnguardedTransition, Definition.UnguardedContextTransition, Definition.UnguardedContextDataTransition, Definition.GuardedTransition, Definition.GuardedContextTransition, Definition.GuardedContextDataTransition, Interpreter.Transition>(
+                        definition => new Interpreter.ForbiddenTransition(stateNode, definition.Event),
+                        definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
+                        definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
+                        definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
+                        definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
+                        definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
+                        definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions)));
 
             InitialContext = initialContext;
             stateNodes = rootNode.Append(rootNode.GetDescendants().ToArray())
@@ -139,20 +121,20 @@ namespace Statecharts.NET
                 (orthogonal, children) => GetTransitions(orthogonal).Concat(children.SelectMany(Identity))).ToList();
         }
 
-        public IEnumerable<BaseStateNode<TContext>> GetStateNodes(StateConfiguration configuration)
+        public IEnumerable<Interpreter.StateNode> GetStateNodes(StateConfiguration configuration)
             => GetStateNodes(configuration.StateNodeIds);
-        public IEnumerable<BaseStateNode<TContext>> GetStateNodes(IEnumerable<StateNodeId> stateNodeIds)
+        public IEnumerable<Interpreter.StateNode> GetStateNodes(IEnumerable<StateNodeId> stateNodeIds)
             => stateNodeIds.Select(id => stateNodes[id]);
 
-        public BaseStateNode<TContext> GetStateNode(StateNodeId id)
+        public Interpreter.StateNode GetStateNode(StateNodeId id)
             => stateNodes[id];
 
-        private BaseStateNode<TContext> ResolveTarget(
-            BaseStateNode<TContext> fromStateNode,
-            BaseTargetDefinition targetDefinition)
-            => targetDefinition.Map(
+        private Interpreter.StateNode ResolveTarget(
+            Interpreter.StateNode fromStateNode,
+            Model.Target target)
+            => target.Match(
                 absolute => GetStateNode(absolute.Id),
-                sibling => GetStateNode(StateNode.MakeId(fromStateNode.Parent, sibling.Key)),
-                child => GetStateNode(StateNode.MakeId(fromStateNode, child.Key)));
+                sibling => GetStateNode(StateNodeId.Make(fromStateNode.Parent, sibling.Key)),
+                child => GetStateNode(StateNodeId.Make(fromStateNode, child.Key)));
     }
 }

@@ -7,12 +7,13 @@ namespace Statecharts.NET.Interpreter
 {
     public class InitialTransition
     {
-        public InitialTransition(StateNode target, IEnumerable<OneOf<Model.Action, Model.ContextAction>> actions)
+        public InitialTransition(StateNode target, StateNode source, IEnumerable<OneOf<Model.Action, Model.ContextAction>> actions)
         {
-            Target = target;
-            Actions = actions;
+            Source = source ?? throw new ArgumentNullException(nameof(source));
+            Target = target ?? throw new ArgumentNullException(nameof(target));
+            Actions = actions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
         }
-
+        public StateNode Source { get; }
         public StateNode Target { get; }
         public IEnumerable<OneOf<Model.Action, Model.ContextAction>> Actions { get; }
     }
@@ -46,6 +47,26 @@ namespace Statecharts.NET.Interpreter
             StateNode source,
             OneOf<Model.Event, Model.CustomDataEvent> @event,
             IEnumerable<StateNode> targets,
+            IEnumerable<Model.Action> actions) :
+            this(source,
+                @event,
+                targets,
+                (IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>)actions) // TODO: validate if this works
+        { }
+        public UnguardedTransition(
+            StateNode source,
+            OneOf<Model.Event, Model.CustomDataEvent> @event,
+            IEnumerable<StateNode> targets,
+            IEnumerable<OneOf<Model.Action, Model.ContextAction>> actions) :
+            this(source,
+                @event,
+                targets,
+                (IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>)actions) // TODO: validate if this works
+        { }
+        public UnguardedTransition(
+            StateNode source,
+            OneOf<Model.Event, Model.CustomDataEvent> @event,
+            IEnumerable<StateNode> targets,
             IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>> actions) : base(source)
         {
             if(@event.Equals(null)) throw new ArgumentNullException(nameof(@event));
@@ -61,6 +82,30 @@ namespace Statecharts.NET.Interpreter
         public IEnumerable<StateNode> Targets { get; }
         public IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>> Actions { get; }
 
+        public GuardedTransition(
+            StateNode source,
+            OneOf<Model.Event, Model.CustomDataEvent> @event,
+            Model.InStateGuard guard,
+            IEnumerable<StateNode> targets,
+            IEnumerable<Model.Action> actions) :
+            this(source,
+                @event,
+                guard,
+                targets,
+                (IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>)actions) // TODO: validate if this works
+        { }
+        public GuardedTransition(
+            StateNode source,
+            OneOf<Model.Event, Model.CustomDataEvent> @event,
+            OneOf<Model.InStateGuard, Model.ConditionContextGuard> guard,
+            IEnumerable<StateNode> targets,
+            IEnumerable<OneOf<Model.Action, Model.ContextAction>> actions) :
+            this(source,
+                @event,
+                guard.Match<OneOf<Model.InStateGuard, Model.ConditionContextGuard, Model.ConditionContextDataGuard>>(g => g, g => g),
+                targets,
+                (IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>)actions) // TODO: validate if this works
+        { }
         public GuardedTransition(
             StateNode source,
             OneOf<Model.Event, Model.CustomDataEvent> @event,
