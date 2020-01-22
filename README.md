@@ -49,6 +49,10 @@
 		- [ ] In State Guards
 		- [ ] Delayed Events
 
+- Modelling
+	- [ ] OnDone Transition should only be available on Compound and Orthogonal States
+	- [ ] Final State Node can only have OnEntryActions and OnExitActions
+
 - Tooling
 	- [ ] Add missing properties to xstate Serialization, and fix it (e.g. same event twice)
 	- [ ] Improve SCXML Test-Server
