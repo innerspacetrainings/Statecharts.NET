@@ -48,7 +48,6 @@ namespace Statecharts.NET.Definition
         public abstract IEnumerable<StateNode> States { get; }
         public abstract InitialTransition InitialTransition { get; }
     }
-
     public abstract class OrthogonalStateNode : StateNode
     {
         public abstract IEnumerable<Service> Services { get; }

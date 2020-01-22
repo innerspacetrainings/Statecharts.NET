@@ -10,6 +10,7 @@ namespace Statecharts.NET.Language
     {
         public static Statechart.Builder Statechart => new Statechart.Builder();
         public static Event.Builder Event => new Event.Builder();
+        public static Transition.WithEvent OnDone => Transition.WithEvent.OnCompoundDone();
 
         public static Service.ServiceLogic Chain(params Service.ServiceLogic[] tasks)
             => async token =>
@@ -94,12 +95,12 @@ namespace Statecharts.NET.Language
             => new Service.WithLogic(task).WithId(id);
         public static Service.WithOnSuccessHandler OnSuccess(
             this Service.ServiceLogic logic,
-            OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> transition)
-            => new Service.WithLogic(logic).OnSuccess(transition);
+            Model.Target target)
+            => new Service.WithLogic(logic).OnSuccess(target);
         public static Service.WithOnErrorHandler OnError(
             this Service.ServiceLogic logic,
-            OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> transition)
-            => new Service.WithLogic(logic).OnError(transition);
+            Model.Target target)
+            => new Service.WithLogic(logic).OnError(target);
 
         // TODO: implement this
         ////public static Service.WithId<T> WithId<T>(

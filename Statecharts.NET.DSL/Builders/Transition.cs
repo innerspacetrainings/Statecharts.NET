@@ -19,6 +19,12 @@ namespace Statecharts.NET.Language.Transition
             new WithEvent(new ImmediateEvent());
         internal static WithEvent Delayed(TimeSpan delay) =>
             new WithEvent(new DelayedEvent(delay));
+        internal static WithEvent OnCompoundDone() =>
+            new WithEvent(new CustomEvent("#compound.done")); // TODO: CompoundDoneEvent()
+        internal static WithEvent OnServiceSuccess() =>
+            new WithEvent(new CustomEvent("#compound.done")); // TODO: ServiceSuccessEvent()
+        internal static WithEvent OnServiceError() =>
+            new WithEvent(new CustomEvent("#service.error")); // TODO: ServiceErrorEvent()
 
         public WithDataEvent<TEventData> WithData<TEventData>() =>
             new WithDataEvent<TEventData>(Event);

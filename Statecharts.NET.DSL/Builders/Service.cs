@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Statecharts.NET.Language.Transition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
@@ -33,9 +34,9 @@ namespace Statecharts.NET.Language.Service
     {
         internal WithId(ServiceLogic task) : base(task) { }
 
-        public WithOnSuccessHandler OnSuccess(OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> transition)
+        public WithOnSuccessHandler OnSuccess(Model.Target target) // TODO: add option to specify Actions
         {
-            DefinitionData.OnSuccessDefinition = transition;
+            DefinitionData.OnSuccessDefinition = WithEvent.OnServiceSuccess().TransitionTo.Multiple(target);
             return this;
         }
     }
@@ -43,9 +44,9 @@ namespace Statecharts.NET.Language.Service
     {
         internal WithOnSuccessHandler(ServiceLogic task) : base(task) { }
 
-        public WithOnErrorHandler OnError(OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> transition)
+        public WithOnErrorHandler OnError(Model.Target target) // TODO: add option to specify Actions
         {
-            DefinitionData.OnErrorTransition = transition;
+            DefinitionData.OnErrorTransition = WithEvent.OnServiceError().TransitionTo.Multiple(target);
             return this;
         }
     }

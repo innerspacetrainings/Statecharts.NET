@@ -2,25 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Language.Service;
-using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 using static Statecharts.NET.Language.Keywords;
-using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET.Language.StateNode
 {
     internal class DefinitionData
     {
         public string Name { get; }
-        public IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; set; }
-        public IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; set; }
+        public IEnumerable<OneOf<Model.Action, Model.ContextAction>> EntryActions { get; set; }
+        public IEnumerable<OneOf<Model.Action, Model.ContextAction>> ExitActions { get; set; }
         public IEnumerable<Definition.Transition> Transitions { get; set; }
-        public IEnumerable<Activity> Activities { get; set; }
+        public IEnumerable<Model.Activity> Activities { get; set; }
         public IEnumerable<Model.Service> Services { get; set; }
         public Definition.InitialTransition InitialTransition { get; set; }
         public IEnumerable<Definition.StateNode> States { get; set; }
 
-        public DefinitionData(string name) => Name = name ?? throw new ArgumentNullException(nameof(name));
+        public DefinitionData(string name)
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            EntryActions = Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
+            ExitActions = Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
+            Transitions = Enumerable.Empty<Definition.Transition>();
+            Activities = Enumerable.Empty<Model.Activity>();
+            Services = Enumerable.Empty<Model.Service>();
+        }
     }
 
     public class WithName : WithEntryActions
@@ -28,8 +34,8 @@ namespace Statecharts.NET.Language.StateNode
         public WithName(string name) : base(name) { }
 
         public WithEntryActions WithEntryActions(
-            OneOf<Action, ContextAction> action,
-            params OneOf<Action, ContextAction>[] actions)
+            OneOf<Model.Action, Model.ContextAction> action,
+            params OneOf<Model.Action, Model.ContextAction>[] actions)
         {
             DefinitionData.EntryActions = action.Append(actions);
             return this;
@@ -40,8 +46,8 @@ namespace Statecharts.NET.Language.StateNode
         internal WithEntryActions(string name) : base(name) { }
 
         public WithExitActions WithExitActions(
-            OneOf<Action, ContextAction> action,
-            params OneOf<Action, ContextAction>[] actions)
+            OneOf<Model.Action, Model.ContextAction> action,
+            params OneOf<Model.Action, Model.ContextAction>[] actions)
         {
             DefinitionData.ExitActions = action.Append(actions);
             return this;
@@ -64,8 +70,8 @@ namespace Statecharts.NET.Language.StateNode
         internal WithTransitions(string name) : base(name) { }
 
         public WithActivities WithActivities(
-            Activity activity,
-            params Activity[] activities)
+            Model.Activity activity,
+            params Model.Activity[] activities)
         {
             DefinitionData.Activities = activity.Append(activities);
             return this;
@@ -95,9 +101,9 @@ namespace Statecharts.NET.Language.StateNode
 
         public override string Name => DefinitionData.Name;
         public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<Action, ContextAction>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Action, ContextAction>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<Activity> Activities => DefinitionData.Activities;
+        public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<Model.Activity> Activities => DefinitionData.Activities;
         public override IEnumerable<Model.Service> Services => DefinitionData.Services;
 
         public Final AsFinal() => new Final(DefinitionData);
@@ -114,9 +120,9 @@ namespace Statecharts.NET.Language.StateNode
 
         public override string Name => DefinitionData.Name;
         public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<Action, ContextAction>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Action, ContextAction>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<Activity> Activities => DefinitionData.Activities;
+        public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<Model.Activity> Activities => DefinitionData.Activities;
     }
 
     public class Compound
@@ -140,8 +146,8 @@ namespace Statecharts.NET.Language.StateNode
             => DefinitionData = compound.DefinitionData;
 
         public CompoundWithInitialActions WithInitialActions(
-            OneOf<Action, ContextAction> action,
-            params OneOf<Action, ContextAction>[] actions)
+            OneOf<Model.Action, Model.ContextAction> action,
+            params OneOf<Model.Action, Model.ContextAction>[] actions)
         {
             DefinitionData.InitialTransition = new Definition.InitialTransition(DefinitionData.InitialTransition.Target, action.Append(actions));
             return new CompoundWithInitialActions(this);
@@ -183,9 +189,9 @@ namespace Statecharts.NET.Language.StateNode
 
         public override string Name => DefinitionData.Name;
         public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<Action, ContextAction>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Action, ContextAction>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<Activity> Activities => DefinitionData.Activities;
+        public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<Model.Activity> Activities => DefinitionData.Activities;
         public override IEnumerable<Model.Service> Services => DefinitionData.Services;
         public override Definition.InitialTransition InitialTransition => DefinitionData.InitialTransition;
         public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
@@ -216,9 +222,9 @@ namespace Statecharts.NET.Language.StateNode
 
         public override string Name => DefinitionData.Name;
         public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<Action, ContextAction>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Action, ContextAction>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<Activity> Activities => DefinitionData.Activities;
+        public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<Model.Activity> Activities => DefinitionData.Activities;
         public override IEnumerable<Model.Service> Services => DefinitionData.Services;
         public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
     }

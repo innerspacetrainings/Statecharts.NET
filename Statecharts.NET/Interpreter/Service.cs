@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
@@ -11,8 +12,8 @@ namespace Statecharts.NET.Interpreter
     public class Service<TContext>
         where TContext : IEquatable<TContext>
     {
-        private Queue<BaseEvent> internalEvents = new Queue<BaseEvent>(); // TODO: https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp
-        private Queue<BaseEvent> externalEvents = new Queue<BaseEvent>();
+        private Queue<Model.Event> internalEvents = new Queue<Model.Event>(); // TODO: https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp
+        private Queue<Model.Event> externalEvents = new Queue<Model.Event>();
         private StateConfiguration stateConfiguration;
         private TContext context;
 
@@ -28,9 +29,9 @@ namespace Statecharts.NET.Interpreter
             var steps = Execute();
             return new State<TContext>(stateConfiguration, context);
         }
-        public State<TContext> Send(Event @event)
+        public State<TContext> Send(Model.CustomEvent @event)
         {
-            Console.WriteLine($"{Environment.NewLine}Enqueuing {@event.Type}...");
+            Console.WriteLine($"{Environment.NewLine}Enqueuing {@event.EventName}...");
             externalEvents.Enqueue(@event);
             var steps = Execute();
             return new State<TContext>(stateConfiguration, context);
@@ -55,24 +56,15 @@ namespace Statecharts.NET.Interpreter
             return steps;
         }
 
-        private StabilizationStep CreateStabilizationStep()
-        {
-            foreach (var stateNode in StateChart.GetStateNodes(stateConfiguration).GetUnstableStateNodes())
-            {
-                switch (stateNode)
-                {
-                    case FinalStateNode<TContext> final:
-                        return null; // TODO: correctly handle final states according to SCXML
-                    case OrthogonalStateNode<TContext> orthogonal:
-                        return new StabilizationStep(orthogonal.StateNodes.Select(state => state.Id));
-                    case CompoundStateNode<TContext> compound:
-                        // TODO: https://github.com/davidkpiano/xstate/issues/675
-                        return new StabilizationStep(compound.InitialTransition.Target.Append(compound.InitialTransition.Target.GetDescendants()).Select(a => a.Id));
-                    default: throw new Exception("NON EXHAUSTIVE SWITCH");
-                }
-            }
-            return null;
-        }
+        private StabilizationStep CreateStabilizationStep() =>
+            StateChart.GetStateNodes(stateConfiguration)
+                .GetUnstableStateNodes()
+                .Select(stateNode => stateNode.Match(
+                    atomic => null,
+                    final => null, // TODO: correctly handle final states according to SCXML
+                    compound => new StabilizationStep(compound.InitialTransition.Target.Append(compound.InitialTransition.Target.GetDescendants()).Select(a => a.Id)), // TODO: https://github.com/davidkpiano/xstate/issues/675
+                    orthogonal => new StabilizationStep(orthogonal.StateNodes.Select(state => state.Id))))
+                .FirstOrDefault();
 
         private MicroStep ApplyStep(MicroStep microStep)
         {
@@ -88,12 +80,12 @@ namespace Statecharts.NET.Interpreter
                 var eventsRaisedByEntering = enteredStateNodes.Select(stateNode => ExecuteActionBlock(stateNode.EntryActions)).ToList();
                 stateConfiguration = stateConfiguration.With(step.EnteredStatesIds);
             }
-            void ApplyStep(IList<StateNodeId> enteredStatesKeys, IList<StateNodeId> exitedStatesKeys, Transition<TContext> transition)
+            void ApplyStep(IList<StateNodeId> enteredStatesKeys, IList<StateNodeId> exitedStatesKeys, Transition transition)
             {
                 var enteredStateNodes = StateChart.GetStateNodes(enteredStatesKeys);
                 var exitedStateNodes = StateChart.GetStateNodes(exitedStatesKeys);
                 var eventsRaisedByExiting = exitedStateNodes.Select(stateNode => ExecuteActionBlock(stateNode.ExitActions)).ToList();
-                var eventsRaisedOnTransition = transition.Map(eventless => ExecuteActionBlock(eventless.Actions),eventful => ExecuteActionBlock(eventful.Actions));
+                var eventsRaisedOnTransition = transition.Match(forbidden => Enumerable.Empty<Model.IEvent>(), unguarded => ExecuteActionBlock(unguarded.Actions), guarded => ExecuteActionBlock(guarded.Actions));
                 var eventsRaisedByEntering = enteredStateNodes.Select(stateNode => ExecuteActionBlock(stateNode.EntryActions)).ToList();
                 stateConfiguration = stateConfiguration.Without(exitedStatesKeys).With(enteredStatesKeys);
             }
@@ -107,45 +99,46 @@ namespace Statecharts.NET.Interpreter
         }
 
         // TODO: https://github.com/davidkpiano/xstate/issues/603
-        private IEnumerable<BaseEvent> ExecuteActionBlock(IEnumerable<Action> actions)
+        // TODO: raised Events
+        private IEnumerable<Model.IEvent> ExecuteActionBlock(IEnumerable<OneOf<Model.Action, Model.ContextAction>> actions)
         {
             foreach (var action in actions)
             {
                 switch (action)
                 {
                     // TODO: execute the Actions
-                    case LogAction logAction:
-                        Debug.WriteLine(logAction.Label);
-                        break;
-                    case SideEffectAction<TContext> sideEffectAction:
-                        sideEffectAction.Function(context);
-                        break;
-                    default:
-                        Debug.WriteLine($"{action.GetType().Name} should be executed");
-                        break;
+                    ////case LogAction logAction:
+                    ////    Debug.WriteLine(logAction.Label);
+                    ////    break;
+                    ////case SideEffectAction<TContext> sideEffectAction:
+                    ////    sideEffectAction.Function(context);
+                    ////    break;
+                    ////default:
+                    ////    Debug.WriteLine($"{action.GetType().Name} should be executed");
+                    ////    break;
                 }
             }
 
-            return Enumerable.Empty<BaseEvent>(); // TODO: return actual raised events
+            return Enumerable.Empty<Model.IEvent>(); // TODO: return actual raised events
         }
 
-        private IEnumerable<BaseEvent> ExecuteActionBlock(IEnumerable<EventAction> actions)
+        private IEnumerable<IEvent> ExecuteActionBlock(IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>> actions)
         {
             foreach (var action in actions)
             {
                 switch (action)
                 {
                     // TODO: execute the Actions
-                    case AssignEventAction<TContext, int> assignEventAction:
-                        assignEventAction.Mutation(context, new Event("TODO, sheeeeesh"));
-                        break;
-                    default:
-                        Debug.WriteLine($"{action.GetType().Name} should be executed");
-                        break;
+                    ////case AssignEventAction<TContext, int> assignEventAction:
+                    ////    assignEventAction.Mutation(context, new Event("TODO, sheeeeesh"));
+                    ////    break;
+                    ////default:
+                    ////    Debug.WriteLine($"{action.GetType().Name} should be executed");
+                    ////    break;
                 }
             }
 
-            return Enumerable.Empty<BaseEvent>(); // TODO: return actual raised events
+            return Enumerable.Empty<IEvent>(); // TODO: return actual raised events
         }
 
         // like 'sismic.execute_once'
@@ -177,7 +170,7 @@ namespace Statecharts.NET.Interpreter
             return computedSteps;
         }
 
-        private BaseEvent SelectEvent()
+        private Model.Event SelectEvent()
             => internalEvents.Count > 0
                 ? internalEvents.Dequeue()
                 : externalEvents.Count > 0
@@ -185,8 +178,7 @@ namespace Statecharts.NET.Interpreter
                     : null;
             //=> internalEvents.Concat(externalEvents).FirstOrDefault();
 
-        private IEnumerable<MicroStep> CreateSteps(BaseEvent @event,
-            IEnumerable<BaseTransition<TContext>> transitions)
+        private IEnumerable<MicroStep> CreateSteps(Model.Event @event, IEnumerable<Transition> transitions)
             => transitions.SelectMany(transition =>
                 transition.GetTargets().Select(target =>
                 {
@@ -195,29 +187,26 @@ namespace Statecharts.NET.Interpreter
                     var lastBeforeLCA = transition.Source.OneBeneath(lca);
                     var exited = lastBeforeLCA.Append(lastBeforeLCA.GetDescendants()).Where(stateConfiguration.Contains);
                     var entered = target.Append(target.AncestorsUntil(lca).Reverse());
-                    return transition.Map<MicroStep, TContext>( // TODO: refactor the similarity
-                        initial => throw new Exception("WTF is happening here..."), // TODO: remodel this
-                        unguarded => new ImmediateStep<TContext>(new EventlessTransition<TContext>(unguarded.Source, unguarded.Targets, unguarded.Actions), entered.Ids(), exited.Ids()),
-                        guarded => new ImmediateStep<TContext>(new EventlessTransition<TContext>(guarded.Source, guarded.Targets, guarded.Actions), entered.Ids(), exited.Ids()),
-                        unguarded => new EventStep<TContext>(@event, new EventfulTransition<TContext>(unguarded.Source, unguarded.Targets, unguarded.Actions), entered.Ids(), exited.Ids()),
-                        guarded => new EventStep<TContext>(@event, new EventfulTransition<TContext>(guarded.Source, guarded.Targets, guarded.Actions), entered.Ids(), exited.Ids()));
+                    return transition.Match<ForbiddenTransition, UnguardedTransition, GuardedTransition, MicroStep>( // TODO: refactor the similarity
+                        forbidden => null, // TODO: WTF, needs remodelling
+                        unguarded => new EventStep<TContext>(@event, transition, entered.Ids(), exited.Ids()), 
+                        guarded => new EventStep<TContext>(@event, transition, entered.Ids(), exited.Ids()));
                 }));
 
         // TODO: don't take all transitions (https://gitlab.com/scion-scxml/test-framework/blob/master/test/documentOrder/documentOrder0.scxml)
-        private IEnumerable<BaseTransition<TContext>> SelectTransitions(BaseEvent nextEvent)
+        private IEnumerable<Transition> SelectTransitions(Model.Event nextEvent)
         {
-            bool Matches(BaseEvent @event) => @event.Equals(nextEvent); // TODO: Equals vs. == (https://docs.microsoft.com/en-us/previous-versions/ms173147(v=vs.90)?redirectedfrom=MSDN)
+            bool Matches(OneOf<Model.Event, Model.CustomDataEvent> @event) => @event.Equals(nextEvent); // TODO: Equals vs. == (https://docs.microsoft.com/en-us/previous-versions/ms173147(v=vs.90)?redirectedfrom=MSDN)
             bool IsEnabled(GuardedTransition guarded)
-                => guarded.Guard.Map<bool, TContext>(
-                    inline => inline.Condition.Invoke(context, nextEvent),
-                    inState => false); // TODO: proper inState check
-            bool SourceStateIsActive(BaseTransition<TContext> transition)
+                => guarded.Guard.Match(
+                    inline => false, // TODO: proper inState check
+                    guard => guard.Condition.Invoke(context),
+                    dataGuard => dataGuard.Condition.Invoke(context, null)); // TODO: pass Data to Event
+            bool SourceStateIsActive(Transition transition)
                 => stateConfiguration.Contains(transition.Source);
-            bool TransitionShouldBeTaken(BaseTransition<TContext> transition)
-                => transition.Map(
-                    _ => false, // TODO: check if this case gets ever hit
-                    _ => true,
-                    guarded => IsEnabled(guarded),
+            bool TransitionShouldBeTaken(Transition transition)
+                => transition.Match(
+                    forbidden => false, // TODO: check if this case gets ever hit
                     unguarded => Matches(unguarded.Event),
                     guarded => Matches(guarded.Event) && IsEnabled(guarded));
 
@@ -306,12 +295,12 @@ namespace Statecharts.NET.Interpreter
     internal class ImmediateStep<TContext> : MicroStep
         where TContext : IEquatable<TContext>
     {
-        public EventlessTransition<TContext> Transition { get; }
+        public UnguardedTransition Transition { get; }
         public IEnumerable<StateNodeId> EnteredStatesIds { get; }
         public IEnumerable<StateNodeId> ExitedStatesIds { get; }
 
         public ImmediateStep(
-            EventlessTransition<TContext> transition,
+            UnguardedTransition transition,
             IEnumerable<StateNodeId> enteredStatesIds,
             IEnumerable<StateNodeId> exitedStatesIds)
         {
@@ -323,14 +312,14 @@ namespace Statecharts.NET.Interpreter
     internal class EventStep<TContext> : MicroStep
         where TContext : IEquatable<TContext>
     {
-        public BaseEvent Event { get; }
-        public EventfulTransition<TContext> Transition { get; }
+        public Model.Event Event { get; }
+        public Transition Transition { get; }
         public IEnumerable<StateNodeId> EnteredStatesIds { get; }
         public IEnumerable<StateNodeId> ExitedStatesIds { get; }
 
         public EventStep(
-            BaseEvent @event,
-            EventfulTransition<TContext> transition,
+            Model.Event @event,
+            Transition transition,
             IEnumerable<StateNodeId> enteredStatesIds,
             IEnumerable<StateNodeId> exitedStatesIds)
         {

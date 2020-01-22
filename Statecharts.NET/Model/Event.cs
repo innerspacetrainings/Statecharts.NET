@@ -57,7 +57,11 @@ namespace Statecharts.NET.Model
 
         public override int GetHashCode() => EventName != null ? EventName.GetHashCode() : 0;
     }
-    public class ServiceDoneEvent : IEvent {
+    public class ServiceSuccessEvent : IEvent {
+        public bool Equals(IEvent other) => throw new NotImplementedException();
+    }
+    public class ServiceErrorEvent : IEvent
+    {
         public bool Equals(IEvent other) => throw new NotImplementedException();
     }
     public class CompoundDoneEvent : IEvent {
