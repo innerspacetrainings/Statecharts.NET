@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Statecharts.NET.Definition;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Language
@@ -20,8 +19,8 @@ namespace Statecharts.NET.Language
                 }
             };
 
-        public static ForbiddenTransition Ignore(string eventName) =>
-            new ForbiddenTransition(eventName);
+        public static Definition.ForbiddenTransition Ignore(string eventName) =>
+            new Definition.ForbiddenTransition(eventName);
         
         public static Transition.WithEvent On(string eventType)
             => Transition.WithEvent.OfEventType(eventType);
@@ -30,27 +29,27 @@ namespace Statecharts.NET.Language
         public static Transition.WithEvent After(TimeSpan delay)
             => Transition.WithEvent.Delayed(delay);
 
-        public static ChildTarget Child(string stateNodeName)
-            => new ChildTarget(stateNodeName);
-        public static SiblingTarget Sibling(string stateNodeName)
-            => new SiblingTarget(stateNodeName);
-        public static AbsoluteTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new AbsoluteTarget(
+        public static Definition.ChildTarget Child(string stateNodeName)
+            => new Definition.ChildTarget(stateNodeName);
+        public static Definition.SiblingTarget Sibling(string stateNodeName)
+            => new Definition.SiblingTarget(stateNodeName);
+        public static Definition.AbsoluteTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
+            new Definition.AbsoluteTarget(
                 new StateNodeId((
                     new RootStateNodeKey(stateChartName) as StateNodeKey)
                     .Append(new NamedStateNodeKey(stateNodeName))
                     .Concat(stateNodeNames.Select(name => new NamedStateNodeKey(name)))));
 
         // TODO: create Keywords for all Action Types
-        public static SendAction Send()
+        public static Definition.SendAction Send()
             => throw new NotImplementedException();
-        public static RaiseAction Raise()
+        public static Definition.RaiseAction Raise()
             => throw new NotImplementedException();
-        public static LogAction Log()
+        public static Definition.LogAction Log()
             => throw new NotImplementedException();
-        public static AssignContextAction Assign()
+        public static Definition.AssignContextAction Assign()
             => throw new NotImplementedException();
-        public static SideEffectContextAction Run()
+        public static Definition.SideEffectContextAction Run()
             => throw new NotImplementedException();
     }
     public static class Helpers
@@ -72,8 +71,8 @@ namespace Statecharts.NET.Language
             => new StateNode.WithName(name).WithTransitions(transition, transitions);
         public static StateNode.WithActivities WithActivities(
             this string name,
-            Activity activity,
-            params Activity[] activities)
+            Definition.Activity activity,
+            params Definition.Activity[] activities)
             => new StateNode.WithName(name).WithActivities(activity, activities);
         public static StateNode.WithServices WithServices(
             this string name,
@@ -93,11 +92,11 @@ namespace Statecharts.NET.Language
             => new Service.WithLogic(task).WithId(id);
         public static Service.WithOnSuccessHandler OnSuccess(
             this Service.ServiceLogic logic,
-            OneOf<UnguardedTransition, UnguardedContextTransition> transition)
+            OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> transition)
             => new Service.WithLogic(logic).OnSuccess(transition);
         public static Service.WithOnErrorHandler OnError(
             this Service.ServiceLogic logic,
-            OneOf<UnguardedTransition, UnguardedContextTransition> transition)
+            OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> transition)
             => new Service.WithLogic(logic).OnError(transition);
 
         // TODO: implement this

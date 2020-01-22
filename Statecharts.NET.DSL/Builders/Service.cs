@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Statecharts.NET.Definition;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Language.Service
@@ -13,8 +12,8 @@ namespace Statecharts.NET.Language.Service
     {
         public ServiceLogic Task { get; }
         public string Id { get; set; }
-        public OneOf<UnguardedTransition, UnguardedContextTransition> OnErrorTransition { get; set; }
-        public OneOf<UnguardedTransition, UnguardedContextTransition> OnSuccessDefinition { get; set; }
+        public OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> OnErrorTransition { get; set; }
+        public OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> OnSuccessDefinition { get; set; }
 
         public DefinitionData(ServiceLogic task) => Task = task ?? throw new ArgumentNullException(nameof(task));
     }
@@ -33,7 +32,7 @@ namespace Statecharts.NET.Language.Service
     {
         internal WithId(ServiceLogic task) : base(task) { }
 
-        public WithOnSuccessHandler OnSuccess(OneOf<UnguardedTransition, UnguardedContextTransition> transition)
+        public WithOnSuccessHandler OnSuccess(OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> transition)
         {
             DefinitionData.OnSuccessDefinition = transition;
             return this;
@@ -43,7 +42,7 @@ namespace Statecharts.NET.Language.Service
     {
         internal WithOnSuccessHandler(ServiceLogic task) : base(task) { }
 
-        public WithOnErrorHandler OnError(OneOf<UnguardedTransition, UnguardedContextTransition> transition)
+        public WithOnErrorHandler OnError(OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> transition)
         {
             DefinitionData.OnErrorTransition = transition;
             return this;
@@ -57,7 +56,7 @@ namespace Statecharts.NET.Language.Service
 
         public override Func<CancellationToken, Task> Task => async token => await DefinitionData.Task(token);
         public override string Id => DefinitionData.Id;
-        public override OneOf<UnguardedTransition, UnguardedContextTransition> OnErrorTransition => DefinitionData.OnErrorTransition;
-        public override OneOf<UnguardedTransition, UnguardedContextTransition> OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
+        public override OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> OnErrorTransition => DefinitionData.OnErrorTransition;
+        public override OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition> OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
     }
 }

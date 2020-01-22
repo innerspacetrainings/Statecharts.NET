@@ -126,7 +126,7 @@ namespace Statecharts.NET.Language.StateNode
 
         public CompoundWithInitialState WithInitialState(string stateName)
         {
-            DefinitionData.InitialTransition = new Definition.InitialTransition { Target = Child(stateName) }; // TODO: change to builder pattern or ctor
+            DefinitionData.InitialTransition = new Definition.InitialTransition(Child(stateName));
             return new CompoundWithInitialState(this);
         }
     }
@@ -141,7 +141,7 @@ namespace Statecharts.NET.Language.StateNode
             OneOf<Definition.Action, Definition.ContextAction> action,
             params OneOf<Definition.Action, Definition.ContextAction>[] actions)
         {
-            DefinitionData.InitialTransition.Actions = action.Append(actions);
+            DefinitionData.InitialTransition = new Definition.InitialTransition(DefinitionData.InitialTransition.Target, action.Append(actions));
             return new CompoundWithInitialActions(this);
         }
 

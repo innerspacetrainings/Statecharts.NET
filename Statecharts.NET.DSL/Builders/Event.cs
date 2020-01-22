@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Statecharts.NET.Language.Event
+﻿namespace Statecharts.NET.Language.Event
 {
     public class Builder
     {
+        // TODO: Event.Define("...")[.WithData<TEventData>()];
     }
 }
