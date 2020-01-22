@@ -13,7 +13,7 @@ namespace Statecharts.NET.Language.Service
     {
         public ServiceLogic Task { get; }
         public string Id { get; set; }
-        public UnguardedTransition OnErrorTransition { get; set; }
+        public OneOf<UnguardedTransition, UnguardedContextTransition> OnErrorTransition { get; set; }
         public OneOf<UnguardedTransition, UnguardedContextTransition> OnSuccessDefinition { get; set; }
 
         public DefinitionData(ServiceLogic task) => Task = task ?? throw new ArgumentNullException(nameof(task));
@@ -43,7 +43,7 @@ namespace Statecharts.NET.Language.Service
     {
         internal WithOnSuccessHandler(ServiceLogic task) : base(task) { }
 
-        public WithOnErrorHandler OnError(UnguardedTransition transition)
+        public WithOnErrorHandler OnError(OneOf<UnguardedTransition, UnguardedContextTransition> transition)
         {
             DefinitionData.OnErrorTransition = transition;
             return this;
@@ -57,7 +57,7 @@ namespace Statecharts.NET.Language.Service
 
         public override Func<CancellationToken, Task> Task => async token => await DefinitionData.Task(token);
         public override string Id => DefinitionData.Id;
-        public override UnguardedTransition OnErrorTransition => DefinitionData.OnErrorTransition;
+        public override OneOf<UnguardedTransition, UnguardedContextTransition> OnErrorTransition => DefinitionData.OnErrorTransition;
         public override OneOf<UnguardedTransition, UnguardedContextTransition> OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
     }
 }

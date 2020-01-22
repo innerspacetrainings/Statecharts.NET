@@ -7,15 +7,15 @@ namespace Statecharts.NET.Definition
 
     public abstract class Event : OneOfBase<CustomEvent, ImmediateEvent, DelayedEvent>, IEvent
     {
-        public bool Equals(IEvent other) => this.Match(Equals, Equals, Equals);
+        public virtual bool Equals(IEvent other) => this.Match(Equals, Equals, Equals);
     }
 
-    public class CustomEvent : IEvent
+    public class CustomEvent : Event
     {
         public string EventName { get; }
         public CustomEvent(string eventName) => EventName = eventName;
 
-        public virtual bool Equals(IEvent other) => other is CustomEvent @event && @event.EventName == EventName;
+        public override bool Equals(IEvent other) => other is CustomEvent @event && @event.EventName == EventName;
 
         public override bool Equals(object obj)
         {
@@ -26,14 +26,14 @@ namespace Statecharts.NET.Definition
 
         public override int GetHashCode() => EventName != null ? EventName.GetHashCode() : 0;
     }
-    public class ImmediateEvent : IEvent {
-        public bool Equals(IEvent other) => other is ImmediateEvent;
+    public class ImmediateEvent : Event {
+        public override bool Equals(IEvent other) => other is ImmediateEvent;
     }
-    public class DelayedEvent : IEvent {
+    public class DelayedEvent : Event {
         public TimeSpan Delay { get; }
         public DelayedEvent(TimeSpan delay) => Delay = delay;
 
-        public bool Equals(IEvent other) => other == this; // TODO: think of this
+        public override bool Equals(IEvent other) => other == this; // TODO: think of this
     }
     public class CustomDataEvent : IEvent
     {

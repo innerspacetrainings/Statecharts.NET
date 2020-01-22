@@ -23,14 +23,12 @@ namespace Statecharts.NET.Language
         public static ForbiddenTransition Ignore(string eventName) =>
             new ForbiddenTransition(eventName);
         
-        public static Transition.WithEventDefinition On(string eventType)
-            => Transition.WithEventDefinition.OfEventType(eventType);
-        public static Transition.WithEventDefinition OnDone
-            => Transition.WithEventDefinition.Done();
-        public static Transition.WithEventDefinition Immediately
-            => Transition.WithEventDefinition.Immediately();
-        public static Transition.WithEventDefinition After(TimeSpan delay)
-            => Transition.WithEventDefinition.Delayed(delay);
+        public static Transition.WithEvent On(string eventType)
+            => Transition.WithEvent.OfEventType(eventType);
+        public static Transition.WithEvent Immediately
+            => Transition.WithEvent.Immediately();
+        public static Transition.WithEvent After(TimeSpan delay)
+            => Transition.WithEvent.Delayed(delay);
 
         public static ChildTarget Child(string stateNodeName)
             => new ChildTarget(stateNodeName);
@@ -63,8 +61,9 @@ namespace Statecharts.NET.Language
             params OneOf<Definition.Action, Definition.ContextAction>[] entryActions)
             => new StateNode.WithName(name).WithEntryActions(action, entryActions);
         public static StateNode.WithExitActions WithExitActions(
-            this string name, Definition.Action action,
-            params Definition.Action[] exitActions)
+            this string name,
+            OneOf<Definition.Action, Definition.ContextAction> action,
+            params OneOf<Definition.Action, Definition.ContextAction>[] exitActions)
             => new StateNode.WithName(name).WithExitActions(action, exitActions);
         public static StateNode.WithTransitions WithTransitions(
             this string name,
@@ -100,13 +99,15 @@ namespace Statecharts.NET.Language
             this Service.ServiceLogic logic,
             OneOf<UnguardedTransition, UnguardedContextTransition> transition)
             => new Service.WithLogic(logic).OnError(transition);
-        public static Service.WithId<T> WithId<T>(
-            this Service.ServiceLogic<T> logic,
-            string id)
-            => throw new NotImplementedException();
-        public static Service.WithOnSuccessHandler<T> OnSuccess<T>(
-            this Service.ServiceLogic logic,
-            UnguardedContextDataTransition transition)
-            => throw new NotImplementedException();
+
+        // TODO: implement this
+        ////public static Service.WithId<T> WithId<T>(
+        ////    this Service.ServiceLogic<T> logic,
+        ////    string id)
+        ////    => throw new NotImplementedException();
+        ////public static Service.WithOnSuccessHandler<T> OnSuccess<T>(
+        ////    this Service.ServiceLogic logic,
+        ////    UnguardedContextDataTransition transition)
+        ////    => throw new NotImplementedException();
     }
 }

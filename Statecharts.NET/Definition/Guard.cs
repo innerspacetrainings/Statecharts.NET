@@ -1,7 +1,7 @@
 ﻿using System;
 using Statecharts.NET.Utilities;
 
-namespace Statecharts.NET
+namespace Statecharts.NET.Definition
 {
     public abstract class Guard : OneOfBase<InStateGuard, ConditionContextGuard, ConditionContextDataGuard> { }
 

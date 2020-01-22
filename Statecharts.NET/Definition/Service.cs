@@ -8,7 +8,7 @@ namespace Statecharts.NET.Definition
     public abstract class Service : OneOfBase<TaskService, TaskDataService>
     {
         public abstract string Id { get; }
-        public abstract UnguardedTransition OnErrorTransition { get; }
+        public abstract OneOf<UnguardedTransition, UnguardedContextTransition> OnErrorTransition { get; }
     }
 
     public abstract class TaskService : Service

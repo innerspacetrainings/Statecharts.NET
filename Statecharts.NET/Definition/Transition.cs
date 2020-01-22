@@ -28,9 +28,9 @@ namespace Statecharts.NET.Definition
     }
     public class UnguardedTransition : Transition
     {
-        public Event Event { get; set; }
-        public IEnumerable<Target> Targets { get; set; }
-        public IEnumerable<Action> Actions { get; set; }
+        public virtual Event Event { get; }
+        public virtual IEnumerable<Target> Targets { get; }
+        public virtual IEnumerable<Action> Actions { get; }
     }
     public class UnguardedContextTransition : Transition
     {
@@ -46,23 +46,23 @@ namespace Statecharts.NET.Definition
     }
     public class GuardedTransition : Transition
     {
-        public Event Event { get; set; }
-        public Guard Guard { get; set; }
-        public IEnumerable<Target> Targets { get; set; }
-        public IEnumerable<Action> Actions { get; set; }
+        public virtual Event Event { get; }
+        public virtual InStateGuard Guard { get; }
+        public virtual IEnumerable<Target> Targets { get; }
+        public virtual IEnumerable<Action> Actions { get; }
     }
     public class GuardedContextTransition
     {
-        public Event Event { get; set; }
-        public OneOf<InStateGuard, ConditionContextGuard> Guard { get; set; }
-        public IEnumerable<Target> Targets { get; set; }
-        public IEnumerable<OneOf<Action, ContextAction>> Actions { get; set; }
+        public virtual Event Event { get; }
+        public virtual OneOf<InStateGuard, ConditionContextGuard> Guard { get; }
+        public virtual IEnumerable<Target> Targets { get; }
+        public virtual IEnumerable<OneOf<Action, ContextAction>> Actions { get; }
     }
     public class GuardedContextDataTransition
     {
-        public OneOf<Event, CustomDataEvent> Event { get; set; }
-        public OneOf<InStateGuard, ConditionContextGuard, ConditionContextDataGuard> Guard { get; set; }
-        public IEnumerable<Target> Targets { get; set; }
-        public IEnumerable<OneOf<Action, ContextAction, ContextDataAction>> Actions { get; set; }
+        public OneOf<Event, CustomDataEvent> Event { get; }
+        public OneOf<InStateGuard, ConditionContextGuard, ConditionContextDataGuard> Guard { get; }
+        public IEnumerable<Target> Targets { get; }
+        public IEnumerable<OneOf<Action, ContextAction, ContextDataAction>> Actions { get; }
     }
 }

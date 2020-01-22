@@ -1,5 +1,4 @@
 ﻿using System;
-using Statecharts.NET.Definition;
 
 namespace Statecharts.NET.Language.Statechart
 {
@@ -18,10 +17,10 @@ namespace Statecharts.NET.Language.Statechart
         internal Builder(TContext initialContext)
             => _initialContext = initialContext;
 
-        public Statechart<TContext> WithRootState(CompoundStateNode rootStateNode)
-            => new Statechart<TContext>(_initialContext, rootStateNode);
+        public Definition.Statechart<TContext> WithRootState(Definition.CompoundStateNode rootStateNode)
+            => new Definition.Statechart<TContext>(_initialContext, rootStateNode);
 
-        public Statechart<TContext> WithRootState(OrthogonalStateNode rootStateNode)
-            => new Statechart<TContext>(_initialContext, rootStateNode);
+        public Definition.Statechart<TContext> WithRootState(Definition.OrthogonalStateNode rootStateNode)
+            => new Definition.Statechart<TContext>(_initialContext, rootStateNode);
     }
 }
