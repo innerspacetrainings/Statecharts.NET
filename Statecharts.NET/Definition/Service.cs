@@ -16,7 +16,6 @@ namespace Statecharts.NET.Definition
         public abstract Func<CancellationToken, Task> Task { get; }
         public abstract OneOf<UnguardedTransition, UnguardedContextTransition> OnSuccessDefinition { get; }
     }
-
     public abstract class TaskDataService : Service
     {
         public abstract Func<CancellationToken, Task<object>> Task { get; }
