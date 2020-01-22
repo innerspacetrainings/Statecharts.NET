@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interpreter\Statechart\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="_Utilities\OneOf\OneOf.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

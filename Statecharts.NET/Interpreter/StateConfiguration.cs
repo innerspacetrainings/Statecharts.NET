@@ -16,8 +16,7 @@ namespace Statecharts.NET
             => new StateConfiguration(stateConfiguration.StateNodeIds.Concat(stateNodeIds));
         public static StateConfiguration With(this StateConfiguration stateConfiguration, StateNodeId stateNodeId)
             => stateConfiguration.With(new[] {stateNodeId});
-        public static bool Contains<TContext>(this StateConfiguration stateConfiguration, BaseStateNode<TContext> stateNode)
-            where TContext : IEquatable<TContext>
+        public static bool Contains(this StateConfiguration stateConfiguration, StateNode stateNode)
             => stateConfiguration.StateNodeIds.Contains(stateNode.Id);
     }
 
