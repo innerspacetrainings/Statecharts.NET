@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Statecharts.NET.Definition;
 using Statecharts.NET.Utilities;
 
-namespace Statecharts.NET.Definition
+namespace Statecharts.NET.Model
 {
     public abstract class Service : OneOfBase<TaskService, TaskDataService>
     {

@@ -1,4 +1,4 @@
-﻿namespace Statecharts.NET.Definition
+﻿namespace Statecharts.NET.Model
 {
     public class Activity
     {

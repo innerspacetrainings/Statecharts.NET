@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
+using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET.Definition
 {

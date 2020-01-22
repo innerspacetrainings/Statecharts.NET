@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Language.Service
@@ -48,7 +49,7 @@ namespace Statecharts.NET.Language.Service
             return this;
         }
     }
-    public class WithOnErrorHandler : Definition.TaskService
+    public class WithOnErrorHandler : TaskService
     {
         private protected DefinitionData DefinitionData { get; }
 

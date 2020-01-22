@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
+using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET.Language
 {
@@ -29,40 +31,40 @@ namespace Statecharts.NET.Language
         public static Transition.WithEvent After(TimeSpan delay)
             => Transition.WithEvent.Delayed(delay);
 
-        public static Definition.ChildTarget Child(string stateNodeName)
-            => new Definition.ChildTarget(stateNodeName);
-        public static Definition.SiblingTarget Sibling(string stateNodeName)
-            => new Definition.SiblingTarget(stateNodeName);
-        public static Definition.AbsoluteTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new Definition.AbsoluteTarget(
+        public static ChildTarget Child(string stateNodeName)
+            => new ChildTarget(stateNodeName);
+        public static SiblingTarget Sibling(string stateNodeName)
+            => new SiblingTarget(stateNodeName);
+        public static AbsoluteTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
+            new AbsoluteTarget(
                 new StateNodeId((
                     new RootStateNodeKey(stateChartName) as StateNodeKey)
                     .Append(new NamedStateNodeKey(stateNodeName))
                     .Concat(stateNodeNames.Select(name => new NamedStateNodeKey(name)))));
 
         // TODO: create Keywords for all Action Types
-        public static Definition.SendAction Send()
+        public static SendAction Send()
             => throw new NotImplementedException();
-        public static Definition.RaiseAction Raise()
+        public static RaiseAction Raise()
             => throw new NotImplementedException();
-        public static Definition.LogAction Log()
+        public static LogAction Log()
             => throw new NotImplementedException();
-        public static Definition.AssignContextAction Assign()
+        public static AssignContextAction Assign()
             => throw new NotImplementedException();
-        public static Definition.SideEffectContextAction Run()
+        public static SideEffectContextAction Run()
             => throw new NotImplementedException();
     }
     public static class Helpers
     {
         public static StateNode.WithEntryActions WithEntryActions(
             this string name,
-            OneOf<Definition.Action, Definition.ContextAction> action,
-            params OneOf<Definition.Action, Definition.ContextAction>[] entryActions)
+            OneOf<Action, ContextAction> action,
+            params OneOf<Action, ContextAction>[] entryActions)
             => new StateNode.WithName(name).WithEntryActions(action, entryActions);
         public static StateNode.WithExitActions WithExitActions(
             this string name,
-            OneOf<Definition.Action, Definition.ContextAction> action,
-            params OneOf<Definition.Action, Definition.ContextAction>[] exitActions)
+            OneOf<Action, ContextAction> action,
+            params OneOf<Action, ContextAction>[] exitActions)
             => new StateNode.WithName(name).WithExitActions(action, exitActions);
         public static StateNode.WithTransitions WithTransitions(
             this string name,
@@ -71,13 +73,13 @@ namespace Statecharts.NET.Language
             => new StateNode.WithName(name).WithTransitions(transition, transitions);
         public static StateNode.WithActivities WithActivities(
             this string name,
-            Definition.Activity activity,
-            params Definition.Activity[] activities)
+            Activity activity,
+            params Activity[] activities)
             => new StateNode.WithName(name).WithActivities(activity, activities);
         public static StateNode.WithServices WithServices(
             this string name,
-            OneOf<Service.ServiceLogic, Definition.Service> service,
-            params OneOf<Service.ServiceLogic, Definition.Service>[] services)
+            OneOf<Service.ServiceLogic, Model.Service> service,
+            params OneOf<Service.ServiceLogic, Model.Service>[] services)
             => new StateNode.WithName(name).WithServices(service, services);
         public static StateNode.Final AsFinal(this string name)
             => new StateNode.WithName(name).AsFinal();

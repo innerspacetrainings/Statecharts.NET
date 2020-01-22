@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Definition;
+using Statecharts.NET.Model;
 using Statecharts.NET.XState;
 using static Statecharts.NET.XState.JPropertyConstructorFunctions;
 
