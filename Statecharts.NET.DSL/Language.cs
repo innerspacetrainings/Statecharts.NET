@@ -72,11 +72,6 @@ namespace Statecharts.NET.Language
             Definition.Transition transition,
             params Definition.Transition[] transitions)
             => new StateNode.WithName(name).WithTransitions(transition, transitions);
-        public static StateNode.WithActivities WithActivities(
-            this string name,
-            Activity activity,
-            params Activity[] activities)
-            => new StateNode.WithName(name).WithActivities(activity, activities);
         public static StateNode.WithServices WithInvocations(
             this string name,
             OneOf<Service.ServiceLogic, Model.Service> service,

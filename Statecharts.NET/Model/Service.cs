@@ -6,7 +6,7 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
 {
-    public abstract class Service : OneOfBase<TaskService, TaskDataService>
+    public abstract class Service : OneOfBase<TaskService, TaskDataService, ActivityService, ObservableService, NestedStatechartService>
     {
         public abstract string Id { get; }
         public abstract OneOf<UnguardedTransition, UnguardedContextTransition> OnErrorTransition { get; }
@@ -23,14 +23,19 @@ namespace Statecharts.NET.Model
         public abstract OneOf<UnguardedTransition, UnguardedContextTransition, UnguardedContextTransition> OnSuccessDefinition { get; }
     }
 
+    public abstract class ActivityService : Service
+    {
+        public abstract Activity Activity { get; }
+    }
+
     public abstract class ObservableService
     {
         public abstract IObservable<string> Observable { get; }
         public abstract OneOf<UnguardedTransition, UnguardedContextTransition> OnSuccessDefinition { get; }
     }
 
-    public abstract class ActivityService : Service
+    public abstract class NestedStatechartService
     {
-        public Activity Activity { get; }
+        // TODO: think about these properties here
     }
 }

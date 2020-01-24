@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Statecharts.NET._Utilities;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
@@ -129,7 +130,11 @@ namespace Statecharts.NET.Interpreter
         public InitialTransition InitialTransition { get; internal set; }
         public IEnumerable<StateNode> StateNodes { get; internal set; }
 
-        public CompoundStateNode(StateNode parent, Definition.CompoundStateNode definition) : base(parent, definition) { }
+        public CompoundStateNode(StateNode parent, Definition.CompoundStateNode definition) : base(parent, definition)
+        {
+            Transitions = Transitions.Prepend(definition.DoneTransition.Match<Definition.Transition>(Functions.Identity,
+                Functions.Identity, Functions.Identity, Functions.Identity));
+        }
 
         public StateNode GetSubstate(NamedStateNodeKey key)
             => StateNodes.FirstOrDefault(state => state.Key.Equals(key)) ?? throw new Exception("[THINK] WTF is happening");

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Statecharts.NET._Utilities;
 using Statecharts.NET.Definition;
 using Statecharts.NET.Interpreter;
 using Statecharts.NET.Utilities;
@@ -98,8 +99,6 @@ namespace Statecharts.NET
 
         public ExecutableStatechart(Interpreter.StateNode rootNode, TContext initialContext) : base(rootNode)
         {
-            T Identity<T>(T t) => t;
-
             IEnumerable<Interpreter.Transition> GetTransitions(Interpreter.StateNode stateNode)
                 => stateNode.Transitions.Select(
                     transition => transition.Match<Definition.ForbiddenTransition, Definition.UnguardedTransition, Definition.UnguardedContextTransition, Definition.UnguardedContextDataTransition, Definition.GuardedTransition, Definition.GuardedContextTransition, Definition.GuardedContextDataTransition, Interpreter.Transition>(
@@ -117,8 +116,8 @@ namespace Statecharts.NET
             Transitions = rootNode.CataFold(
                 GetTransitions,
                 GetTransitions,
-                (compound, children) => GetTransitions(compound).Concat(children.SelectMany(Identity)),
-                (orthogonal, children) => GetTransitions(orthogonal).Concat(children.SelectMany(Identity))).ToList();
+                (compound, children) => GetTransitions(compound).Concat(children.SelectMany(Functions.Identity)),
+                (orthogonal, children) => GetTransitions(orthogonal).Concat(children.SelectMany(Functions.Identity))).ToList();
         }
 
         public IEnumerable<Interpreter.StateNode> GetStateNodes(StateConfiguration configuration)

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Statecharts.NET.Utilities
 {
-    public static class LINQ
+    public static class LINQExtensions
     {
         public static (IEnumerable<T>, IEnumerable<T>) Segment<T>(this IEnumerable<T> source, Func<T, bool> predicate)
         {

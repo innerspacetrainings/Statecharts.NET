@@ -38,7 +38,6 @@ namespace Statecharts.NET.Definition
     public abstract class NonFinalStateNode : StateNode
     {
         public abstract IEnumerable<Transition> Transitions { get; }
-        public abstract IEnumerable<Activity> Activities { get; }
     }
     public abstract class AtomicStateNode : NonFinalStateNode
     {
@@ -49,10 +48,12 @@ namespace Statecharts.NET.Definition
         public abstract IEnumerable<Service> Services { get; }
         public abstract IEnumerable<StateNode> States { get; }
         public abstract InitialTransition InitialTransition { get; }
+        public abstract OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition> DoneTransition { get; } // TODO: think about done data
     }
     public abstract class OrthogonalStateNode : NonFinalStateNode
     {
         public abstract IEnumerable<Service> Services { get; }
         public abstract IEnumerable<StateNode> States { get; }
+        public abstract OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition> DoneTransition { get; } // TODO: think about done data
     }
 }

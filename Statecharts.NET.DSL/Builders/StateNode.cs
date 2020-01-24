@@ -67,22 +67,9 @@ namespace Statecharts.NET.Language.StateNode
 
         public Final AsFinal() => new Final(DefinitionData);
     }
-    public class WithTransitions : WithActivities
+    public class WithTransitions : WithServices
     {
         internal WithTransitions(string name) : base(name) { }
-
-        public WithActivities WithActivities(
-            Model.Activity activity,
-            params Model.Activity[] activities)
-        {
-            DefinitionData.Activities = activity.Append(activities);
-            return this;
-        }
-    }
-
-    public class WithActivities : WithServices
-    {
-        internal WithActivities(string name) : base(name) { }
 
         public WithServices WithInvocations(
             OneOf<ServiceLogic, Model.Service> service,

@@ -61,14 +61,14 @@ namespace Statecharts.NET.Definition
         public abstract IEnumerable<Target> Targets { get; }
         public abstract IEnumerable<Action> Actions { get; }
     }
-    public abstract class GuardedContextTransition
+    public abstract class GuardedContextTransition : Transition
     {
         public abstract Event Event { get; }
         public abstract OneOf<InStateGuard, ConditionContextGuard> Guard { get; }
         public abstract IEnumerable<Target> Targets { get; }
         public abstract IEnumerable<OneOf<Action, ContextAction>> Actions { get; }
     }
-    public abstract class GuardedContextDataTransition
+    public abstract class GuardedContextDataTransition : Transition
     {
         public abstract OneOf<Event, CustomDataEvent> Event { get; }
         public abstract OneOf<InStateGuard, ConditionContextGuard, ConditionContextDataGuard> Guard { get; }
