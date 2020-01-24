@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Statecharts.NET._Utilities;
+using Statecharts.NET.Utilities;
 using Statecharts.NET.Definition;
 using Statecharts.NET.Interpreter;
-using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET
 {

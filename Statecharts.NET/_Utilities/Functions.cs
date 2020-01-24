@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Statecharts.NET._Utilities
+namespace Statecharts.NET.Utilities
 {
     public static class Functions
     {

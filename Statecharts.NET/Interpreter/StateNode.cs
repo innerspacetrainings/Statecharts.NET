@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Statecharts.NET._Utilities;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
@@ -27,7 +25,6 @@ namespace Statecharts.NET.Interpreter
             Id = Parent == null ? new StateNodeId(new RootStateNodeKey(definition.Name)) : new StateNodeId(Parent.Id, Key);
             Depth = Parent?.Depth + 1 ?? 0;
 
-            Transitions = definition.Transitions ?? Enumerable.Empty<Definition.Transition>();
             EntryActions = definition.EntryActions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
             ExitActions = definition.ExitActions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
         }
@@ -117,29 +114,33 @@ namespace Statecharts.NET.Interpreter
         }
     }
 
-    public class AtomicStateNode : StateNode
-    {
-        public AtomicStateNode(StateNode parent, Definition.AtomicStateNode definition) : base(parent, definition) { }
-    }
     public class FinalStateNode : StateNode
     {
         public FinalStateNode(StateNode parent, Definition.FinalStateNode definition) : base(parent, definition) { }
     }
-    public class CompoundStateNode : StateNode
+
+    public abstract class NonFinalStateNode : StateNode
+    {
+        protected NonFinalStateNode(StateNode parent, Definition.NonFinalStateNode definition) : base(parent, definition) =>
+            Transitions = definition.Transitions ?? Enumerable.Empty<Definition.Transition>();
+    }
+    public class AtomicStateNode : NonFinalStateNode
+    {
+        public AtomicStateNode(StateNode parent, Definition.AtomicStateNode definition) : base(parent, definition) { }
+    }
+    public class CompoundStateNode : NonFinalStateNode
     {
         public InitialTransition InitialTransition { get; internal set; }
         public IEnumerable<StateNode> StateNodes { get; internal set; }
 
-        public CompoundStateNode(StateNode parent, Definition.CompoundStateNode definition) : base(parent, definition)
-        {
+        public CompoundStateNode(StateNode parent, Definition.CompoundStateNode definition) : base(parent, definition) =>
             Transitions = Transitions.Prepend(definition.DoneTransition.Match<Definition.Transition>(Functions.Identity,
-                Functions.Identity, Functions.Identity, Functions.Identity));
-        }
+                Functions.Identity, Functions.Identity, Functions.Identity)); // TODO: probably create Union<TBase, T0, T1, ...>
 
         public StateNode GetSubstate(NamedStateNodeKey key)
             => StateNodes.FirstOrDefault(state => state.Key.Equals(key)) ?? throw new Exception("[THINK] WTF is happening");
     }
-    public class OrthogonalStateNode : StateNode
+    public class OrthogonalStateNode : NonFinalStateNode
     {
         public IEnumerable<StateNode> StateNodes { get; internal set; }
 

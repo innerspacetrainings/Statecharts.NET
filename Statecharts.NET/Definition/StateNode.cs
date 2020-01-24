@@ -25,6 +25,11 @@ namespace Statecharts.NET.Definition
                 compound => fCompound(compound, compound.States.Select(Recurse)),
                 orthogonal => fOrthogonal(orthogonal, orthogonal.States.Select(Recurse)));
         }
+
+        public static IEnumerable<Transition> GetTransitions(this StateNode stateNode) =>
+            stateNode.Match(
+                final => Enumerable.Empty<Transition>(),
+                nonFinal => nonFinal.Transitions);
     }
 
     public abstract class StateNode :
@@ -33,6 +38,9 @@ namespace Statecharts.NET.Definition
         public abstract string Name { get; }
         public abstract IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
         public abstract IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
+
+        public TResult Match<TResult>(Func<FinalStateNode, TResult> final, Func<NonFinalStateNode, TResult> nonFinal) =>
+            this.Match(nonFinal, final, nonFinal, nonFinal);
     }
     public abstract class FinalStateNode : StateNode {}
     public abstract class NonFinalStateNode : StateNode

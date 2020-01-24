@@ -10,17 +10,17 @@ namespace Statecharts.NET.XState
     public static class XStateExtensions
     {
         public static string AsXStateDefinition<TContext>(
-            this Definition.Statechart<TContext> statechartDefinition, string prefix = "")
+            this Definition.Statechart<TContext> statechartDefinition)
             where TContext : IEquatable<TContext>, IXStateSerializable
-            => WrapInMachine(
-                prefix,
-                ObjectValue(
+            => ObjectValue(
                     ("id", statechartDefinition.Id),
                     ("context", statechartDefinition.InitialContext.AsJSObject())
-                ).With(statechartDefinition.RootStateNode.AsJSProperty(statechartDefinition).Value as ObjectValue)); // this cast is necessary because of the way xstate merges the top-level state node with the machine definition
+                ).With(statechartDefinition.RootStateNode.AsJSProperty(statechartDefinition).Value as ObjectValue).AsString(); // this cast is necessary because of the way xstate merges the top-level state node with the machine definition
 
-        private static string WrapInMachine(string prefix, ObjectValue @object)
-            => $"const {prefix}Machine = Machine({@object.AsString()})";
+        public static string AsXStateVisualizerDefinition<TContext>(
+            this Definition.Statechart<TContext> statechartDefinition)
+            where TContext : IEquatable<TContext>, IXStateSerializable
+            => $"const machine = Machine({statechartDefinition.AsXStateDefinition()});";
 
         private static JSProperty AsJSProperty<TContext>(
             this Definition.StateNode stateNodeDefinition,
@@ -50,21 +50,18 @@ namespace Statecharts.NET.XState
             JSProperty Guarded(Model.Event @event, IEnumerable<Model.Target> targets)
                 => (Event(@event), ObjectValue(("target", Targets(targets)), ("cond", SimpleValue("() => false", true))));
 
-            List <JSProperty> properties = new List<JSProperty>();
+            var transitions = definition.GetTransitions().Select(
+                transition => transition
+                    .Match(
+                        forbidden => (forbidden.Event.EventName, "undefined"),
+                        unguarded => Unguarded(unguarded.Event, unguarded.Targets),
+                        unguarded => Unguarded(unguarded.Event, unguarded.Targets),
+                        unguarded => Unguarded(new Model.CustomEvent("[THINK]"), unguarded.Targets),
+                        guarded => Guarded(guarded.Event, guarded.Targets),
+                        guarded => Guarded(guarded.Event, guarded.Targets),
+                        guarded => Guarded(new Model.CustomEvent("[THINK]"), guarded.Targets))).ToList();
 
-            if (definition.Transitions.Any())
-                properties.Add(("on", ObjectValue(
-                    definition.Transitions.Select(
-                        transition => transition.Match<Definition.ForbiddenTransition, Definition.UnguardedTransition, Definition.UnguardedContextTransition, Definition.UnguardedContextDataTransition, Definition.GuardedTransition, Definition.GuardedContextTransition, Definition.GuardedContextDataTransition, JSProperty>(
-                            forbidden => (forbidden.Event.EventName, "undefined"),
-                            unguarded => Unguarded(unguarded.Event, unguarded.Targets),
-                            unguarded => Unguarded(unguarded.Event, unguarded.Targets),
-                            unguarded => Unguarded(new Model.CustomEvent("[THINK]"), unguarded.Targets),
-                            guarded => Guarded(guarded.Event, guarded.Targets),
-                            guarded => Guarded(guarded.Event, guarded.Targets),
-                            guarded => Guarded(new Model.CustomEvent("[THINK]"), guarded.Targets))))));
-
-            return properties;
+            return transitions.Any() ? ObjectValue(("on", ObjectValue(transitions))) : new JSProperty[0];
         }
     }
 

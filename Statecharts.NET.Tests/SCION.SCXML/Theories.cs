@@ -46,7 +46,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML
             Assert.Equal(service.Start().Ids(), test.Script.InitialConfiguration);
 
             foreach (var step in test.Script.Steps)
-                Assert.Equal(service.Send(new NET.Event(step.Event.Name)).Ids(), step.NextConfiguration);
+                Assert.Equal(service.Send(new Model.CustomEvent(step.Event.Name)).Ids(), step.NextConfiguration);
         }
         public static TheoryData<Test> GetTestSuite(string _case)
         {
