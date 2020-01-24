@@ -77,11 +77,11 @@ namespace Statecharts.NET.Language
             Activity activity,
             params Activity[] activities)
             => new StateNode.WithName(name).WithActivities(activity, activities);
-        public static StateNode.WithServices WithServices(
+        public static StateNode.WithServices WithInvocations(
             this string name,
             OneOf<Service.ServiceLogic, Model.Service> service,
             params OneOf<Service.ServiceLogic, Model.Service>[] services)
-            => new StateNode.WithName(name).WithServices(service, services);
+            => new StateNode.WithName(name).WithInvocations(service, services);
         public static StateNode.Final AsFinal(this string name)
             => new StateNode.WithName(name).AsFinal();
         public static StateNode.Compound AsCompound(this string name)

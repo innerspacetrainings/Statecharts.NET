@@ -22,4 +22,15 @@ namespace Statecharts.NET.Model
         public abstract Func<CancellationToken, Task<object>> Task { get; }
         public abstract OneOf<UnguardedTransition, UnguardedContextTransition, UnguardedContextTransition> OnSuccessDefinition { get; }
     }
+
+    public abstract class ObservableService
+    {
+        public abstract IObservable<string> Observable { get; }
+        public abstract OneOf<UnguardedTransition, UnguardedContextTransition> OnSuccessDefinition { get; }
+    }
+
+    public abstract class ActivityService : Service
+    {
+        public Activity Activity { get; }
+    }
 }

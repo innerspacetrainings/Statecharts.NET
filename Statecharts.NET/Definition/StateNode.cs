@@ -31,24 +31,26 @@ namespace Statecharts.NET.Definition
         OneOfBase<AtomicStateNode, FinalStateNode, CompoundStateNode, OrthogonalStateNode>
     {
         public abstract string Name { get; }
-        public abstract IEnumerable<Transition> Transitions { get; }
         public abstract IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
         public abstract IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
+    }
+    public abstract class FinalStateNode : StateNode {}
+    public abstract class NonFinalStateNode : StateNode
+    {
+        public abstract IEnumerable<Transition> Transitions { get; }
         public abstract IEnumerable<Activity> Activities { get; }
     }
-
-    public abstract class AtomicStateNode : StateNode
+    public abstract class AtomicStateNode : NonFinalStateNode
     {
         public abstract IEnumerable<Service> Services { get; }
     }
-    public abstract class FinalStateNode : StateNode {}
-    public abstract class CompoundStateNode : StateNode
+    public abstract class CompoundStateNode : NonFinalStateNode
     {
         public abstract IEnumerable<Service> Services { get; }
         public abstract IEnumerable<StateNode> States { get; }
         public abstract InitialTransition InitialTransition { get; }
     }
-    public abstract class OrthogonalStateNode : StateNode
+    public abstract class OrthogonalStateNode : NonFinalStateNode
     {
         public abstract IEnumerable<Service> Services { get; }
         public abstract IEnumerable<StateNode> States { get; }

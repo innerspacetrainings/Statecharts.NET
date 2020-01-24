@@ -64,6 +64,8 @@ namespace Statecharts.NET.Language.StateNode
             DefinitionData.Transitions = transitionDefinition.Append(transitionDefinitions);
             return this;
         }
+
+        public Final AsFinal() => new Final(DefinitionData);
     }
     public class WithTransitions : WithActivities
     {
@@ -82,7 +84,7 @@ namespace Statecharts.NET.Language.StateNode
     {
         internal WithActivities(string name) : base(name) { }
 
-        public WithServices WithServices(
+        public WithServices WithInvocations(
             OneOf<ServiceLogic, Model.Service> service,
             params OneOf<ServiceLogic, Model.Service>[] services)
         {
@@ -106,7 +108,6 @@ namespace Statecharts.NET.Language.StateNode
         public override IEnumerable<Model.Activity> Activities => DefinitionData.Activities;
         public override IEnumerable<Model.Service> Services => DefinitionData.Services;
 
-        public Final AsFinal() => new Final(DefinitionData);
         public Compound AsCompound() => new Compound(DefinitionData);
         public Orthogonal AsOrthogonal() => new Orthogonal(DefinitionData);
     }
@@ -119,10 +120,8 @@ namespace Statecharts.NET.Language.StateNode
             => DefinitionData = data;
 
         public override string Name => DefinitionData.Name;
-        public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
         public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> EntryActions => DefinitionData.EntryActions;
         public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<Model.Activity> Activities => DefinitionData.Activities;
     }
 
     public class Compound
