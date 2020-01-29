@@ -1,6 +1,6 @@
-﻿namespace Statecharts.NET.Language.Event
+﻿namespace Statecharts.NET.Language.Builders
 {
-    public class Builder
+    public class Event
     {
         // TODO: Event.Define("...")[.WithData<TEventData>()];
     }

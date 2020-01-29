@@ -1,20 +1,13 @@
 ﻿using System;
 
-namespace Statecharts.NET.Language.Statechart
+namespace Statecharts.NET.Language.Builders
 {
-    public class Builder
-    {
-        public Builder<TContext> WithInitialContext<TContext>(TContext initialContext)
-            where TContext : IEquatable<TContext>
-            => new Builder<TContext>(initialContext);
-    }
-
-    public class Builder<TContext>
+    public class Statechart<TContext>
         where TContext : IEquatable<TContext>
     {
         private readonly TContext _initialContext;
 
-        internal Builder(TContext initialContext)
+        internal Statechart(TContext initialContext)
             => _initialContext = initialContext;
 
         public Definition.Statechart<TContext> WithRootState(Definition.CompoundStateNode rootStateNode)

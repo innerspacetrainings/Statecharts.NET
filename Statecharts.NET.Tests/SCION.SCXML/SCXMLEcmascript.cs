@@ -27,7 +27,7 @@ namespace Statecharts.NET.SCION.SCXML.Tests
 
     static class SCXMLEcmascript
     {
-        internal static StatechartDefinition<EcmaScriptContext> TestXML(string scxmlDefinition)
+        internal static Statechart<EcmaScriptContext> TestXML(string scxmlDefinition)
         {
             var definition = XElement.Parse(scxmlDefinition);
             XName NSd(string name) => definition.GetDefaultNamespace() + name;
@@ -35,10 +35,10 @@ namespace Statecharts.NET.SCION.SCXML.Tests
 
             var datamodel = definition.Element(NSd("datamodel"));
             var context = datamodel != null ? GetInitialContext(datamodel, engine, NSd) : null;
-            return new StatechartDefinition<EcmaScriptContext>() { InitialContext = context, StateNodeDefinition = GetStateNodeDefinition(definition, engine, NSd) };
+            return Language.Statechart.WithInitialContext(context).WithRootState(GetStateNodeDefinition(definition));
         }
 
-        private static IBaseStateNodeDefinition GetRootStateNodeDefinition(
+        private static StateNode GetRootStateNodeDefinition(
             XElement definition,
             Engine engine,
             Func<string, XName> NSd)

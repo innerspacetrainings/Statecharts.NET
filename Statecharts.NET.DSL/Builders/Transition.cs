@@ -4,7 +4,7 @@ using System.Linq;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
-namespace Statecharts.NET.Language.Transition
+namespace Statecharts.NET.Language.Builders.Transition
 {
     public class WithEvent
     {

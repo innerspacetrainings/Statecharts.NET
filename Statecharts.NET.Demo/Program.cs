@@ -23,7 +23,7 @@ namespace Statecharts.NET.Demo
 
     internal static class Program
     {
-        private static readonly StatechartDefinition<FetchContext> FetchDefinition = null;
+        private static readonly Statechart<FetchContext> FetchDefinition = null;
             /*new StatechartDefinition<FetchContext>()
             {
                 InitialContext = new FetchContext() { Retries = 0 },
@@ -187,7 +187,7 @@ namespace Statecharts.NET.Demo
         private static void Main()
         {
             var definition = FetchDefinition;
-            Console.WriteLine(definition.AsXStateDefinition("fetch"));
+            Console.WriteLine(definition.AsXStateVisualizerV4Definition());
 
             var parsedStatechart = definition.Parse();
             Console.WriteLine($"Parsing the definition of the Statechart resulted in {parsedStatechart.GetType().Name}");
@@ -201,7 +201,7 @@ namespace Statecharts.NET.Demo
                     while (true)
                     {
                         var eventType = Console.ReadLine();
-                        state = service.Send(new Event(eventType?.ToUpper()));
+                        state = service.Send(new CustomEvent(eventType?.ToUpper()));
                         Log(state);
                     }
                 default:

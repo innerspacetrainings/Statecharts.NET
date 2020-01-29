@@ -1,21 +1,51 @@
 ﻿using System;
 using Statecharts.NET.Definition;
-using Statecharts.NET.Language.Service;
-using Statecharts.NET.Language.Transition;
+using Statecharts.NET.Language.Builders.Service;
+using Statecharts.NET.Language.Builders.Transition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
-namespace Statecharts.NET.Language.Service
+namespace Statecharts.NET.Language
 {
-    public class Builder
+    public class TaskService : Definition.TaskService
     {
-        public ActivityService.ServiceActivity DefineActivity(System.Action start, System.Action stop) =>
-            new ActivityService.ServiceActivity(new Activity(start, stop));
-        public ActivityService.ServiceActivity DefineActivity(Model.Activity activity) =>
-            new ActivityService.ServiceActivity(activity);
-        public TaskService.ServiceTask DefineTask(Model.Task task) =>
-            new TaskService.ServiceTask(task);
+        internal DefinitionData DefinitionData { get; }
+
+        public TaskService(Model.Task task)
+        {
+            DefinitionData = new DefinitionData();
+            Task = task;
+        }
+
+        public override Model.Task Task { get; }
+        public override Option<string> Id => DefinitionData.Id;
+        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition>> OnErrorTransition => DefinitionData.OnErrorTransition;
+        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition>> OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
+
+        public object WithId => throw new NotImplementedException();
+        public Builders.TaskService.WithOnSuccess OnSuccess => new Builders.TaskService.WithOnSuccess(this);
+        public object OnError => throw new NotImplementedException();
     }
+    public class ActivityService : Definition.ActivityService
+    {
+        internal DefinitionData DefinitionData { get; }
+
+        public ActivityService(Activity activity)
+        {
+            DefinitionData = new DefinitionData();
+            Activity = activity;
+        }
+
+        public override Activity Activity { get; }
+        public override Option<string> Id => DefinitionData.Id;
+        public override Option<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => DefinitionData.OnErrorTransition;
+
+        public Builders.ActivityService.WithId WithId(string id) => new Builders.ActivityService.WithId(this, id);
+        public Builders.ActivityService.WithOnError OnError => new Builders.ActivityService.WithOnError(this);
+    }
+}
+namespace Statecharts.NET.Language.Builders.Service
+{
     internal class DefinitionData
     {
         public Option<string> Id { get; set; }
@@ -30,38 +60,19 @@ namespace Statecharts.NET.Language.Service
         }
     }
 }
-namespace Statecharts.NET.Language.TaskService
+namespace Statecharts.NET.Language.Builders.TaskService
 {
-    public class ServiceTask : Definition.TaskService
-    {
-        internal Service.DefinitionData DefinitionData { get; }
-
-        public ServiceTask(Model.Task task)
-        {
-            DefinitionData = new DefinitionData();
-            Task = task;
-        }
-
-        public override Model.Task Task { get; }
-        public override Option<string> Id => DefinitionData.Id;
-        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition>> OnErrorTransition => DefinitionData.OnErrorTransition;
-        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition>> OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
-
-        public object WithId => throw new NotImplementedException();
-        public WithOnSuccess OnSuccess => new WithOnSuccess(this);
-        public object OnError => throw new NotImplementedException();
-    }
     public class WithOnSuccess
     {
-        internal ServiceTask Service { get; }
+        internal Language.TaskService Service { get; }
 
-        internal WithOnSuccess(ServiceTask service) => Service = service;
+        internal WithOnSuccess(Language.TaskService service) => Service = service;
 
         public WithOnSuccessTransitionTo TransitionTo => new WithOnSuccessTransitionTo(this);
     }
     public class WithOnSuccessTransitionTo
     {
-        internal ServiceTask Service { get; }
+        internal Language.TaskService Service { get; }
 
         internal WithOnSuccessTransitionTo(WithOnSuccess service) => Service = service.Service;
 
@@ -76,7 +87,7 @@ namespace Statecharts.NET.Language.TaskService
     }
     public class WithOnSuccessTransition : Definition.TaskService
     {
-        private ServiceTask Service { get; }
+        private Language.TaskService Service { get; }
 
         internal WithOnSuccessTransition(WithOnSuccessTransitionTo service, Target target, params Target[] targets)
         {
@@ -90,30 +101,13 @@ namespace Statecharts.NET.Language.TaskService
         public override Option<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
     }
 }
-namespace Statecharts.NET.Language.ActivityService
+namespace Statecharts.NET.Language.Builders.ActivityService
 {
-    public class ServiceActivity : Definition.ActivityService
-    {
-        internal Service.DefinitionData DefinitionData { get; }
-
-        public ServiceActivity(Activity activity)
-        {
-            DefinitionData = new Service.DefinitionData();
-            Activity = activity;
-        }
-
-        public override Activity Activity { get; }
-        public override Option<string> Id => DefinitionData.Id;
-        public override Option<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => DefinitionData.OnErrorTransition;
-
-        public WithId WithId(string id) => new WithId(this, id);
-        public WithOnError OnError => new WithOnError(this);
-    }
     public class WithId : Definition.ActivityService
     {
-        internal ServiceActivity Service { get; }
+        internal Language.ActivityService Service { get; }
 
-        internal WithId(ServiceActivity service, string id)
+        internal WithId(Language.ActivityService service, string id)
         {
             Service = service;
             Service.DefinitionData.Id = id.ToOption();
@@ -127,16 +121,16 @@ namespace Statecharts.NET.Language.ActivityService
     }
     public class WithOnError
     {
-        internal ServiceActivity Service { get; }
+        internal Language.ActivityService Service { get; }
 
-        internal WithOnError(ServiceActivity service) => Service = service;
+        internal WithOnError(Language.ActivityService service) => Service = service;
         internal WithOnError(WithId service) => Service = service.Service;
 
         public WithOnErrorTransitionTo TransitionTo => new WithOnErrorTransitionTo(this);
     }
     public class WithOnErrorTransitionTo
     {
-        internal ServiceActivity Service { get; }
+        internal Language.ActivityService Service { get; }
 
         internal WithOnErrorTransitionTo(WithOnError service) => Service = service.Service;
 
@@ -151,7 +145,7 @@ namespace Statecharts.NET.Language.ActivityService
     }
     public class WithOnErrorTransition : Definition.ActivityService
     {
-        private ServiceActivity Service { get; }
+        private Language.ActivityService Service { get; }
 
         internal WithOnErrorTransition(WithOnErrorTransitionTo service, Target target, params Target[] targets)
         {

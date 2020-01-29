@@ -51,6 +51,7 @@
 		- [ ] ObservableService
 		- [ ] NestedStatechartService
 		- [ ] TaskService<T>
+		- [ ] Keywords for all Action Types
 
 - Modelling
 	- [ ] OnDone Transition should only be available on Compound and Orthogonal States

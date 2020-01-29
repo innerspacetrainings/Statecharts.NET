@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Definition;
-using Statecharts.NET.Language.Transition;
+using Statecharts.NET.Language.Builders.Transition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 using static Statecharts.NET.Language.Keywords;
 
-namespace Statecharts.NET.Language.StateNode
+namespace Statecharts.NET.Language.Builders.StateNode
 {
     internal class DefinitionData
     {
