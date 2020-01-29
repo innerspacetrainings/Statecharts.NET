@@ -48,6 +48,9 @@
 		- [ ] Deep Initial IDs (https://github.com/davidkpiano/xstate/issues/675)
 		- [ ] In State Guards
 		- [ ] Delayed Events
+		- [ ] ObservableService
+		- [ ] NestedStatechartService
+		- [ ] TaskService<T>
 
 - Modelling
 	- [ ] OnDone Transition should only be available on Compound and Orthogonal States

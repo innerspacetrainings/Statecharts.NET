@@ -23,7 +23,7 @@ namespace Statecharts.NET.Tests.XState
             where TContext : IEquatable<TContext>, IXStateSerializable
         {
             var schema = JSchema.Parse(File.ReadAllText(Path.GetRelativePath(Directory.GetCurrentDirectory(), $"XState/machine.schema.json")));
-            var definition = JObject.Parse(statechart.AsXStateDefinition());
+            var definition = JObject.Parse(statechart.AsXStateVisualizerV5Definition());
 
             Assert.True(definition.IsValid(schema));
         }

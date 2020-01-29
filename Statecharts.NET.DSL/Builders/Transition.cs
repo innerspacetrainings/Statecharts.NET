@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
-using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET.Language.Transition
 {
@@ -158,14 +157,14 @@ namespace Statecharts.NET.Language.Transition
 
         public override Model.Event Event { get; }
         public override IEnumerable<Target> Targets { get; }
-        public override IEnumerable<Action> Actions => Enumerable.Empty<Action>();
+        public override IEnumerable<Model.Action> Actions => Enumerable.Empty<Model.Action>();
 
-        public WithActions WithActions(Action action, params Action[] actions) =>
+        public WithActions WithActions(Model.Action action, params Model.Action[] actions) =>
             new WithActions(this, action, actions);
         public WithActions WithActions<TContext>(
-            OneOf<Action, ContextAction> action,
-            params OneOf<Action, ContextAction>[] actions) =>
-            throw new NotImplementedException(); // new WithActions<TContext>(this, action, actions); 
+            OneOf<Model.Action, ContextAction> action,
+            params OneOf<Model.Action, ContextAction>[] actions) =>
+            throw new NotImplementedException(); // new WithActions<TContext>(this, action, actions);
     }
     public class GuardedWithTarget : Definition.GuardedTransition
     {
@@ -182,13 +181,13 @@ namespace Statecharts.NET.Language.Transition
         public override Model.Event Event { get; }
         public override InStateGuard Guard { get; }
         public override IEnumerable<Target> Targets { get; }
-        public override IEnumerable<Action> Actions => Enumerable.Empty<Action>();
+        public override IEnumerable<Model.Action> Actions => Enumerable.Empty<Model.Action>();
 
-        public GuardedWithActions WithActions(Action action, params Action[] actions) =>
+        public GuardedWithActions WithActions(Model.Action action, params Model.Action[] actions) =>
             new GuardedWithActions(this, action, actions);
         public GuardedWithActions<TContext> WithActions<TContext>(
-            OneOf<Action, ContextAction> action,
-            params OneOf<Action, ContextAction>[] actions) where TContext : IEquatable<TContext> =>
+            OneOf<Model.Action, ContextAction> action,
+            params OneOf<Model.Action, ContextAction>[] actions) where TContext : IEquatable<TContext> =>
             new GuardedWithActions<TContext>(this, action, actions);
     }
     public class GuardedWithTarget<TContext> : Definition.GuardedContextTransition
@@ -207,11 +206,11 @@ namespace Statecharts.NET.Language.Transition
         public override Model.Event Event { get; }
         public override OneOf<InStateGuard, ConditionContextGuard> Guard { get; }
         public override IEnumerable<Target> Targets { get; }
-        public override IEnumerable<OneOf<Action, ContextAction>> Actions => Enumerable.Empty<OneOf<Action, ContextAction>>();
+        public override IEnumerable<OneOf<Model.Action, ContextAction>> Actions => Enumerable.Empty<OneOf<Model.Action, ContextAction>>();
 
         public GuardedWithActions<TContext> WithActions(
-            OneOf<Action, ContextAction> action,
-            params OneOf<Action, ContextAction>[] actions) =>
+            OneOf<Model.Action, ContextAction> action,
+            params OneOf<Model.Action, ContextAction>[] actions) =>
             new GuardedWithActions<TContext>(this, action, actions);
     }
 
@@ -219,36 +218,36 @@ namespace Statecharts.NET.Language.Transition
     {
         internal WithActions(
             Definition.UnguardedTransition transition,
-            Action action,
-            params Action[] actions) : base(transition.Event, transition.Targets) =>
+            Model.Action action,
+            params Model.Action[] actions) : base(transition.Event, transition.Targets) =>
             Actions = action.Append(actions);
 
-        public override IEnumerable<Action> Actions { get; }
+        public override IEnumerable<Model.Action> Actions { get; }
     }
     public class GuardedWithActions : GuardedWithTarget
     {
         internal GuardedWithActions(
             Definition.GuardedTransition transition,
-            Action action,
-            params Action[] actions) : base(transition.Event, transition.Guard, transition.Targets) =>
+            Model.Action action,
+            params Model.Action[] actions) : base(transition.Event, transition.Guard, transition.Targets) =>
             Actions = action.Append(actions);
 
-        public override IEnumerable<Action> Actions { get; }
+        public override IEnumerable<Model.Action> Actions { get; }
     }
     public class GuardedWithActions<TContext> : GuardedWithTarget<TContext>
         where TContext : IEquatable<TContext>
     {
         internal GuardedWithActions(
             Definition.GuardedTransition transition,
-            OneOf<Action, ContextAction> action,
-            params OneOf<Action, ContextAction>[] actions) : base(transition.Event, transition.Guard, transition.Targets) =>
+            OneOf<Model.Action, ContextAction> action,
+            params OneOf<Model.Action, ContextAction>[] actions) : base(transition.Event, transition.Guard, transition.Targets) =>
             Actions = action.Append(actions);
         internal GuardedWithActions(
             Definition.GuardedContextTransition transition,
-            OneOf<Action, ContextAction> action,
-            params OneOf<Action, ContextAction>[] actions) : base(transition.Event, transition.Guard, transition.Targets) =>
+            OneOf<Model.Action, ContextAction> action,
+            params OneOf<Model.Action, ContextAction>[] actions) : base(transition.Event, transition.Guard, transition.Targets) =>
             Actions = action.Append(actions);
 
-        public override IEnumerable<OneOf<Action, ContextAction>> Actions { get; }
+        public override IEnumerable<OneOf<Model.Action, ContextAction>> Actions { get; }
     }
 }

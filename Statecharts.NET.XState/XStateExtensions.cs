@@ -9,18 +9,22 @@ namespace Statecharts.NET.XState
 {
     public static class XStateExtensions
     {
-        public static string AsXStateDefinition<TContext>(
+        public static string AsXStateVisualizerV4Definition<TContext>(
+            this Definition.Statechart<TContext> statechartDefinition)
+            where TContext : IEquatable<TContext>, IXStateSerializable
+            => $"const machine = Machine({statechartDefinition.AsXStateV4Definition()});";
+        public static string AsXStateVisualizerV5Definition<TContext>(
+            this Definition.Statechart<TContext> statechartDefinition)
+            where TContext : IEquatable<TContext>, IXStateSerializable
+            => throw new NotImplementedException();
+
+        private static string AsXStateV4Definition<TContext>(
             this Definition.Statechart<TContext> statechartDefinition)
             where TContext : IEquatable<TContext>, IXStateSerializable
             => ObjectValue(
                     ("id", statechartDefinition.Id),
                     ("context", statechartDefinition.InitialContext.AsJSObject())
                 ).With(statechartDefinition.RootStateNode.AsJSProperty(statechartDefinition).Value as ObjectValue).AsString(); // this cast is necessary because of the way xstate merges the top-level state node with the machine definition
-
-        public static string AsXStateVisualizerDefinition<TContext>(
-            this Definition.Statechart<TContext> statechartDefinition)
-            where TContext : IEquatable<TContext>, IXStateSerializable
-            => $"const machine = Machine({statechartDefinition.AsXStateDefinition()});";
 
         private static JSProperty AsJSProperty<TContext>(
             this Definition.StateNode stateNodeDefinition,

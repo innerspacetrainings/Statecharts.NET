@@ -1,26 +1,31 @@
 ﻿using System;
 using System.Linq;
+using Statecharts.NET.Language.TaskService;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
-using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET.Language
 {
     public static class Keywords
     {
         public static Statechart.Builder Statechart => new Statechart.Builder();
+        public static Service.Builder Service => new Service.Builder();
+        public static SideEffect.Builder SideEffect => new SideEffect.Builder();
         public static Event.Builder Event => new Event.Builder();
-        public static Transition.WithEvent OnDone => Transition.WithEvent.OnCompoundDone();
 
-        public static Service.ServiceLogic Chain(params Service.ServiceLogic[] tasks)
-            => async token =>
+        public static ServiceTask Chain(
+            OneOf<Model.Task, Definition.TaskService> first,
+            OneOf<Model.Task, Definition.TaskService> second,
+            params OneOf<Model.Task, Definition.TaskService>[] remaining) // TODO: add Model.Task + required first param
+            => Service.DefineTask(async token =>
             {
-                foreach (var task in tasks)
+                foreach (var wrappedTask in first.Append(second).Append(remaining))
                 {
+                    var task = wrappedTask.Match(Functions.Identity, service => service.Task);
                     await task(token);
                     token.ThrowIfCancellationRequested();
                 }
-            };
+            });
 
         public static Definition.ForbiddenTransition Ignore(string eventName) =>
             new Definition.ForbiddenTransition(eventName);
@@ -59,13 +64,13 @@ namespace Statecharts.NET.Language
     {
         public static StateNode.WithEntryActions WithEntryActions(
             this string name,
-            OneOf<Action, ContextAction> action,
-            params OneOf<Action, ContextAction>[] entryActions)
+            OneOf<Model.Action, ContextAction> action,
+            params OneOf<Model.Action, ContextAction>[] entryActions)
             => new StateNode.WithName(name).WithEntryActions(action, entryActions);
         public static StateNode.WithExitActions WithExitActions(
             this string name,
-            OneOf<Action, ContextAction> action,
-            params OneOf<Action, ContextAction>[] exitActions)
+            OneOf<Model.Action, ContextAction> action,
+            params OneOf<Model.Action, ContextAction>[] exitActions)
             => new StateNode.WithName(name).WithExitActions(action, exitActions);
         public static StateNode.WithTransitions WithTransitions(
             this string name,
@@ -74,8 +79,8 @@ namespace Statecharts.NET.Language
             => new StateNode.WithName(name).WithTransitions(transition, transitions);
         public static StateNode.WithServices WithInvocations(
             this string name,
-            OneOf<Service.ServiceLogic, Model.Service> service,
-            params OneOf<Service.ServiceLogic, Model.Service>[] services)
+            Definition.Service service,
+            params Definition.Service[] services)
             => new StateNode.WithName(name).WithInvocations(service, services);
         public static StateNode.Final AsFinal(this string name)
             => new StateNode.WithName(name).AsFinal();
@@ -83,28 +88,5 @@ namespace Statecharts.NET.Language
             => new StateNode.WithName(name).AsCompound();
         public static StateNode.Orthogonal AsOrthogonal(this string name)
             => new StateNode.WithName(name).AsOrthogonal();
-        
-        public static Service.WithId WithId(
-            this Service.ServiceLogic task,
-            string id)
-            => new Service.WithLogic(task).WithId(id);
-        public static Service.WithOnSuccessHandler OnSuccess(
-            this Service.ServiceLogic logic,
-            Model.Target target)
-            => new Service.WithLogic(logic).OnSuccess(target);
-        public static Service.WithOnErrorHandler OnError(
-            this Service.ServiceLogic logic,
-            Model.Target target)
-            => new Service.WithLogic(logic).OnError(target);
-
-        // TODO: implement this
-        ////public static Service.WithId<T> WithId<T>(
-        ////    this Service.ServiceLogic<T> logic,
-        ////    string id)
-        ////    => throw new NotImplementedException();
-        ////public static Service.WithOnSuccessHandler<T> OnSuccess<T>(
-        ////    this Service.ServiceLogic logic,
-        ////    UnguardedContextDataTransition transition)
-        ////    => throw new NotImplementedException();
     }
 }

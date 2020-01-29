@@ -134,8 +134,9 @@ namespace Statecharts.NET.Interpreter
         public IEnumerable<StateNode> StateNodes { get; internal set; }
 
         public CompoundStateNode(StateNode parent, Definition.CompoundStateNode definition) : base(parent, definition) =>
-            Transitions = Transitions.Prepend(definition.DoneTransition.Match<Definition.Transition>(Functions.Identity,
-                Functions.Identity, Functions.Identity, Functions.Identity)); // TODO: probably create Union<TBase, T0, T1, ...>
+            Transitions = definition.DoneTransition.Match(
+                doneTransition => Transitions.Prepend(doneTransition.Match<Definition.Transition>(Functions.Identity, Functions.Identity, Functions.Identity, Functions.Identity)), // TODO: probably create Union<TBase, T0, T1, ...>
+                () => Transitions);
 
         public StateNode GetSubstate(NamedStateNodeKey key)
             => StateNodes.FirstOrDefault(state => state.Key.Equals(key)) ?? throw new Exception("[THINK] WTF is happening");

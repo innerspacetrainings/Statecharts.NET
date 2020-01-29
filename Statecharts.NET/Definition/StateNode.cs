@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
-using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET.Definition
 {
@@ -36,8 +35,8 @@ namespace Statecharts.NET.Definition
         OneOfBase<AtomicStateNode, FinalStateNode, CompoundStateNode, OrthogonalStateNode>
     {
         public abstract string Name { get; }
-        public abstract IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
-        public abstract IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
+        public abstract IEnumerable<OneOf<Model.Action, ContextAction>> EntryActions { get; }
+        public abstract IEnumerable<OneOf<Model.Action, ContextAction>> ExitActions { get; }
 
         public TResult Match<TResult>(Func<FinalStateNode, TResult> final, Func<NonFinalStateNode, TResult> nonFinal) =>
             this.Match(nonFinal, final, nonFinal, nonFinal);
@@ -56,12 +55,12 @@ namespace Statecharts.NET.Definition
         public abstract IEnumerable<Service> Services { get; }
         public abstract IEnumerable<StateNode> States { get; }
         public abstract InitialTransition InitialTransition { get; }
-        public abstract OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition> DoneTransition { get; } // TODO: think about done data
+        public abstract Option<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; } // TODO: think about done data
     }
     public abstract class OrthogonalStateNode : NonFinalStateNode
     {
         public abstract IEnumerable<Service> Services { get; }
         public abstract IEnumerable<StateNode> States { get; }
-        public abstract OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition> DoneTransition { get; } // TODO: think about done data
+        public abstract Option<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; } // TODO: think about done data
     }
 }
