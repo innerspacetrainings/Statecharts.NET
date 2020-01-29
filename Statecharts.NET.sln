@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET", "Statecharts.NET\Statecharts.NET.csproj", "{2AB196F4-E2B9-424E-A957-A4C5600E384B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0CF03BCA-B589-4CB9-88E2-1DDC9D3ED733}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 		Research.md = Research.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET", "Statecharts.NET\Statecharts.NET.csproj", "{2AB196F4-E2B9-424E-A957-A4C5600E384B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Demo", "Statecharts.NET.Demo\Statecharts.NET.Demo.csproj", "{2AF48A52-944B-4B09-89F5-0BB400603B23}"
 EndProject
@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.XState", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Tests", "Statecharts.NET.Tests\Statecharts.NET.Tests.csproj", "{C710E619-E730-483A-B6D4-F66853711A22}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Language", "Statecharts.NET.DSL\Statecharts.NET.Language.csproj", "{72401C57-5422-4EC8-8FCD-19EC1A7E6D94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Language", "Statecharts.NET.Language\Statecharts.NET.Language.csproj", "{72401C57-5422-4EC8-8FCD-19EC1A7E6D94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
