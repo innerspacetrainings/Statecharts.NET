@@ -194,7 +194,7 @@ namespace Statecharts.NET.Interpreter
                 }));
 
         // TODO: don't take all transitions (https://gitlab.com/scion-scxml/test-framework/blob/master/test/documentOrder/documentOrder0.scxml)
-        private IEnumerable<Transition> SelectTransitions(Model.Event nextEvent)
+        private IEnumerable<Transition> SelectTransitions(OneOf<Model.Event, Model.CustomDataEvent> nextEvent)
         {
             bool Matches(OneOf<Model.Event, Model.CustomDataEvent> @event) => @event.Equals(nextEvent); // TODO: Equals vs. == (https://docs.microsoft.com/en-us/previous-versions/ms173147(v=vs.90)?redirectedfrom=MSDN)
             bool IsEnabled(GuardedTransition guarded)
@@ -204,13 +204,10 @@ namespace Statecharts.NET.Interpreter
                     dataGuard => dataGuard.Condition.Invoke(context, null)); // TODO: pass Data to Event
             bool SourceStateIsActive(Transition transition)
                 => stateConfiguration.Contains(transition.Source);
-            bool TransitionShouldBeTaken(Transition transition)
-                => transition.Match(
-                    forbidden => false, // TODO: check if this case gets ever hit
-                    unguarded => Matches(unguarded.Event),
+            bool TransitionShouldBeTaken(Transition transition) => transition.Match(
+                    forbidden => false, // TODO: remove others if first was forbidden
+                    unguarded =>Matches(unguarded.Event),
                     guarded => Matches(guarded.Event) && IsEnabled(guarded));
-
-            if (nextEvent == null) Debug.WriteLine("TODO: SelectTransitions(...) was called with NULL event, remodel this"); // TODO: remodel
 
             return StateChart.Transitions
                 .Where(SourceStateIsActive)
