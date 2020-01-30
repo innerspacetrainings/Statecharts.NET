@@ -30,6 +30,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>OneOfBase.tt</DependentUpon>
     </Compile>
+    <Compile Update="_Utilities\Union.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Union.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -40,6 +45,10 @@
     <None Update="_Utilities\OneOfBase.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>OneOfBase.cs</LastGenOutput>
+    </None>
+    <None Update="_Utilities\Union.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Union.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
