@@ -54,7 +54,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 <#= GenerateForArity(arity, $"case {{0}}: return FormatValue(typeof(T{{0}}), _value{{0}});", $"{Environment.NewLine}                ") #>

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Definition;
+using Statecharts.NET.Language;
 using Statecharts.NET.Model;
 using Statecharts.NET.XState;
 using static Statecharts.NET.XState.JPropertyConstructorFunctions;
+using static Statecharts.NET.Language.Keywords;
 
 namespace Statecharts.NET.Demo
 {
@@ -23,166 +25,34 @@ namespace Statecharts.NET.Demo
 
     internal static class Program
     {
-        private static readonly Statechart<FetchContext> FetchDefinition = null;
-            /*new StatechartDefinition<FetchContext>()
-            {
-                InitialContext = new FetchContext() { Retries = 0 },
-                StateNodeDefinition = new CompoundStateNodeDefinition<FetchContext>()
-                {
-                    Name = "fetch",
-                    InitialTransition = new InitialTransitionDefinition { Target = new ChildTargetDefinition() { Key = new NamedStateNodeKey("idle") } },
-                    States = new List<BaseStateNodeDefinition<FetchContext>> {
-                        new OrthogonalStateNodeDefinition<FetchContext>()
-                        {
-                            Name = "idle",
-                            States = new List<BaseStateNodeDefinition<FetchContext>>()
-                            {
-                                new AtomicStateNodeDefinition<FetchContext>()
-                                {
-                                    Name = "really",
-                                    Events = new List<BaseEventDefinition>
-                                    {
-                                        new EventDefinition<Event>()
-                                        {
-                                            Event = new Event("YES"),
-                                            Transitions = new List<EventTransitionDefinition>()
-                                            {
-                                                new UnguardedEventTransitionDefinition()
-                                                {
-                                                    Targets = new List<BaseTargetDefinition>() { new AbsoluteTargetDefinition() { Id = new StateNodeId(new StateNodeKey[]{ new RootStateNodeKey("fetch"), new NamedStateNodeKey("loading") })} }
-                                                }
-                                            }
-                                        },
-                                        new EventDefinition<Event>()
-                                        {
-                                            Event = new Event("NO"),
-                                            Transitions = new List<EventTransitionDefinition>()
-                                            {
-                                                new UnguardedEventTransitionDefinition()
-                                                {
-                                                    Targets = new List<BaseTargetDefinition>() { new SiblingTargetDefinition() { Key =  new NamedStateNodeKey("nana") } }
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                new AtomicStateNodeDefinition<FetchContext>()
-                                {
-                                    Name = "nana",
-                                    Events = new List<BaseEventDefinition>
-                                    {
-                                        new EventDefinition<Event>()
-                                        {
-                                            Event = new Event("SERIOUSLY"),
-                                            Transitions = new List<EventTransitionDefinition>()
-                                            {
-                                                new UnguardedEventTransitionDefinition()
-                                                {
-                                                    Targets = new List<BaseTargetDefinition>() { new AbsoluteTargetDefinition() { Id = new StateNodeId(new StateNodeKey[] { new RootStateNodeKey("fetch"), new NamedStateNodeKey("failure") }) } }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            Events = new List<BaseEventDefinition>
-                            {
-                                new EventDefinition<Event>()
-                                {
-                                    Event = new Event("FETCH"),
-                                    Transitions = new List<EventTransitionDefinition>()
-                                    {
-                                        new UnguardedEventTransitionDefinition()
-                                        {
-                                            Targets = new List<BaseTargetDefinition>() { new SiblingTargetDefinition() { Key = new NamedStateNodeKey("loading") } }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        new AtomicStateNodeDefinition<FetchContext>()
-                        {
-                            Name = "loading",
-                            Events = new List<BaseEventDefinition>
-                            {
-                                new ImmediateEventDefinition()
-                                {
-                                    Transitions = new List<ImmediateTransitionDefinition>()
-                                    {
-                                        new GuardedImmediateTransitionDefinition()
-                                        {
-                                            Guard = new InlineGuard<FetchContext>() { Condition = (context, _) => context.Retries >= 3},
-                                            Targets = new List<BaseTargetDefinition>() {new SiblingTargetDefinition() { Key = new NamedStateNodeKey("sheeeesh") } }
-                                        }
-                                    }
-                                },
-                                new EventDefinition<Event>()
-                                {
-                                    Event = new Event("RESOLVE"),
-                                    Transitions = new List<EventTransitionDefinition>()
-                                    {
-                                        new UnguardedEventTransitionDefinition()
-                                        {
-                                            Targets = new List<BaseTargetDefinition>() { new SiblingTargetDefinition() { Key = new NamedStateNodeKey("success") } }
-                                        }
-                                    }
-                                },
-                                new EventDefinition<Event>()
-                                {
-                                    Event = new Event("REJECT"),
-                                    Transitions = new List<EventTransitionDefinition>()
-                                    {
-                                        new UnguardedEventTransitionDefinition()
-                                        {
-                                            Targets = new List<BaseTargetDefinition>() { new SiblingTargetDefinition() { Key = new NamedStateNodeKey("failure") } }
-                                        }
-                                    }
-                                }
-                            },
-                            EntryActions = new List<Action>()
-                            {
-                                new SideEffectAction<FetchContext>()
-                                {
-                                    Function = context => Console.WriteLine($"Entered loading state with context: {context}")
-                                }
-                            }
-                        },
-                        new FinalStateNodeDefinition<FetchContext>()
-                        {
-                            Name = "success"
-                        },
-                        new FinalStateNodeDefinition<FetchContext>()
-                        {
-                            Name = "sheeeesh"
-                        },
-                        new AtomicStateNodeDefinition<FetchContext>()
-                        {
-                            Name = "failure",
-                            Events = new List<BaseEventDefinition>
-                            {
-                                new EventDefinition<Event>()
-                                {
-                                    Event = new Event("RETRY"),
-                                    Transitions = new List<EventTransitionDefinition>()
-                                    {
-                                        new UnguardedEventTransitionDefinition()
-                                        {
-                                            Targets = new List<BaseTargetDefinition>() { new SiblingTargetDefinition() { Key = new NamedStateNodeKey("loading") } },
-                                            Actions = new List<EventAction>()
-                                            {
-                                                new AssignEventAction<FetchContext, int>()
-                                                {
-                                                    Mutation = (context, _) => context.Retries++
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };*/
+        private static readonly Statechart<FetchContext> FetchDefinition = Statechart
+            .WithInitialContext(new FetchContext { Retries = 0 })
+            .WithRootState(
+                "fetch"
+                    .AsCompound()
+                    .WithInitialState("idle")
+                    .WithStates(
+                        "idle"
+                            .WithTransitions(
+                                Ignore("GATHERUSERDATA"),
+                                On("FETCH").TransitionTo.Sibling("loading"))
+                            .AsOrthogonal()
+                            .WithStates(
+                                "really".WithTransitions(
+                                        On("YES").TransitionTo.Absolute("fetch", "loading"),
+                                        On("NO").TransitionTo.Sibling("nana")),
+                                "nana".WithTransitions(On("SERIOUSLY").TransitionTo.Absolute("fetch", "failure"))),
+                        "loading"
+                            .WithEntryActions(Run<FetchContext>(context => Console.WriteLine($"Entered loading state with context: {context}")))
+                            .WithTransitions(
+                                Immediately.If<FetchContext>(context => context.Retries >= 3).TransitionTo.Sibling("sheeeesh"),
+                                On("RESOLVE").TransitionTo.Sibling("success"),
+                                On("REJECT").TransitionTo.Sibling("failure")),
+                        "success".AsFinal(),
+                        "sheeeesh".AsFinal(),
+                        "failure".WithTransitions(
+                                On("RETRY").TransitionTo.Sibling("loading")
+                                    .WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++)))));
 
         private static void Main()
         {

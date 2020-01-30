@@ -110,7 +110,8 @@ namespace Statecharts.NET
                         definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions)));
 
             InitialContext = initialContext;
-            _stateNodes = rootNode.Append(rootNode.GetDescendants().ToArray())
+            var descendants = rootNode.GetDescendants().ToArray();
+            _stateNodes = rootNode.Append(descendants)
                 .ToDictionary(stateNode => stateNode.Id, stateNode => stateNode);
             Transitions = rootNode.CataFold(
                 GetTransitions,

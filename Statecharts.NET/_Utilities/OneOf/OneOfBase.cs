@@ -38,7 +38,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 case 0: return FormatValue(typeof(T0), _value0);
@@ -99,7 +99,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 case 0: return FormatValue(typeof(T0), _value0);
@@ -167,7 +167,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 case 0: return FormatValue(typeof(T0), _value0);
@@ -242,7 +242,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 case 0: return FormatValue(typeof(T0), _value0);
@@ -324,7 +324,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 case 0: return FormatValue(typeof(T0), _value0);
@@ -413,7 +413,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 case 0: return FormatValue(typeof(T0), _value0);
@@ -509,7 +509,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 case 0: return FormatValue(typeof(T0), _value0);
@@ -612,7 +612,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 case 0: return FormatValue(typeof(T0), _value0);
@@ -722,7 +722,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 case 0: return FormatValue(typeof(T0), _value0);
@@ -839,7 +839,7 @@ namespace Statecharts.NET.Utilities
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value?.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // : {value?.ToString()}
             switch (_index)
             {
                 case 0: return FormatValue(typeof(T0), _value0);

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Statecharts.NET.Definition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
+using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET.Language.Builders.Transition
 {
@@ -161,10 +163,11 @@ namespace Statecharts.NET.Language.Builders.Transition
 
         public WithActions WithActions(Model.Action action, params Model.Action[] actions) =>
             new WithActions(this, action, actions);
-        public WithActions WithActions<TContext>(
+        public WithActions<TContext> WithActions<TContext>(
             OneOf<Model.Action, ContextAction> action,
-            params OneOf<Model.Action, ContextAction>[] actions) =>
-            throw new NotImplementedException(); // new WithActions<TContext>(this, action, actions);
+            params OneOf<Model.Action, ContextAction>[] actions)
+            where TContext : IEquatable<TContext> =>
+            new WithActions<TContext>(this, action, actions);
     }
     public class GuardedWithTarget : Definition.GuardedTransition
     {
@@ -223,6 +226,24 @@ namespace Statecharts.NET.Language.Builders.Transition
             Actions = action.Append(actions);
 
         public override IEnumerable<Model.Action> Actions { get; }
+    }
+    public class WithActions<TContext> : UnguardedContextTransition
+        where TContext : IEquatable<TContext>
+    {
+        private Definition.UnguardedTransition Transition { get; }
+
+        internal WithActions(
+            Definition.UnguardedTransition transition,
+            OneOf<Model.Action, ContextAction> action,
+            params OneOf<Model.Action, ContextAction>[] actions)
+        {
+            Transition = transition;
+            Actions = action.Append(actions);
+        }
+
+        public override Model.Event Event => Transition.Event;
+        public override IEnumerable<Target> Targets => Transition.Targets;
+        public override IEnumerable<OneOf<Action, ContextAction>> Actions { get; }
     }
     public class GuardedWithActions : GuardedWithTarget
     {

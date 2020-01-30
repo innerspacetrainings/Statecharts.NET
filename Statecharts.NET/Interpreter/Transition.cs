@@ -7,7 +7,7 @@ namespace Statecharts.NET.Interpreter
 {
     public class InitialTransition
     {
-        public InitialTransition(StateNode target, StateNode source, IEnumerable<OneOf<Model.Action, Model.ContextAction>> actions)
+        public InitialTransition(StateNode source, StateNode target, IEnumerable<OneOf<Model.Action, Model.ContextAction>> actions)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
             Target = target ?? throw new ArgumentNullException(nameof(target));
@@ -36,6 +36,8 @@ namespace Statecharts.NET.Interpreter
         public Model.CustomEvent Event { get; }
         public ForbiddenTransition(StateNode source, Model.CustomEvent @event) : base(source) =>
             Event = @event ?? throw new ArgumentNullException(nameof(@event));
+
+        public override string ToString() => $"{Source}: {Event} ⛔";
     }
     public class UnguardedTransition : Transition
     {
@@ -51,7 +53,7 @@ namespace Statecharts.NET.Interpreter
             this(source,
                 @event,
                 targets,
-                (IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>)actions) // TODO: validate if this works
+                actions.Select<Model.Action, OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>(action => action)) // TODO: validate if this works
         { }
         public UnguardedTransition(
             StateNode source,
@@ -61,7 +63,7 @@ namespace Statecharts.NET.Interpreter
             this(source,
                 @event,
                 targets,
-                (IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>)actions) // TODO: validate if this works
+                actions.Select(action => action.Match<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>(a => a, ca => ca))) // TODO: validate if this works
         { }
         public UnguardedTransition(
             StateNode source,
@@ -74,6 +76,8 @@ namespace Statecharts.NET.Interpreter
             Targets = targets ?? throw new ArgumentNullException(nameof(targets));
             Actions = actions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>();
         }
+
+        public override string ToString() => $"{Source}: {Event.Match(e => e.ToString(), cde => cde.ToString())} ✔ to [{string.Join(", ", Targets)}] ({Actions.Count()} Actions)";
     }
     public class GuardedTransition : Transition
     {
@@ -92,7 +96,7 @@ namespace Statecharts.NET.Interpreter
                 @event,
                 guard,
                 targets,
-                (IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>)actions) // TODO: validate if this works
+                actions.Select<Model.Action, OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>(action => action)) // TODO: validate if this works
         { }
         public GuardedTransition(
             StateNode source,
@@ -104,7 +108,7 @@ namespace Statecharts.NET.Interpreter
                 @event,
                 guard.Match<OneOf<Model.InStateGuard, Model.ConditionContextGuard, Model.ConditionContextDataGuard>>(g => g, g => g),
                 targets,
-                (IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>)actions) // TODO: validate if this works
+                actions.Select(action => action.Match<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>(a => a, ca => ca))) // TODO: validate if this works
         { }
         public GuardedTransition(
             StateNode source,
@@ -120,5 +124,7 @@ namespace Statecharts.NET.Interpreter
             Targets = targets ?? throw new ArgumentNullException(nameof(targets));
             Actions = actions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>();
         }
+
+        public override string ToString() => $"{Source}: {Event.Match(e => e.ToString(), cde => cde.ToString())} ❓ to [{string.Join(", ", Targets)}] ({Actions.Count()} Actions)";
     }
 }

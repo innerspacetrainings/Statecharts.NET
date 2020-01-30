@@ -38,6 +38,8 @@ namespace Statecharts.NET.Definition
         public abstract IEnumerable<OneOf<Model.Action, ContextAction>> EntryActions { get; }
         public abstract IEnumerable<OneOf<Model.Action, ContextAction>> ExitActions { get; }
 
+        public override string ToString() => $"{Name} ({GetType().Name.Replace("Definition.StateNode`1", string.Empty)})";
+
         public TResult Match<TResult>(Func<FinalStateNode, TResult> final, Func<NonFinalStateNode, TResult> nonFinal) =>
             this.Match(nonFinal, final, nonFinal, nonFinal);
     }

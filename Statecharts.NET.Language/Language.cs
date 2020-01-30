@@ -75,10 +75,10 @@ namespace Statecharts.NET.Language
             => throw new NotImplementedException();
         public static LogAction Log()
             => throw new NotImplementedException();
-        public static AssignContextAction Assign()
-            => throw new NotImplementedException();
-        public static SideEffectContextAction Run()
-            => throw new NotImplementedException();
+        public static AssignContextAction Assign<TContext>(System.Action<TContext> mutation)
+            => new AssignContextAction(context => mutation((TContext)context));
+        public static SideEffectContextAction Run<TContext>(System.Action<TContext> action)
+            => new SideEffectContextAction(context => action((TContext)context));
     }
     public static class Helpers
     {

@@ -1,39 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Statecharts.NET.Definition;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
 {
-    public abstract class StateNode : OneOfBase<AtomicStateNode, FinalStateNode, CompoundStateNode, OrthogonalStateNode>
-    {
-        public StateNodeId Id { get; }
-        public StateNodeKey Key { get; }
-        internal int Depth { get; }
-        public IEnumerable<Definition.Transition> Transitions { get; protected set; }
-        public StateNode Parent { get; }
-        public IEnumerable<OneOf<Model.Action, Model.ContextAction>> EntryActions { get; }
-        public IEnumerable<OneOf<Model.Action, Model.ContextAction>> ExitActions { get; }
-        public bool HasParent => Parent != null;
-        public string Name => Key.Map(_ => null, named => named.StateName);
-
-        protected StateNode(StateNode parent, Definition.StateNode definition)
-        {
-            if (definition is null) throw new ArgumentNullException(nameof(definition));
-            Parent = parent;
-            Key = Parent == null ? new RootStateNodeKey(definition.Name) as StateNodeKey : new NamedStateNodeKey(definition.Name);
-            Id = Parent == null ? new StateNodeId(new RootStateNodeKey(definition.Name)) : new StateNodeId(Parent.Id, Key);
-            Depth = Parent?.Depth + 1 ?? 0;
-
-            EntryActions = definition.EntryActions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
-            ExitActions = definition.ExitActions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
-        }
-
-        public override string ToString() => $"{Id} ({GetType().Name.Replace("StateNode`1", string.Empty)})";
-
-        internal static StateNodeId MakeId(StateNode stateNode, NamedStateNodeKey key)
-            => new StateNodeId(stateNode.Id, key);
-    }
     static class StateNodeFunctions
     {
         internal static TResult CataFold<TResult>(
@@ -113,16 +85,46 @@ namespace Statecharts.NET.Interpreter
                 child => GetStateNode(sourceStateNode, child.Key));
         }
     }
+    
+    public abstract class StateNode : OneOfBase<AtomicStateNode, FinalStateNode, CompoundStateNode, OrthogonalStateNode>
+    {
+        public StateNodeId Id { get; }
+        public StateNodeKey Key { get; }
+        internal int Depth { get; }
+        public IEnumerable<Definition.Transition> Transitions { get; protected set; }
+        public StateNode Parent { get; }
+        public IEnumerable<OneOf<Model.Action, Model.ContextAction>> EntryActions { get; }
+        public IEnumerable<OneOf<Model.Action, Model.ContextAction>> ExitActions { get; }
+        public bool HasParent => Parent != null;
+        public string Name => Key.Map(_ => null, named => named.StateName);
 
+        protected StateNode(StateNode parent, Definition.StateNode definition)
+        {
+            if (definition is null) throw new ArgumentNullException(nameof(definition));
+            Parent = parent;
+            Key = Parent == null ? new RootStateNodeKey(definition.Name) as StateNodeKey : new NamedStateNodeKey(definition.Name);
+            Id = Parent == null ? new StateNodeId(new RootStateNodeKey(definition.Name)) : new StateNodeId(Parent.Id, Key);
+            Depth = Parent?.Depth + 1 ?? 0;
+
+            Transitions = definition.GetTransitions();
+            EntryActions = definition.EntryActions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
+            ExitActions = definition.ExitActions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
+        }
+
+        public override string ToString() => $"{Id} ({GetType().Name.Replace("Interpreter.StateNode`1", string.Empty).Replace("StateNode", string.Empty).ToLowerInvariant()})";
+        public override int GetHashCode() => Key.GetHashCode();
+        public override bool Equals(object obj) => obj is StateNode stateNode && Key.Equals(stateNode.Key);
+
+        internal static StateNodeId MakeId(StateNode stateNode, NamedStateNodeKey key)
+            => new StateNodeId(stateNode.Id, key);
+    }
     public class FinalStateNode : StateNode
     {
         public FinalStateNode(StateNode parent, Definition.FinalStateNode definition) : base(parent, definition) { }
     }
-
     public abstract class NonFinalStateNode : StateNode
     {
-        protected NonFinalStateNode(StateNode parent, Definition.NonFinalStateNode definition) : base(parent, definition) =>
-            Transitions = definition.Transitions ?? Enumerable.Empty<Definition.Transition>();
+        protected NonFinalStateNode(StateNode parent, Definition.NonFinalStateNode definition) : base(parent, definition) { }
     }
     public class AtomicStateNode : NonFinalStateNode
     {

@@ -25,9 +25,11 @@ namespace Statecharts.NET.Model
         }
 
         public override int GetHashCode() => EventName != null ? EventName.GetHashCode() : 0;
+        public override string ToString() => $"@\"{EventName}\"";
     }
     public class ImmediateEvent : Event {
         public override bool Equals(IEvent other) => other is ImmediateEvent;
+        public override string ToString() => "Immediately";
     }
     public class DelayedEvent : Event {
         public TimeSpan Delay { get; }
