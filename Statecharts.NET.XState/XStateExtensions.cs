@@ -69,7 +69,7 @@ namespace Statecharts.NET.XState
                         guarded => Guarded(new Model.CustomEvent("[THINK]"), guarded.Targets))).ToList();
             if(transitions.Any()) properties.Add(("on", ObjectValue(transitions)));
 
-            JSProperty MapDoneTransition(OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition> transition) =>
+            JSProperty MapDoneTransition(OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition> transition) =>
                 transition.Match(
                     unguarded => Unguarded("onDone", unguarded.Targets),
                     unguarded => Unguarded("onDone", unguarded.Targets),

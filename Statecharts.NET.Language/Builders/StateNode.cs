@@ -177,8 +177,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
         public override Definition.InitialTransition InitialTransition => DefinitionData.InitialTransition;
         public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
-        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
-            Option.None<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>>();
+        public override Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
+            Option.None<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>>();
 
         public CompoundWithOnDone OnDone => new CompoundWithOnDone(this);
     }
@@ -226,8 +226,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
         public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
         public override InitialTransition InitialTransition => DefinitionData.InitialTransition;
-        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
-            Option.From<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>>(DoneTransitionBuilder);
+        public override Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
+            Option.From<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>>(DoneTransitionBuilder);
     }
     public class CompoundWithDoneTransitionWithActions : Definition.CompoundStateNode
     {
@@ -246,8 +246,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
         public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
         public override InitialTransition InitialTransition => DefinitionData.InitialTransition;
-        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
-            Option.From<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>>(DoneTransitionBuilder);
+        public override Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
+            Option.From<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>>(DoneTransitionBuilder);
     }
 
     public class Orthogonal
@@ -279,8 +279,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public override IEnumerable<OneOf<Model.Action, Model.ContextAction>> ExitActions => DefinitionData.ExitActions;
         public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
         public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
-        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
-            Option.None<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>>();
+        public override Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
+            Option.None<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>>();
 
         public object OnDone => throw new NotImplementedException();
     }

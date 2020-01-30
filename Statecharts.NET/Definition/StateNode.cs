@@ -56,11 +56,11 @@ namespace Statecharts.NET.Definition
     {
         public abstract IEnumerable<StateNode> States { get; }
         public abstract InitialTransition InitialTransition { get; }
-        public abstract Option<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; } // TODO: think about done data
+        public abstract Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; } // TODO: think about done data
     }
     public abstract class OrthogonalStateNode : NonFinalStateNode
     {
         public abstract IEnumerable<StateNode> States { get; }
-        public abstract Option<OneOf<UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; } // TODO: think about done data
+        public abstract Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; } // TODO: think about done data
     }
 }

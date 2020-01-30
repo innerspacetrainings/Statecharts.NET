@@ -137,7 +137,7 @@ namespace Statecharts.NET.Interpreter
 
         public CompoundStateNode(StateNode parent, Definition.CompoundStateNode definition) : base(parent, definition) =>
             Transitions = definition.DoneTransition.Match(
-                doneTransition => Transitions.Prepend(doneTransition.Match<Definition.Transition>(Functions.Identity, Functions.Identity, Functions.Identity, Functions.Identity)), // TODO: probably create Union<TBase, T0, T1, ...>
+                doneTransition => Transitions.Prepend(doneTransition.AsBase()),
                 () => Transitions);
 
         public StateNode GetSubstate(NamedStateNodeKey key)

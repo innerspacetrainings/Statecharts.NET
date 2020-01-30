@@ -1,0 +1,99 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#
+var maxGenerics = 10;
+
+string GenerateForArity(int arity, string template, string separator) =>
+    string.Join(separator, Enumerable.Range(0, arity).Select(position => string.Format(template, position)));
+string Generics(int arity) =>
+    GenerateForArity(arity, "T{0}", ", ");
+#>
+using System;
+
+namespace Statecharts.NET.Utilities
+{
+<#foreach(var arity in Enumerable.Range(2, maxGenerics))
+{#>
+    public struct OneOfUnion<TBase, <#= Generics(arity) #>>
+        <#= GenerateForArity(arity, $"where T{{0}} : TBase", $"{Environment.NewLine}        ") #>
+    {
+        readonly int _index;
+        <#= GenerateForArity(arity, "readonly T{0} _value{0};", $"{Environment.NewLine}        ") #>
+
+        private OneOfUnion(int index, <#= GenerateForArity(arity, "T{0} value{0} = default", ", ") #>)
+        {
+            _index = index;
+            <#= GenerateForArity(arity, "_value{0} = value{0};", $"{Environment.NewLine}            ") #>
+        }
+
+        <#= GenerateForArity(arity, $"public static implicit operator OneOfUnion<TBase, {Generics(arity)}>(T{{0}} t) => new OneOfUnion<TBase, {Generics(arity)}>({{0}}, value{{0}}: t);", $"{Environment.NewLine}        ") #>
+
+        public TResult Match<TResult>(<#= GenerateForArity(arity, "Func<T{0}, TResult> f{0}", ", ") #>)
+        {
+            switch (_index)
+            {
+                <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: return f{{0}}(_value{{0}});", $"{Environment.NewLine}                ") #>
+                default: throw new InvalidOperationException();
+            }
+        }
+
+        public void Switch(<#= GenerateForArity(arity, "Action<T{0}> f{0}", ", ") #>)
+        {
+            switch (_index)
+            {
+                <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: f{{0}}(_value{{0}}); return;", $"{Environment.NewLine}                ") #>
+                default: throw new InvalidOperationException();
+            }
+        }
+
+        public TBase AsBase()
+        {
+            switch (_index)
+            {
+                <#= GenerateForArity(arity, $"case {{0}}: return _value{{0}};", $"{Environment.NewLine}                ") #>
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfUnion codegen.");
+            }
+        }
+
+        private bool Equals(OneOfUnion<TBase, <#= Generics(arity) #>> other)
+        {
+            if (_index != other._index) return false;
+            switch (_index)
+            {
+                <#= GenerateForArity(arity, $"case {{0}}: return Equals(_value{{0}}, other._value{{0}});", $"{Environment.NewLine}                ") #>
+                default: return false;
+            }
+        }
+
+        public override bool Equals(object obj) =>
+            !(obj is null) && obj is OneOfUnion<TBase, <#= Generics(arity) #>> other && Equals(other);
+
+        public override string ToString()
+        {
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value.ToString()}";
+            switch (_index)
+            {
+                <#= GenerateForArity(arity, $"case {{0}}: return FormatValue(typeof(T{{0}}), _value{{0}});", $"{Environment.NewLine}                ") #>
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfUnion codegen.");
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                switch (_index)
+                {
+                    <#= GenerateForArity(arity, $"case {{0}}: return ((_value{{0}}?.GetHashCode() ?? 0) * 397) ^ _index;", $"{Environment.NewLine}                    ") #>
+                    default: return 0 ^ _index;
+                }
+            }
+        }
+    }
+    
+<#}#>
+}

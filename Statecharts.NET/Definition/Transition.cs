@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 using Action = Statecharts.NET.Model.Action;
@@ -18,6 +19,19 @@ namespace Statecharts.NET.Definition
 
         public virtual ChildTarget Target { get; }
         public virtual IEnumerable<OneOf<Action, ContextAction>> Actions { get; }
+    }
+
+    public static class TransitionDefinitionFunctions
+    {
+        public static IEnumerable<Target> GetTargets(this Transition transition) =>
+            transition.Match(
+                forbidden => Enumerable.Empty<Target>(),
+                unguarded => unguarded.Targets,
+                unguarded => unguarded.Targets,
+                unguarded => unguarded.Targets,
+                guarded => guarded.Targets,
+                guarded => guarded.Targets,
+                guarded => guarded.Targets);
     }
 
     public abstract class Transition :

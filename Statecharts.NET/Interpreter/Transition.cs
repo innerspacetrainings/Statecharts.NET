@@ -96,7 +96,7 @@ namespace Statecharts.NET.Interpreter
                 @event,
                 guard,
                 targets,
-                actions.Select<Model.Action, OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>(action => action)) // TODO: validate if this works
+                actions.Select<Model.Action, OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>(action => action))
         { }
         public GuardedTransition(
             StateNode source,
@@ -108,7 +108,7 @@ namespace Statecharts.NET.Interpreter
                 @event,
                 guard.Match<OneOf<Model.InStateGuard, Model.ConditionContextGuard, Model.ConditionContextDataGuard>>(g => g, g => g),
                 targets,
-                actions.Select(action => action.Match<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>(a => a, ca => ca))) // TODO: validate if this works
+                actions.Select(action => action.Match<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>>(a => a, ca => ca)))
         { }
         public GuardedTransition(
             StateNode source,
