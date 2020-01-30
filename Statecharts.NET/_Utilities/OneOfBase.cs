@@ -877,13 +877,14 @@ namespace Statecharts.NET.Utilities
             }
         }
     }
+
     public static class OneOfBaseExtensions {
         public static TResult Match<T0, TResult>(this OneOfBase<T0> oneOf, Func<T0, TResult> f0)
         {
             switch (oneOf._index)
             {
                 case 0 when f0 != null: return f0(oneOf._value0);
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
         public static void Switch<T0>(this OneOfBase<T0> oneOf, System.Action<T0> f0)
@@ -891,17 +892,16 @@ namespace Statecharts.NET.Utilities
             switch (oneOf._index)
             {
                 case 0 when f0 != null: f0(oneOf._value0); return;
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
-
         public static TResult Match<T0, T1, TResult>(this OneOfBase<T0, T1> oneOf, Func<T0, TResult> f0, Func<T1, TResult> f1)
         {
             switch (oneOf._index)
             {
                 case 0 when f0 != null: return f0(oneOf._value0);
                 case 1 when f1 != null: return f1(oneOf._value1);
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
         public static void Switch<T0, T1>(this OneOfBase<T0, T1> oneOf, System.Action<T0> f0, System.Action<T1> f1)
@@ -910,10 +910,9 @@ namespace Statecharts.NET.Utilities
             {
                 case 0 when f0 != null: f0(oneOf._value0); return;
                 case 1 when f1 != null: f1(oneOf._value1); return;
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
-
         public static TResult Match<T0, T1, T2, TResult>(this OneOfBase<T0, T1, T2> oneOf, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2)
         {
             switch (oneOf._index)
@@ -921,7 +920,7 @@ namespace Statecharts.NET.Utilities
                 case 0 when f0 != null: return f0(oneOf._value0);
                 case 1 when f1 != null: return f1(oneOf._value1);
                 case 2 when f2 != null: return f2(oneOf._value2);
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
         public static void Switch<T0, T1, T2>(this OneOfBase<T0, T1, T2> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2)
@@ -931,10 +930,9 @@ namespace Statecharts.NET.Utilities
                 case 0 when f0 != null: f0(oneOf._value0); return;
                 case 1 when f1 != null: f1(oneOf._value1); return;
                 case 2 when f2 != null: f2(oneOf._value2); return;
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
-
         public static TResult Match<T0, T1, T2, T3, TResult>(this OneOfBase<T0, T1, T2, T3> oneOf, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3)
         {
             switch (oneOf._index)
@@ -943,7 +941,7 @@ namespace Statecharts.NET.Utilities
                 case 1 when f1 != null: return f1(oneOf._value1);
                 case 2 when f2 != null: return f2(oneOf._value2);
                 case 3 when f3 != null: return f3(oneOf._value3);
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
         public static void Switch<T0, T1, T2, T3>(this OneOfBase<T0, T1, T2, T3> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3)
@@ -954,10 +952,9 @@ namespace Statecharts.NET.Utilities
                 case 1 when f1 != null: f1(oneOf._value1); return;
                 case 2 when f2 != null: f2(oneOf._value2); return;
                 case 3 when f3 != null: f3(oneOf._value3); return;
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
-
         public static TResult Match<T0, T1, T2, T3, T4, TResult>(this OneOfBase<T0, T1, T2, T3, T4> oneOf, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4)
         {
             switch (oneOf._index)
@@ -967,7 +964,7 @@ namespace Statecharts.NET.Utilities
                 case 2 when f2 != null: return f2(oneOf._value2);
                 case 3 when f3 != null: return f3(oneOf._value3);
                 case 4 when f4 != null: return f4(oneOf._value4);
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
         public static void Switch<T0, T1, T2, T3, T4>(this OneOfBase<T0, T1, T2, T3, T4> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4)
@@ -979,10 +976,9 @@ namespace Statecharts.NET.Utilities
                 case 2 when f2 != null: f2(oneOf._value2); return;
                 case 3 when f3 != null: f3(oneOf._value3); return;
                 case 4 when f4 != null: f4(oneOf._value4); return;
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
-
         public static TResult Match<T0, T1, T2, T3, T4, T5, TResult>(this OneOfBase<T0, T1, T2, T3, T4, T5> oneOf, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5)
         {
             switch (oneOf._index)
@@ -993,7 +989,7 @@ namespace Statecharts.NET.Utilities
                 case 3 when f3 != null: return f3(oneOf._value3);
                 case 4 when f4 != null: return f4(oneOf._value4);
                 case 5 when f5 != null: return f5(oneOf._value5);
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
         public static void Switch<T0, T1, T2, T3, T4, T5>(this OneOfBase<T0, T1, T2, T3, T4, T5> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5)
@@ -1006,10 +1002,9 @@ namespace Statecharts.NET.Utilities
                 case 3 when f3 != null: f3(oneOf._value3); return;
                 case 4 when f4 != null: f4(oneOf._value4); return;
                 case 5 when f5 != null: f5(oneOf._value5); return;
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
-
         public static TResult Match<T0, T1, T2, T3, T4, T5, T6, TResult>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6> oneOf, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6)
         {
             switch (oneOf._index)
@@ -1021,7 +1016,7 @@ namespace Statecharts.NET.Utilities
                 case 4 when f4 != null: return f4(oneOf._value4);
                 case 5 when f5 != null: return f5(oneOf._value5);
                 case 6 when f6 != null: return f6(oneOf._value6);
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
         public static void Switch<T0, T1, T2, T3, T4, T5, T6>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6)
@@ -1035,10 +1030,9 @@ namespace Statecharts.NET.Utilities
                 case 4 when f4 != null: f4(oneOf._value4); return;
                 case 5 when f5 != null: f5(oneOf._value5); return;
                 case 6 when f6 != null: f6(oneOf._value6); return;
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
-
         public static TResult Match<T0, T1, T2, T3, T4, T5, T6, T7, TResult>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7> oneOf, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7)
         {
             switch (oneOf._index)
@@ -1051,7 +1045,7 @@ namespace Statecharts.NET.Utilities
                 case 5 when f5 != null: return f5(oneOf._value5);
                 case 6 when f6 != null: return f6(oneOf._value6);
                 case 7 when f7 != null: return f7(oneOf._value7);
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
         public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7)
@@ -1066,10 +1060,9 @@ namespace Statecharts.NET.Utilities
                 case 5 when f5 != null: f5(oneOf._value5); return;
                 case 6 when f6 != null: f6(oneOf._value6); return;
                 case 7 when f7 != null: f7(oneOf._value7); return;
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
-
         public static TResult Match<T0, T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7, T8> oneOf, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7, Func<T8, TResult> f8)
         {
             switch (oneOf._index)
@@ -1083,7 +1076,7 @@ namespace Statecharts.NET.Utilities
                 case 6 when f6 != null: return f6(oneOf._value6);
                 case 7 when f7 != null: return f7(oneOf._value7);
                 case 8 when f8 != null: return f8(oneOf._value8);
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
         public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7, T8>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7, T8> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7, System.Action<T8> f8)
@@ -1099,10 +1092,9 @@ namespace Statecharts.NET.Utilities
                 case 6 when f6 != null: f6(oneOf._value6); return;
                 case 7 when f7 != null: f7(oneOf._value7); return;
                 case 8 when f8 != null: f8(oneOf._value8); return;
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
-
         public static TResult Match<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> oneOf, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7, Func<T8, TResult> f8, Func<T9, TResult> f9)
         {
             switch (oneOf._index)
@@ -1117,7 +1109,7 @@ namespace Statecharts.NET.Utilities
                 case 7 when f7 != null: return f7(oneOf._value7);
                 case 8 when f8 != null: return f8(oneOf._value8);
                 case 9 when f9 != null: return f9(oneOf._value9);
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
         public static void Switch<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(this OneOfBase<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> oneOf, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7, System.Action<T8> f8, System.Action<T9> f9)
@@ -1134,9 +1126,8 @@ namespace Statecharts.NET.Utilities
                 case 7 when f7 != null: f7(oneOf._value7); return;
                 case 8 when f8 != null: f8(oneOf._value8); return;
                 case 9 when f9 != null: f9(oneOf._value9); return;
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
-
     }
 }

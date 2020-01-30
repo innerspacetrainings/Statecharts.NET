@@ -6,9 +6,9 @@ namespace Statecharts.NET.Utilities
         where T0 : TBase
         where T1 : TBase
     {
-        private readonly int _index;
-        private readonly T0 _value0;
-        private readonly T1 _value1;
+        internal readonly int _index;
+        internal readonly T0 _value0;
+        internal readonly T1 _value1;
 
         protected Union(int index, T0 value0 = default, T1 value1 = default)
         {
@@ -55,10 +55,10 @@ namespace Statecharts.NET.Utilities
         where T1 : TBase
         where T2 : TBase
     {
-        private readonly int _index;
-        private readonly T0 _value0;
-        private readonly T1 _value1;
-        private readonly T2 _value2;
+        internal readonly int _index;
+        internal readonly T0 _value0;
+        internal readonly T1 _value1;
+        internal readonly T2 _value2;
 
         protected Union(int index, T0 value0 = default, T1 value1 = default, T2 value2 = default)
         {
@@ -111,11 +111,11 @@ namespace Statecharts.NET.Utilities
         where T2 : TBase
         where T3 : TBase
     {
-        private readonly int _index;
-        private readonly T0 _value0;
-        private readonly T1 _value1;
-        private readonly T2 _value2;
-        private readonly T3 _value3;
+        internal readonly int _index;
+        internal readonly T0 _value0;
+        internal readonly T1 _value1;
+        internal readonly T2 _value2;
+        internal readonly T3 _value3;
 
         protected Union(int index, T0 value0 = default, T1 value1 = default, T2 value2 = default, T3 value3 = default)
         {
@@ -174,12 +174,12 @@ namespace Statecharts.NET.Utilities
         where T3 : TBase
         where T4 : TBase
     {
-        private readonly int _index;
-        private readonly T0 _value0;
-        private readonly T1 _value1;
-        private readonly T2 _value2;
-        private readonly T3 _value3;
-        private readonly T4 _value4;
+        internal readonly int _index;
+        internal readonly T0 _value0;
+        internal readonly T1 _value1;
+        internal readonly T2 _value2;
+        internal readonly T3 _value3;
+        internal readonly T4 _value4;
 
         protected Union(int index, T0 value0 = default, T1 value1 = default, T2 value2 = default, T3 value3 = default, T4 value4 = default)
         {
@@ -244,13 +244,13 @@ namespace Statecharts.NET.Utilities
         where T4 : TBase
         where T5 : TBase
     {
-        private readonly int _index;
-        private readonly T0 _value0;
-        private readonly T1 _value1;
-        private readonly T2 _value2;
-        private readonly T3 _value3;
-        private readonly T4 _value4;
-        private readonly T5 _value5;
+        internal readonly int _index;
+        internal readonly T0 _value0;
+        internal readonly T1 _value1;
+        internal readonly T2 _value2;
+        internal readonly T3 _value3;
+        internal readonly T4 _value4;
+        internal readonly T5 _value5;
 
         protected Union(int index, T0 value0 = default, T1 value1 = default, T2 value2 = default, T3 value3 = default, T4 value4 = default, T5 value5 = default)
         {
@@ -321,14 +321,14 @@ namespace Statecharts.NET.Utilities
         where T5 : TBase
         where T6 : TBase
     {
-        private readonly int _index;
-        private readonly T0 _value0;
-        private readonly T1 _value1;
-        private readonly T2 _value2;
-        private readonly T3 _value3;
-        private readonly T4 _value4;
-        private readonly T5 _value5;
-        private readonly T6 _value6;
+        internal readonly int _index;
+        internal readonly T0 _value0;
+        internal readonly T1 _value1;
+        internal readonly T2 _value2;
+        internal readonly T3 _value3;
+        internal readonly T4 _value4;
+        internal readonly T5 _value5;
+        internal readonly T6 _value6;
 
         protected Union(int index, T0 value0 = default, T1 value1 = default, T2 value2 = default, T3 value3 = default, T4 value4 = default, T5 value5 = default, T6 value6 = default)
         {
@@ -405,15 +405,15 @@ namespace Statecharts.NET.Utilities
         where T6 : TBase
         where T7 : TBase
     {
-        private readonly int _index;
-        private readonly T0 _value0;
-        private readonly T1 _value1;
-        private readonly T2 _value2;
-        private readonly T3 _value3;
-        private readonly T4 _value4;
-        private readonly T5 _value5;
-        private readonly T6 _value6;
-        private readonly T7 _value7;
+        internal readonly int _index;
+        internal readonly T0 _value0;
+        internal readonly T1 _value1;
+        internal readonly T2 _value2;
+        internal readonly T3 _value3;
+        internal readonly T4 _value4;
+        internal readonly T5 _value5;
+        internal readonly T6 _value6;
+        internal readonly T7 _value7;
 
         protected Union(int index, T0 value0 = default, T1 value1 = default, T2 value2 = default, T3 value3 = default, T4 value4 = default, T5 value5 = default, T6 value6 = default, T7 value7 = default)
         {
@@ -496,16 +496,16 @@ namespace Statecharts.NET.Utilities
         where T7 : TBase
         where T8 : TBase
     {
-        private readonly int _index;
-        private readonly T0 _value0;
-        private readonly T1 _value1;
-        private readonly T2 _value2;
-        private readonly T3 _value3;
-        private readonly T4 _value4;
-        private readonly T5 _value5;
-        private readonly T6 _value6;
-        private readonly T7 _value7;
-        private readonly T8 _value8;
+        internal readonly int _index;
+        internal readonly T0 _value0;
+        internal readonly T1 _value1;
+        internal readonly T2 _value2;
+        internal readonly T3 _value3;
+        internal readonly T4 _value4;
+        internal readonly T5 _value5;
+        internal readonly T6 _value6;
+        internal readonly T7 _value7;
+        internal readonly T8 _value8;
 
         protected Union(int index, T0 value0 = default, T1 value1 = default, T2 value2 = default, T3 value3 = default, T4 value4 = default, T5 value5 = default, T6 value6 = default, T7 value7 = default, T8 value8 = default)
         {
@@ -594,17 +594,17 @@ namespace Statecharts.NET.Utilities
         where T8 : TBase
         where T9 : TBase
     {
-        private readonly int _index;
-        private readonly T0 _value0;
-        private readonly T1 _value1;
-        private readonly T2 _value2;
-        private readonly T3 _value3;
-        private readonly T4 _value4;
-        private readonly T5 _value5;
-        private readonly T6 _value6;
-        private readonly T7 _value7;
-        private readonly T8 _value8;
-        private readonly T9 _value9;
+        internal readonly int _index;
+        internal readonly T0 _value0;
+        internal readonly T1 _value1;
+        internal readonly T2 _value2;
+        internal readonly T3 _value3;
+        internal readonly T4 _value4;
+        internal readonly T5 _value5;
+        internal readonly T6 _value6;
+        internal readonly T7 _value7;
+        internal readonly T8 _value8;
+        internal readonly T9 _value9;
 
         protected Union(int index, T0 value0 = default, T1 value1 = default, T2 value2 = default, T3 value3 = default, T4 value4 = default, T5 value5 = default, T6 value6 = default, T7 value7 = default, T8 value8 = default, T9 value9 = default)
         {
@@ -699,18 +699,18 @@ namespace Statecharts.NET.Utilities
         where T9 : TBase
         where T10 : TBase
     {
-        private readonly int _index;
-        private readonly T0 _value0;
-        private readonly T1 _value1;
-        private readonly T2 _value2;
-        private readonly T3 _value3;
-        private readonly T4 _value4;
-        private readonly T5 _value5;
-        private readonly T6 _value6;
-        private readonly T7 _value7;
-        private readonly T8 _value8;
-        private readonly T9 _value9;
-        private readonly T10 _value10;
+        internal readonly int _index;
+        internal readonly T0 _value0;
+        internal readonly T1 _value1;
+        internal readonly T2 _value2;
+        internal readonly T3 _value3;
+        internal readonly T4 _value4;
+        internal readonly T5 _value5;
+        internal readonly T6 _value6;
+        internal readonly T7 _value7;
+        internal readonly T8 _value8;
+        internal readonly T9 _value9;
+        internal readonly T10 _value10;
 
         protected Union(int index, T0 value0 = default, T1 value1 = default, T2 value2 = default, T3 value3 = default, T4 value4 = default, T5 value5 = default, T6 value6 = default, T7 value7 = default, T8 value8 = default, T9 value9 = default, T10 value10 = default)
         {
@@ -793,6 +793,409 @@ namespace Statecharts.NET.Utilities
                 case 8: return _value8;
                 case 9: return _value9;
                 case 10: return _value10;
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+    }
+
+    public static class UnionExtensions {
+        public static TResult Match<TBase, T0, T1, TResult>(this Union<TBase, T0, T1> union, Func<T0, TResult> f0, Func<T1, TResult> f1)
+            where T0 : TBase
+            where T1 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: return f0(union._value0);
+                case 1 when f1 != null: return f1(union._value1);
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static void Switch<TBase, T0, T1>(this Union<TBase, T0, T1> union, System.Action<T0> f0, System.Action<T1> f1)
+            where T0 : TBase
+            where T1 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: f0(union._value0); return;
+                case 1 when f1 != null: f1(union._value1); return;
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static TResult Match<TBase, T0, T1, T2, TResult>(this Union<TBase, T0, T1, T2> union, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: return f0(union._value0);
+                case 1 when f1 != null: return f1(union._value1);
+                case 2 when f2 != null: return f2(union._value2);
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static void Switch<TBase, T0, T1, T2>(this Union<TBase, T0, T1, T2> union, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: f0(union._value0); return;
+                case 1 when f1 != null: f1(union._value1); return;
+                case 2 when f2 != null: f2(union._value2); return;
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static TResult Match<TBase, T0, T1, T2, T3, TResult>(this Union<TBase, T0, T1, T2, T3> union, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: return f0(union._value0);
+                case 1 when f1 != null: return f1(union._value1);
+                case 2 when f2 != null: return f2(union._value2);
+                case 3 when f3 != null: return f3(union._value3);
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static void Switch<TBase, T0, T1, T2, T3>(this Union<TBase, T0, T1, T2, T3> union, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: f0(union._value0); return;
+                case 1 when f1 != null: f1(union._value1); return;
+                case 2 when f2 != null: f2(union._value2); return;
+                case 3 when f3 != null: f3(union._value3); return;
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static TResult Match<TBase, T0, T1, T2, T3, T4, TResult>(this Union<TBase, T0, T1, T2, T3, T4> union, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: return f0(union._value0);
+                case 1 when f1 != null: return f1(union._value1);
+                case 2 when f2 != null: return f2(union._value2);
+                case 3 when f3 != null: return f3(union._value3);
+                case 4 when f4 != null: return f4(union._value4);
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static void Switch<TBase, T0, T1, T2, T3, T4>(this Union<TBase, T0, T1, T2, T3, T4> union, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: f0(union._value0); return;
+                case 1 when f1 != null: f1(union._value1); return;
+                case 2 when f2 != null: f2(union._value2); return;
+                case 3 when f3 != null: f3(union._value3); return;
+                case 4 when f4 != null: f4(union._value4); return;
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static TResult Match<TBase, T0, T1, T2, T3, T4, T5, TResult>(this Union<TBase, T0, T1, T2, T3, T4, T5> union, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: return f0(union._value0);
+                case 1 when f1 != null: return f1(union._value1);
+                case 2 when f2 != null: return f2(union._value2);
+                case 3 when f3 != null: return f3(union._value3);
+                case 4 when f4 != null: return f4(union._value4);
+                case 5 when f5 != null: return f5(union._value5);
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static void Switch<TBase, T0, T1, T2, T3, T4, T5>(this Union<TBase, T0, T1, T2, T3, T4, T5> union, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: f0(union._value0); return;
+                case 1 when f1 != null: f1(union._value1); return;
+                case 2 when f2 != null: f2(union._value2); return;
+                case 3 when f3 != null: f3(union._value3); return;
+                case 4 when f4 != null: f4(union._value4); return;
+                case 5 when f5 != null: f5(union._value5); return;
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static TResult Match<TBase, T0, T1, T2, T3, T4, T5, T6, TResult>(this Union<TBase, T0, T1, T2, T3, T4, T5, T6> union, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+            where T6 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: return f0(union._value0);
+                case 1 when f1 != null: return f1(union._value1);
+                case 2 when f2 != null: return f2(union._value2);
+                case 3 when f3 != null: return f3(union._value3);
+                case 4 when f4 != null: return f4(union._value4);
+                case 5 when f5 != null: return f5(union._value5);
+                case 6 when f6 != null: return f6(union._value6);
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static void Switch<TBase, T0, T1, T2, T3, T4, T5, T6>(this Union<TBase, T0, T1, T2, T3, T4, T5, T6> union, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+            where T6 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: f0(union._value0); return;
+                case 1 when f1 != null: f1(union._value1); return;
+                case 2 when f2 != null: f2(union._value2); return;
+                case 3 when f3 != null: f3(union._value3); return;
+                case 4 when f4 != null: f4(union._value4); return;
+                case 5 when f5 != null: f5(union._value5); return;
+                case 6 when f6 != null: f6(union._value6); return;
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static TResult Match<TBase, T0, T1, T2, T3, T4, T5, T6, T7, TResult>(this Union<TBase, T0, T1, T2, T3, T4, T5, T6, T7> union, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+            where T6 : TBase
+            where T7 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: return f0(union._value0);
+                case 1 when f1 != null: return f1(union._value1);
+                case 2 when f2 != null: return f2(union._value2);
+                case 3 when f3 != null: return f3(union._value3);
+                case 4 when f4 != null: return f4(union._value4);
+                case 5 when f5 != null: return f5(union._value5);
+                case 6 when f6 != null: return f6(union._value6);
+                case 7 when f7 != null: return f7(union._value7);
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static void Switch<TBase, T0, T1, T2, T3, T4, T5, T6, T7>(this Union<TBase, T0, T1, T2, T3, T4, T5, T6, T7> union, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+            where T6 : TBase
+            where T7 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: f0(union._value0); return;
+                case 1 when f1 != null: f1(union._value1); return;
+                case 2 when f2 != null: f2(union._value2); return;
+                case 3 when f3 != null: f3(union._value3); return;
+                case 4 when f4 != null: f4(union._value4); return;
+                case 5 when f5 != null: f5(union._value5); return;
+                case 6 when f6 != null: f6(union._value6); return;
+                case 7 when f7 != null: f7(union._value7); return;
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static TResult Match<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8, TResult>(this Union<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8> union, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7, Func<T8, TResult> f8)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+            where T6 : TBase
+            where T7 : TBase
+            where T8 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: return f0(union._value0);
+                case 1 when f1 != null: return f1(union._value1);
+                case 2 when f2 != null: return f2(union._value2);
+                case 3 when f3 != null: return f3(union._value3);
+                case 4 when f4 != null: return f4(union._value4);
+                case 5 when f5 != null: return f5(union._value5);
+                case 6 when f6 != null: return f6(union._value6);
+                case 7 when f7 != null: return f7(union._value7);
+                case 8 when f8 != null: return f8(union._value8);
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static void Switch<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8>(this Union<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8> union, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7, System.Action<T8> f8)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+            where T6 : TBase
+            where T7 : TBase
+            where T8 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: f0(union._value0); return;
+                case 1 when f1 != null: f1(union._value1); return;
+                case 2 when f2 != null: f2(union._value2); return;
+                case 3 when f3 != null: f3(union._value3); return;
+                case 4 when f4 != null: f4(union._value4); return;
+                case 5 when f5 != null: f5(union._value5); return;
+                case 6 when f6 != null: f6(union._value6); return;
+                case 7 when f7 != null: f7(union._value7); return;
+                case 8 when f8 != null: f8(union._value8); return;
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static TResult Match<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(this Union<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> union, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7, Func<T8, TResult> f8, Func<T9, TResult> f9)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+            where T6 : TBase
+            where T7 : TBase
+            where T8 : TBase
+            where T9 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: return f0(union._value0);
+                case 1 when f1 != null: return f1(union._value1);
+                case 2 when f2 != null: return f2(union._value2);
+                case 3 when f3 != null: return f3(union._value3);
+                case 4 when f4 != null: return f4(union._value4);
+                case 5 when f5 != null: return f5(union._value5);
+                case 6 when f6 != null: return f6(union._value6);
+                case 7 when f7 != null: return f7(union._value7);
+                case 8 when f8 != null: return f8(union._value8);
+                case 9 when f9 != null: return f9(union._value9);
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static void Switch<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(this Union<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> union, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7, System.Action<T8> f8, System.Action<T9> f9)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+            where T6 : TBase
+            where T7 : TBase
+            where T8 : TBase
+            where T9 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: f0(union._value0); return;
+                case 1 when f1 != null: f1(union._value1); return;
+                case 2 when f2 != null: f2(union._value2); return;
+                case 3 when f3 != null: f3(union._value3); return;
+                case 4 when f4 != null: f4(union._value4); return;
+                case 5 when f5 != null: f5(union._value5); return;
+                case 6 when f6 != null: f6(union._value6); return;
+                case 7 when f7 != null: f7(union._value7); return;
+                case 8 when f8 != null: f8(union._value8); return;
+                case 9 when f9 != null: f9(union._value9); return;
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static TResult Match<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(this Union<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> union, Func<T0, TResult> f0, Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4, Func<T5, TResult> f5, Func<T6, TResult> f6, Func<T7, TResult> f7, Func<T8, TResult> f8, Func<T9, TResult> f9, Func<T10, TResult> f10)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+            where T6 : TBase
+            where T7 : TBase
+            where T8 : TBase
+            where T9 : TBase
+            where T10 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: return f0(union._value0);
+                case 1 when f1 != null: return f1(union._value1);
+                case 2 when f2 != null: return f2(union._value2);
+                case 3 when f3 != null: return f3(union._value3);
+                case 4 when f4 != null: return f4(union._value4);
+                case 5 when f5 != null: return f5(union._value5);
+                case 6 when f6 != null: return f6(union._value6);
+                case 7 when f7 != null: return f7(union._value7);
+                case 8 when f8 != null: return f8(union._value8);
+                case 9 when f9 != null: return f9(union._value9);
+                case 10 when f10 != null: return f10(union._value10);
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
+            }
+        }
+        public static void Switch<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this Union<TBase, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> union, System.Action<T0> f0, System.Action<T1> f1, System.Action<T2> f2, System.Action<T3> f3, System.Action<T4> f4, System.Action<T5> f5, System.Action<T6> f6, System.Action<T7> f7, System.Action<T8> f8, System.Action<T9> f9, System.Action<T10> f10)
+            where T0 : TBase
+            where T1 : TBase
+            where T2 : TBase
+            where T3 : TBase
+            where T4 : TBase
+            where T5 : TBase
+            where T6 : TBase
+            where T7 : TBase
+            where T8 : TBase
+            where T9 : TBase
+            where T10 : TBase
+        {
+            switch (union._index)
+            {
+                case 0 when f0 != null: f0(union._value0); return;
+                case 1 when f1 != null: f1(union._value1); return;
+                case 2 when f2 != null: f2(union._value2); return;
+                case 3 when f3 != null: f3(union._value3); return;
+                case 4 when f4 != null: f4(union._value4); return;
+                case 5 when f5 != null: f5(union._value5); return;
+                case 6 when f6 != null: f6(union._value6); return;
+                case 7 when f7 != null: f7(union._value7); return;
+                case 8 when f8 != null: f8(union._value8); return;
+                case 9 when f9 != null: f9(union._value9); return;
+                case 10 when f10 != null: f10(union._value10); return;
                 default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the Union codegen.");
             }
         }
