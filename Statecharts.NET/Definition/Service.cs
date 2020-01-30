@@ -21,6 +21,6 @@ namespace Statecharts.NET.Definition
     public abstract class TaskDataService : Service
     {
         public abstract Model.Task<object> Task { get; }
-        public abstract Option<OneOf<UnguardedTransition, UnguardedContextTransition, UnguardedContextTransition>> OnSuccessDefinition { get; }
+        public abstract Option<OneOf<UnguardedTransition, UnguardedContextTransition, UnguardedContextDataTransition>> OnSuccessDefinition { get; }
     }
 }
