@@ -114,9 +114,7 @@ namespace Statecharts.NET.XState
                 });
 
             // services
-            var services = definition.Match(
-                _ => Enumerable.Empty<ObjectValue>(),
-                MapServices).ToList();
+            var services = definition.Match(_ => Enumerable.Empty<ObjectValue>(), MapServices).ToList();
             if (services.Any()) properties.Add(("invoke", ArrayValue(services)));
 
             return properties;

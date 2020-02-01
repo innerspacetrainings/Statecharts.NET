@@ -9,10 +9,10 @@ namespace Statecharts.NET
 {
     public static class StateChartExtensions
     {
-        public static Service<TContext> Interpret<TContext>(
+        public static Machine<TContext> Interpret<TContext>(
             this ExecutableStatechart<TContext> statechart)
             where TContext : IEquatable<TContext>
-            => new Service<TContext> {StateChart = statechart}; // TODO: use ctor
+            => new Machine<TContext> {StateChart = statechart}; // TODO: use ctor
     }
 
     public static class ParsedStatechartFunctions

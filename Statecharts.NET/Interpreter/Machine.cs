@@ -9,9 +9,9 @@ namespace Statecharts.NET.Interpreter
 {
     // TODO: CurrentConfig/CurrentState
 
-    // TODO: roadmap: Union<TBase, T0, T1, T2, ...> | move Action to Definition and Unify | invoke Actions | invoke Services | unify Micro/Macrosteps
+    // TODO: roadmap: move Action to Definition and Unify | invoke Actions | invoke Services | rethink Events | unify Micro/Macrosteps
 
-    public class Service<TContext>
+    public class Machine<TContext>
         where TContext : IEquatable<TContext>
     {
         private Queue<Model.Event> internalEvents = new Queue<Model.Event>(); // TODO: https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp
