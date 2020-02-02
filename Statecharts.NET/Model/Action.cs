@@ -1,54 +1,54 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
 {
-    public interface IPureAction { }
-    public interface IMutatingAction { }
-
-    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction> { }
-    public abstract class ContextAction : OneOfBase<LogContextAction, AssignContextAction, SideEffectContextAction> { }
-    public abstract class ContextDataAction : OneOfBase<LogContextDataAction, AssignContextDataAction, SideEffectContextDataAction> { }
-
-    public class SendAction : Action, IPureAction { }
-
-    public class RaiseAction : Action, IPureAction { }
-
-    public class LogAction : Action, IPureAction
+    public static class ActionExtensionFunctions
     {
-        public string Label { get; }
-        public LogAction(string label) => Label = label;
+        internal static IEnumerable<Action> ToModelActions(this IEnumerable<Definition.Action> definitionActions)
+            => definitionActions.Select(Action.From);
+        internal static IEnumerable<Action> ToModelActions(this IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> definitionActions)
+            => definitionActions.Select(action => action.Match(Action.From, Action.From));
+        internal static IEnumerable<Action> ToModelActions(this IEnumerable<OneOf<Definition.Action, Definition.ContextAction, Definition.ContextDataAction>> definitionActions)
+            => definitionActions.Select(action => action.Match(Action.From, Action.From, Action.From));
     }
-    public class LogContextAction : ContextAction, IPureAction
+
+    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction>
     {
-        public Func<object, string> Message { get; }
-        public LogContextAction(Func<object, string> message) => Message = message;
+        public static Action From(Definition.Action action) =>
+            action.Match(
+                send => new SendAction() as Action,
+                raise => new RaiseAction(),
+                log => new LogAction((context, data) => log.Label));
+        public static Action From(Definition.ContextAction action) =>
+            action.Match(
+                log => new LogAction((context, data) => log.Message(context)) as Action, 
+                assign => new AssignAction((context, data) => assign.Mutation(context)), 
+                sideEffect => new SideEffectAction((context, data) => sideEffect.Function(context)));
+        public static Action From(Definition.ContextDataAction action) =>
+            action.Match(
+                log => new LogAction(log.Message) as Action,
+                assign => new AssignAction(assign.Mutation),
+                sideEffect => new SideEffectAction(sideEffect.Function));
     }
-    public class LogContextDataAction : ContextDataAction, IPureAction
+
+    public class SendAction : Action { }
+    public class RaiseAction : Action { }
+    public class LogAction : Action
     {
         public Func<object, object, string> Message { get; }
-        public LogContextDataAction(Func<object, object, string> message) => Message = message;
+        public LogAction(Func<object, object, string> message) => Message = message;
     }
-
-    public class AssignContextAction : ContextAction, IPureAction
-    {
-        public Action<object> Mutation { get; }
-        public AssignContextAction(Action<object> mutation) => Mutation = mutation;
-    }
-    public class AssignContextDataAction : ContextDataAction, IPureAction
+    public class AssignAction : Action
     {
         public Action<object, object> Mutation { get; }
-        public AssignContextDataAction(Action<object, object> mutation) => Mutation = mutation;
+        public AssignAction(Action<object, object> mutation) => Mutation = mutation;
     }
-
-    public class SideEffectContextAction : ContextAction, IMutatingAction
-    {
-        public Action<object> Function { get; }
-        public SideEffectContextAction(Action<object> function) => Function = function;
-    }
-    public class SideEffectContextDataAction : ContextDataAction, IMutatingAction
+    public class SideEffectAction : Action
     {
         public Action<object, object> Function { get; }
-        public SideEffectContextDataAction(Action<object, object> function) => Function = function;
+        public SideEffectAction(Action<object, object> function) => Function = function;
     }
 }

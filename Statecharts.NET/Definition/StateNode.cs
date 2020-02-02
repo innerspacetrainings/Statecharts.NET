@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Definition
@@ -29,20 +28,21 @@ namespace Statecharts.NET.Definition
             stateNode.Match(
                 final => Enumerable.Empty<Transition>(),
                 nonFinal => nonFinal.Transitions);
+
+        public static TResult Match<TResult>(this StateNode stateNode, Func<FinalStateNode, TResult> final, Func<NonFinalStateNode, TResult> nonFinal) =>
+            stateNode.Match(nonFinal, final, nonFinal, nonFinal);
     }
 
     public abstract class StateNode :
         OneOfBase<AtomicStateNode, FinalStateNode, CompoundStateNode, OrthogonalStateNode>
     {
         public abstract string Name { get; }
-        public abstract IEnumerable<OneOf<Model.Action, ContextAction>> EntryActions { get; }
-        public abstract IEnumerable<OneOf<Model.Action, ContextAction>> ExitActions { get; }
+        public abstract IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
+        public abstract IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
 
         public override string ToString() => $"{Name} ({GetType().Name.Replace("Definition.StateNode`1", string.Empty)})";
-
-        public TResult Match<TResult>(Func<FinalStateNode, TResult> final, Func<NonFinalStateNode, TResult> nonFinal) =>
-            this.Match(nonFinal, final, nonFinal, nonFinal);
     }
+
     public abstract class FinalStateNode : StateNode {}
     public abstract class NonFinalStateNode : StateNode
     {

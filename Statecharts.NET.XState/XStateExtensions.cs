@@ -63,10 +63,10 @@ namespace Statecharts.NET.XState
                         forbidden => (forbidden.Event.EventName, "undefined"),
                         unguarded => Unguarded(unguarded.Event, unguarded.Targets),
                         unguarded => Unguarded(unguarded.Event, unguarded.Targets),
-                        unguarded => Unguarded(new Model.CustomEvent("[THINK]"), unguarded.Targets),
+                        unguarded => Unguarded(new Model.NamedEvent("[THINK]"), unguarded.Targets),
                         guarded => Guarded(guarded.Event, guarded.Targets),
                         guarded => Guarded(guarded.Event, guarded.Targets),
-                        guarded => Guarded(new Model.CustomEvent("[THINK]"), guarded.Targets))).ToList();
+                        guarded => Guarded(new Model.NamedEvent("[THINK]"), guarded.Targets))).ToList();
             if(transitions.Any()) properties.Add(("on", ObjectValue(transitions)));
 
             JSProperty MapDoneTransition(OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition> transition) =>

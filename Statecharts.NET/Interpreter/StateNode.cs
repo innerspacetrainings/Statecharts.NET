@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Definition;
+using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
@@ -93,8 +94,8 @@ namespace Statecharts.NET.Interpreter
         internal int Depth { get; }
         public IEnumerable<Definition.Transition> Transitions { get; protected set; }
         public StateNode Parent { get; }
-        public IEnumerable<OneOf<Model.Action, Model.ContextAction>> EntryActions { get; }
-        public IEnumerable<OneOf<Model.Action, Model.ContextAction>> ExitActions { get; }
+        public IEnumerable<Model.Action> EntryActions { get; }
+        public IEnumerable<Model.Action> ExitActions { get; }
         public bool HasParent => Parent != null;
         public string Name => Key.Map(_ => null, named => named.StateName);
 
@@ -107,8 +108,9 @@ namespace Statecharts.NET.Interpreter
             Depth = Parent?.Depth + 1 ?? 0;
 
             Transitions = definition.GetTransitions();
-            EntryActions = definition.EntryActions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
-            ExitActions = definition.ExitActions ?? Enumerable.Empty<OneOf<Model.Action, Model.ContextAction>>();
+
+            EntryActions = definition.EntryActions != null ? definition.EntryActions.ToModelActions() : Enumerable.Empty<Model.Action>();
+            ExitActions = definition.ExitActions != null ? definition.ExitActions.ToModelActions() : Enumerable.Empty<Model.Action>();
         }
 
         public override string ToString() => $"{Id} ({GetType().Name.Replace("Interpreter.StateNode`1", string.Empty).Replace("StateNode", string.Empty).ToLowerInvariant()})";

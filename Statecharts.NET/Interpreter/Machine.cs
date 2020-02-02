@@ -31,7 +31,7 @@ namespace Statecharts.NET.Interpreter
             var steps = Execute();
             return new State<TContext>(stateConfiguration, context);
         }
-        public State<TContext> Send(Model.CustomEvent @event)
+        public State<TContext> Send(NamedEvent @event)
         {
             Console.WriteLine($"{Environment.NewLine}Enqueuing {@event.EventName}...");
             externalEvents.Enqueue(@event);
@@ -102,45 +102,21 @@ namespace Statecharts.NET.Interpreter
 
         // TODO: https://github.com/davidkpiano/xstate/issues/603
         // TODO: raised Events
-        private IEnumerable<Model.IEvent> ExecuteActionBlock(IEnumerable<OneOf<Model.Action, Model.ContextAction>> actions)
+        private IEnumerable<Model.IEvent> ExecuteActionBlock(IEnumerable<Model.Action> actions)
         {
+            var events = new List<Event>();
+
             foreach (var action in actions)
-            {
-                switch (action)
-                {
-                    // TODO: execute the Actions
-                    ////case LogAction logAction:
-                    ////    Debug.WriteLine(logAction.Label);
-                    ////    break;
-                    ////case SideEffectAction<TContext> sideEffectAction:
-                    ////    sideEffectAction.Function(context);
-                    ////    break;
-                    ////default:
-                    ////    Debug.WriteLine($"{action.GetType().Name} should be executed");
-                    ////    break;
-                }
-            }
+                action.Switch(
+                    // TODO: actually execute the Actions
+                    // TODO: where to get EventData from
+                    send => { }, 
+                    raise => { },
+                    log => { },
+                    assign => assign.Mutation(context, default),
+                    sideEffect => sideEffect.Function(context, default));
 
-            return Enumerable.Empty<Model.IEvent>(); // TODO: return actual raised events
-        }
-
-        private IEnumerable<IEvent> ExecuteActionBlock(IEnumerable<OneOf<Model.Action, Model.ContextAction, Model.ContextDataAction>> actions)
-        {
-            foreach (var action in actions)
-            {
-                switch (action)
-                {
-                    // TODO: execute the Actions
-                    ////case AssignEventAction<TContext, int> assignEventAction:
-                    ////    assignEventAction.Mutation(context, new Event("TODO, sheeeeesh"));
-                    ////    break;
-                    ////default:
-                    ////    Debug.WriteLine($"{action.GetType().Name} should be executed");
-                    ////    break;
-                }
-            }
-
-            return Enumerable.Empty<IEvent>(); // TODO: return actual raised events
+            return events; // TODO: return actual raised events
         }
 
         // like 'sismic.execute_once'

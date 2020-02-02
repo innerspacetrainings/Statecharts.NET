@@ -22,10 +22,10 @@ namespace Statecharts.NET.Language
     }
     public static class SideEffect
     {
-        public static SideEffectContextAction Define(System.Action effect) =>
-            new SideEffectContextAction(_ => effect());
-        public static SideEffectContextAction Define<T>(System.Action<T> effect) =>
-            new SideEffectContextAction(context => effect((T)context));
+        public static SideEffectAction<TContext> Define<TContext>(System.Action<TContext> effect) =>
+            new SideEffectAction<TContext>(effect);
+        public static SideEffectAction<TContext, TData> Define<TContext, TData>(System.Action<TContext, TData> effect) =>
+            new SideEffectAction<TContext, TData>(effect);
     }
     public static class Event
     {
@@ -75,22 +75,32 @@ namespace Statecharts.NET.Language
             => throw new NotImplementedException();
         public static LogAction Log()
             => throw new NotImplementedException();
-        public static AssignContextAction Assign<TContext>(System.Action<TContext> mutation)
-            => new AssignContextAction(context => mutation((TContext)context));
-        public static SideEffectContextAction Run<TContext>(System.Action<TContext> action)
-            => new SideEffectContextAction(context => action((TContext)context));
+        public static AssignAction<TContext> Assign<TContext>(System.Action<TContext> mutation)
+            => new AssignAction<TContext>(mutation);
+        public static SideEffectAction<TContext> Run<TContext>(System.Action<TContext> action)
+            => new SideEffectAction<TContext>(action);
     }
     public static class Helpers
     {
         public static Builders.StateNode.WithEntryActions WithEntryActions(
             this string name,
-            OneOf<Model.Action, ContextAction> action,
-            params OneOf<Model.Action, ContextAction>[] entryActions)
+            Language.Action action,
+            params Language.Action[] entryActions)
+            => new Builders.StateNode.WithName(name).WithEntryActions(action, entryActions);
+        public static Builders.StateNode.WithEntryActions WithEntryActions<TContext>(
+            this string name,
+            OneOf<Language.Action, Language.Action<TContext>> action,
+            params OneOf<Language.Action, Language.Action<TContext>>[] entryActions)
             => new Builders.StateNode.WithName(name).WithEntryActions(action, entryActions);
         public static Builders.StateNode.WithExitActions WithExitActions(
             this string name,
-            OneOf<Model.Action, ContextAction> action,
-            params OneOf<Model.Action, ContextAction>[] exitActions)
+            Language.Action action,
+            params Language.Action[] exitActions)
+            => new Builders.StateNode.WithName(name).WithExitActions(action, exitActions);
+        public static Builders.StateNode.WithExitActions WithExitActions<TContext>(
+            this string name,
+            OneOf<Language.Action, Language.Action<TContext>> action,
+            params OneOf<Language.Action, Language.Action<TContext>>[] exitActions)
             => new Builders.StateNode.WithName(name).WithExitActions(action, exitActions);
         public static Builders.StateNode.WithTransitions WithTransitions(
             this string name,

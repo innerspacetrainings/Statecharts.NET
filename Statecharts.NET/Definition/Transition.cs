@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
-using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET.Definition
 {
@@ -47,8 +45,8 @@ namespace Statecharts.NET.Definition
 
     public sealed class ForbiddenTransition : Transition
     {
-        public CustomEvent Event { get; }
-        public ForbiddenTransition(string eventName) => Event = new CustomEvent(eventName);
+        public NamedEvent Event { get; }
+        public ForbiddenTransition(string eventName) => Event = new NamedEvent(eventName);
     }
     public abstract class UnguardedTransition : Transition
     {
