@@ -31,7 +31,10 @@ namespace Statecharts.NET.Language
     }
     public static class Event
     {
-        // TODO: Event.Define("...")[.WithData<TEventData>()];
+        public static NamedEvent Define(string eventName) =>
+            new NamedEvent(eventName);
+        public static CustomDataEvent WithData<TEventData>(this NamedEvent @event) => // TODO: Event.Define("...")[.WithData<TEventData>()];
+            new CustomDataEvent(@event.EventName, default);
     }
 
     public static class Keywords
@@ -39,7 +42,7 @@ namespace Statecharts.NET.Language
         public static TaskService Chain(
             OneOf<Model.Task, Definition.TaskService> first,
             OneOf<Model.Task, Definition.TaskService> second,
-            params OneOf<Model.Task, Definition.TaskService>[] remaining) // TODO: add Model.Task + required first param
+            params OneOf<Model.Task, Definition.TaskService>[] remaining)
             => Service.DefineTask(async token =>
             {
                 foreach (var wrappedTask in first.Append(second).Append(remaining))
@@ -72,11 +75,15 @@ namespace Statecharts.NET.Language
                     .Concat(stateNodeNames.Select(name => new NamedStateNodeKey(name)))));
 
         public static SendAction Send()
-            => throw new NotImplementedException();
+            => new SendAction();
         public static RaiseAction Raise()
-            => throw new NotImplementedException();
-        public static LogAction Log()
-            => throw new NotImplementedException();
+            => new RaiseAction();
+        public static LogAction Log(string label)
+            => new LogAction(label);
+        public static LogAction<TContext> Log<TContext>(Func<TContext, string> message)
+            => new LogAction<TContext>(message);
+        public static LogAction<TContext, TData> Assign<TContext, TData>(Func<TContext, TData, string> message)
+            => new LogAction<TContext, TData>(message);
         public static AssignAction Assign(System.Action mutation)
             => new AssignAction(mutation);
         public static AssignAction<TContext> Assign<TContext>(System.Action<TContext> mutation)
