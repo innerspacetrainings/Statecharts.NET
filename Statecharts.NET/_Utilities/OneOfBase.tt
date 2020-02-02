@@ -39,6 +39,24 @@ namespace Statecharts.NET.Utilities
 
         <#= GenerateForArity(arity, $"public static implicit operator OneOfBase<{Generics(arity)}>(T{{0}} t) => new OneOfBase<{Generics(arity)}>({{0}}, value{{0}}: t);", $"{Environment.NewLine}        ") #>
 
+        public TResult Match<TResult>(<#= GenerateForArity(arity, "Func<T{0}, TResult> f{0}", ", ") #>)
+        {
+            switch (_index)
+            {
+                <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: return f{{0}}(_value{{0}});", $"{Environment.NewLine}                ") #>
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
+            }
+        }
+
+        public void Switch(<#= GenerateForArity(arity, "System.Action<T{0}> f{0}", ", ") #>)
+        {
+            switch (_index)
+            {
+                <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: f{{0}}(_value{{0}}); return;", $"{Environment.NewLine}                ") #>
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
+            }
+        }
+
         private bool Equals(OneOfBase<<#= Generics(arity) #>> other)
         {
             if (_index != other._index) return false;
@@ -75,25 +93,4 @@ namespace Statecharts.NET.Utilities
         }
     }
 <#}#>
-
-    public static class OneOfBaseExtensions {
-<#foreach(var arity in Enumerable.Range(minGenerics, maxGenerics)){#>
-        public static TResult Match<<#= Generics(arity) #>, TResult>(this OneOfBase<<#= Generics(arity) #>> oneOf, <#= GenerateForArity(arity, "Func<T{0}, TResult> f{0}", ", ") #>)
-        {
-            switch (oneOf._index)
-            {
-                <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: return f{{0}}(oneOf._value{{0}});", $"{Environment.NewLine}                ") #>
-                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
-            }
-        }
-        public static void Switch<<#= Generics(arity) #>>(this OneOfBase<<#= Generics(arity) #>> oneOf, <#= GenerateForArity(arity, "System.Action<T{0}> f{0}", ", ") #>)
-        {
-            switch (oneOf._index)
-            {
-                <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: f{{0}}(oneOf._value{{0}}); return;", $"{Environment.NewLine}                ") #>
-                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
-            }
-        }
-<#}#>
-    }
 }

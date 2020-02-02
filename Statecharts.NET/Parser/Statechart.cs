@@ -49,7 +49,7 @@ namespace Statecharts.NET
                 return orthogonal;
             }
 
-            return stateNodeDefinition.Match<Definition.AtomicStateNode, Definition.FinalStateNode, Definition.CompoundStateNode, Definition.OrthogonalStateNode, Interpreter.StateNode>(
+            return stateNodeDefinition.Match<Interpreter.StateNode>(
                 definition => new Interpreter.AtomicStateNode(parent, definition),
                 definition => new Interpreter.FinalStateNode(parent, definition),
                 CreateCompoundStateNode,
@@ -100,7 +100,7 @@ namespace Statecharts.NET
         {
             IEnumerable<Interpreter.Transition> GetTransitions(Interpreter.StateNode stateNode)
                 => stateNode.Transitions.Select(
-                    transition => transition.Match<Definition.ForbiddenTransition, Definition.UnguardedTransition, Definition.UnguardedContextTransition, Definition.UnguardedContextDataTransition, Definition.GuardedTransition, Definition.GuardedContextTransition, Definition.GuardedContextDataTransition, Interpreter.Transition>(
+                    transition => transition.Match<Interpreter.Transition>(
                         definition => new Interpreter.ForbiddenTransition(stateNode, definition.Event),
                         definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
                         definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),

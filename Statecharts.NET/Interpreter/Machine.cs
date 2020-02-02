@@ -165,7 +165,7 @@ namespace Statecharts.NET.Interpreter
                     var lastBeforeLCA = transition.Source.OneBeneath(lca);
                     var exited = lastBeforeLCA.Append(lastBeforeLCA.GetDescendants()).Where(stateConfiguration.Contains);
                     var entered = target.Append(target.AncestorsUntil(lca).Reverse());
-                    return transition.Match<ForbiddenTransition, UnguardedTransition, GuardedTransition, MicroStep>( // TODO: refactor the similarity
+                    return transition.Match<MicroStep>( // TODO: refactor the similarity
                         forbidden => null, // TODO: WTF, needs remodelling
                         unguarded => new EventStep<TContext>(@event, transition, entered.Ids(), exited.Ids()), 
                         guarded => new EventStep<TContext>(@event, transition, entered.Ids(), exited.Ids()));
