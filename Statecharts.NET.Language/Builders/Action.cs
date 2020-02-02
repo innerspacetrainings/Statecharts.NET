@@ -3,13 +3,15 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Language
 {
-    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction>
+    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction>
     {
         internal Definition.Action ToDefinitionAction() =>
             this.Match(
                 send => new Definition.SendAction() as Definition.Action, 
                 raise => new Definition.RaiseAction(),
-                log => new Definition.LogAction(log.Label));
+                log => new Definition.LogAction(log.Label),
+                assign => new Definition.AssignAction(assign.Mutation),
+                sideEffect => new Definition.SideEffectAction(sideEffect.Function));
     }
     public abstract class Action<TContext> : OneOfBase<LogAction<TContext>, AssignAction<TContext>, SideEffectAction<TContext>>
     {
@@ -41,6 +43,11 @@ namespace Statecharts.NET.Language
         public LogAction(Func<TContext, TData, string> message) => Message = message;
     }
 
+    public class AssignAction : Action
+    {
+        public System.Action Mutation { get; }
+        public AssignAction(System.Action mutation) => Mutation = mutation;
+    }
     public class AssignAction<TContext> : Action<TContext>
     {
         public System.Action<TContext> Mutation { get; }
@@ -52,6 +59,11 @@ namespace Statecharts.NET.Language
         public AssignAction(System.Action<TContext, TData> mutation) => Mutation = mutation;
     }
 
+    public class SideEffectAction : Action
+    {
+        public System.Action Function { get; }
+        public SideEffectAction(System.Action function) => Function = function;
+    }
     public class SideEffectAction<TContext> : Action<TContext>
     {
         public System.Action<TContext> Function { get; }

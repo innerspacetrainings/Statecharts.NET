@@ -43,7 +43,9 @@ namespace Statecharts.NET.Demo
                                         On("NO").TransitionTo.Sibling("nana")),
                                 "nana".WithTransitions(On("SERIOUSLY").TransitionTo.Absolute("fetch", "failure"))),
                         "loading"
-                            .WithEntryActions<FetchContext>(Run<FetchContext>(context => Console.WriteLine($"Entered loading state with context: {context}")))
+                            .WithEntryActions<FetchContext>(
+                                Run<FetchContext>(context => Console.WriteLine($"Entered loading state with context: {context}")),
+                                Run(() => Console.WriteLine("parameterless Actions also compile *party*")))
                             .WithTransitions(
                                 Immediately.If<FetchContext>(context => context.Retries >= 3).TransitionTo.Sibling("sheeeesh"),
                                 On("RESOLVE").TransitionTo.Sibling("success"),

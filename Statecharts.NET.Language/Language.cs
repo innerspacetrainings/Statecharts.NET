@@ -22,6 +22,8 @@ namespace Statecharts.NET.Language
     }
     public static class SideEffect
     {
+        public static SideEffectAction Define(System.Action effect) =>
+            new SideEffectAction(effect);
         public static SideEffectAction<TContext> Define<TContext>(System.Action<TContext> effect) =>
             new SideEffectAction<TContext>(effect);
         public static SideEffectAction<TContext, TData> Define<TContext, TData>(System.Action<TContext, TData> effect) =>
@@ -75,10 +77,18 @@ namespace Statecharts.NET.Language
             => throw new NotImplementedException();
         public static LogAction Log()
             => throw new NotImplementedException();
+        public static AssignAction Assign(System.Action mutation)
+            => new AssignAction(mutation);
         public static AssignAction<TContext> Assign<TContext>(System.Action<TContext> mutation)
             => new AssignAction<TContext>(mutation);
+        public static AssignAction<TContext, TData> Assign<TContext, TData>(System.Action<TContext, TData> mutation)
+            => new AssignAction<TContext, TData>(mutation);
+        public static SideEffectAction Run(System.Action action)
+            => new SideEffectAction(action);
         public static SideEffectAction<TContext> Run<TContext>(System.Action<TContext> action)
             => new SideEffectAction<TContext>(action);
+        public static SideEffectAction<TContext, TData> Run<TContext, TData>(System.Action<TContext, TData> action)
+            => new SideEffectAction<TContext, TData>(action);
     }
     public static class Helpers
     {

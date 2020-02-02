@@ -21,7 +21,9 @@ namespace Statecharts.NET.Model
             action.Match(
                 send => new SendAction() as Action,
                 raise => new RaiseAction(),
-                log => new LogAction((context, data) => log.Label));
+                log => new LogAction((context, data) => log.Label),
+                assign => new AssignAction((context, data) => assign.Mutation()),
+                sideEffect => new SideEffectAction((context, data) => sideEffect.Function()));
         public static Action From(Definition.ContextAction action) =>
             action.Match(
                 log => new LogAction((context, data) => log.Message(context)) as Action, 

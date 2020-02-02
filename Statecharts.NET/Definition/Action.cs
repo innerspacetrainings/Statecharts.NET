@@ -6,7 +6,7 @@ namespace Statecharts.NET.Definition
     public interface IPureAction { } // TODO: probably remove those unused interfaces
     public interface IMutatingAction { }
 
-    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction> { }
+    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction> { }
     public abstract class ContextAction : OneOfBase<LogContextAction, AssignContextAction, SideEffectContextAction> { }
     public abstract class ContextDataAction : OneOfBase<LogContextDataAction, AssignContextDataAction, SideEffectContextDataAction> { }
 
@@ -30,6 +30,11 @@ namespace Statecharts.NET.Definition
         public LogContextDataAction(Func<object, object, string> message) => Message = message;
     }
 
+    public class AssignAction : Action, IPureAction
+    {
+        public System.Action Mutation { get; }
+        public AssignAction(System.Action mutation) => Mutation = mutation;
+    }
     public class AssignContextAction : ContextAction, IPureAction
     {
         public Action<object> Mutation { get; }
@@ -41,6 +46,11 @@ namespace Statecharts.NET.Definition
         public AssignContextDataAction(Action<object, object> mutation) => Mutation = mutation;
     }
 
+    public class SideEffectAction : Action, IMutatingAction
+    {
+        public System.Action Function { get; }
+        public SideEffectAction(System.Action function) => Function = function;
+    }
     public class SideEffectContextAction : ContextAction, IMutatingAction
     {
         public Action<object> Function { get; }
