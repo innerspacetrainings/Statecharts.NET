@@ -9,7 +9,7 @@ namespace Statecharts.NET.Interpreter
 {
     // TODO: CurrentConfig/CurrentState
 
-    // TODO: roadmap: move Action to Definition and Unify | invoke Actions | invoke Services | rethink Events | unify Micro/Macrosteps
+    // TODO: roadmap: invoke Services | rethink Events | unify Micro/Macrosteps
 
     public class Machine<TContext>
         where TContext : IEquatable<TContext>
@@ -92,7 +92,7 @@ namespace Statecharts.NET.Interpreter
                 stateConfiguration = stateConfiguration.Without(exitedStatesKeys).With(enteredStatesKeys);
             }
 
-            microStep.Match<TContext>(
+            microStep.Switch(
                 ApplyInitialStep,
                 ApplyStabilizationStep,
                 immediate => ApplyStep(immediate.EnteredStatesIds.ToList(), immediate.ExitedStatesIds.ToList(), immediate.Transition),
@@ -167,8 +167,8 @@ namespace Statecharts.NET.Interpreter
                     var entered = target.Append(target.AncestorsUntil(lca).Reverse());
                     return transition.Match<MicroStep>( // TODO: refactor the similarity
                         forbidden => null, // TODO: WTF, needs remodelling
-                        unguarded => new EventStep<TContext>(@event, transition, entered.Ids(), exited.Ids()), 
-                        guarded => new EventStep<TContext>(@event, transition, entered.Ids(), exited.Ids()));
+                        unguarded => new EventStep(@event, transition, entered.Ids(), exited.Ids()), 
+                        guarded => new EventStep(@event, transition, entered.Ids(), exited.Ids()));
                 }));
 
         // TODO: don't take all transitions (https://gitlab.com/scion-scxml/test-framework/blob/master/test/documentOrder/documentOrder0.scxml)
@@ -202,58 +202,8 @@ namespace Statecharts.NET.Interpreter
 
         public IEnumerable<MicroStep> MicroSteps { get; }
     }
-
-    internal static class MicroStepFunctions
-    {
-        internal static TResult Map<TContext, TResult>(
-            this MicroStep microStep,
-            Func<InitializationStep, TResult> fInitial,
-            Func<StabilizationStep, TResult> fStabilization,
-            Func<ImmediateStep<TContext>, TResult> fImmediate,
-            Func<EventStep<TContext>, TResult> fEvent)
-            where TContext : IEquatable<TContext>
-        {
-            switch (microStep)
-            {
-                case InitializationStep initial:
-                    return fInitial(initial);
-                case StabilizationStep stabilization:
-                    return fStabilization(stabilization);
-                case ImmediateStep<TContext> immediate:
-                    return fImmediate(immediate);
-                case EventStep<TContext> @event:
-                    return fEvent(@event);
-                default: throw new Exception("NON EXHAUSTIVE SWITCH");
-            }
-        }
-        internal static void Match<TContext>(
-            this MicroStep microStep,
-            Action<InitializationStep> fInitial,
-            Action<StabilizationStep> fStabilization,
-            Action<ImmediateStep<TContext>> fImmediate,
-            Action<EventStep<TContext>> fEvent)
-            where TContext : IEquatable<TContext>
-        {
-            switch (microStep)
-            {
-                case InitializationStep initial:
-                    fInitial(initial);
-                    break;
-                case StabilizationStep stabilization:
-                    fStabilization(stabilization);
-                    break;
-                case ImmediateStep<TContext> immediate:
-                    fImmediate(immediate);
-                    break;
-                case EventStep<TContext> @event:
-                    fEvent(@event);
-                    break;
-                default: throw new Exception("NON EXHAUSTIVE SWITCH");
-            }
-        }
-    }
-
-    internal abstract class MicroStep { }
+    
+    internal abstract class MicroStep : OneOfBase<InitializationStep, StabilizationStep, ImmediateStep, EventStep> { }
     internal class InitializationStep : MicroStep
     {
         public StateNodeId RootStateId => new StateNodeId(new RootStateNodeKey(string.Empty)); // TODO: fix this
@@ -267,8 +217,7 @@ namespace Statecharts.NET.Interpreter
             EnteredStatesIds = enteredStatesIds ?? throw new ArgumentNullException(nameof(enteredStatesIds));
         }
     }
-    internal class ImmediateStep<TContext> : MicroStep
-        where TContext : IEquatable<TContext>
+    internal class ImmediateStep : MicroStep
     {
         public UnguardedTransition Transition { get; }
         public IEnumerable<StateNodeId> EnteredStatesIds { get; }
@@ -284,8 +233,7 @@ namespace Statecharts.NET.Interpreter
             ExitedStatesIds = exitedStatesIds ?? throw new ArgumentNullException(nameof(exitedStatesIds));
         }
     }
-    internal class EventStep<TContext> : MicroStep
-        where TContext : IEquatable<TContext>
+    internal class EventStep : MicroStep
     {
         public Model.Event Event { get; }
         public Transition Transition { get; }
