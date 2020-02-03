@@ -45,7 +45,10 @@ namespace Statecharts.NET.Demo
                         "loading"
                             .WithEntryActions<FetchContext>(
                                 Run<FetchContext>(context => Console.WriteLine($"Entered loading state with context: {context}")),
-                                Run(() => Console.WriteLine("parameterless Actions also compile *party*")))
+                                Run(() => Console.WriteLine("parameterless Actions also compile *party*")),
+                                Raise("raise"),
+                                Send("send"),
+                                Log<FetchContext>(context => $"Entered loading state with context: {context}"))
                             .WithTransitions(
                                 Immediately.If<FetchContext>(context => context.Retries >= 3).TransitionTo.Sibling("sheeeesh"),
                                 On("RESOLVE").TransitionTo.Sibling("success"),
@@ -69,12 +72,12 @@ namespace Statecharts.NET.Demo
                 case ExecutableStatechart<FetchContext> statechart:
                     var service = statechart.Interpret();
                     var state = service.Start();
-                    Log(state);
+                    LogState(state);
                     while (true)
                     {
                         var eventType = Console.ReadLine();
                         state = service.Send(new NamedEvent(eventType?.ToUpper()));
-                        Log(state);
+                        LogState(state);
                     }
                 default:
                     Console.WriteLine("NOT EXECUTABLE");
@@ -83,7 +86,7 @@ namespace Statecharts.NET.Demo
 
         }
 
-        private static void Log(State<FetchContext> state)
+        private static void LogState(State<FetchContext> state)
         {
             Console.WriteLine("StateConfig:");
             Console.WriteLine(string.Join(Environment.NewLine, state.StateConfiguration.StateNodeIds.Select(text => $"  {text}")));

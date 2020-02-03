@@ -74,10 +74,10 @@ namespace Statecharts.NET.Language
                     .Append(new NamedStateNodeKey(stateNodeName))
                     .Concat(stateNodeNames.Select(name => new NamedStateNodeKey(name)))));
 
-        public static SendAction Send()
-            => new SendAction();
-        public static RaiseAction Raise()
-            => new RaiseAction();
+        public static SendAction Send(string eventName)
+            => new SendAction(eventName);
+        public static RaiseAction Raise(string eventName)
+            => new RaiseAction(eventName);
         public static LogAction Log(string label)
             => new LogAction(label);
         public static LogAction<TContext> Log<TContext>(Func<TContext, string> message)

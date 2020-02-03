@@ -6,9 +6,9 @@ namespace Statecharts.NET.Language
     public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction>
     {
         internal Definition.Action ToDefinitionAction() =>
-            this.Match(
-                send => new Definition.SendAction() as Definition.Action, 
-                raise => new Definition.RaiseAction(),
+            Match(
+                send => new Definition.SendAction(send.EventName) as Definition.Action, 
+                raise => new Definition.RaiseAction(raise.EventName),
                 log => new Definition.LogAction(log.Label),
                 assign => new Definition.AssignAction(assign.Mutation),
                 sideEffect => new Definition.SideEffectAction(sideEffect.Function));
@@ -23,9 +23,15 @@ namespace Statecharts.NET.Language
     }
     public abstract class Action<TContext, TData> : OneOfBase<LogAction<TContext, TData>, AssignAction<TContext, TData>, SideEffectAction<TContext, TData>> { }
 
-    public class SendAction : Action { }
+    public class SendAction : Action {
+        public string EventName { get; }
+        public SendAction(string eventName) => EventName = eventName;
+    }
 
-    public class RaiseAction : Action { }
+    public class RaiseAction : Action {
+        public string EventName { get; }
+        public RaiseAction(string eventName) => EventName = eventName;
+    }
 
     public class LogAction : Action
     {

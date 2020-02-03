@@ -10,9 +10,15 @@ namespace Statecharts.NET.Definition
     public abstract class ContextAction : OneOfBase<LogContextAction, AssignContextAction, SideEffectContextAction> { }
     public abstract class ContextDataAction : OneOfBase<LogContextDataAction, AssignContextDataAction, SideEffectContextDataAction> { }
 
-    public class SendAction : Action, IPureAction { }
+    public class SendAction : Action, IPureAction {
+        public string EventName { get; }
+        public SendAction(string eventName) => EventName = eventName;
+    }
 
-    public class RaiseAction : Action, IPureAction { }
+    public class RaiseAction : Action, IPureAction {
+        public string EventName { get; }
+        public RaiseAction(string eventName) => EventName = eventName;
+    }
 
     public class LogAction : Action, IPureAction
     {
