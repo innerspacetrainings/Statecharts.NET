@@ -4,7 +4,8 @@ using System.Linq;
 using System.Xml.Linq;
 using Jint;
 using Jint.Native;
-using Statecharts.NET.Definition;
+using Statecharts.NET.Tests.Definition;
+using Statecharts.NET.Tests.SCION.SCXML.Definition;
 
 namespace Statecharts.NET.Tests.SCION.SCXML
 {
@@ -26,82 +27,71 @@ namespace Statecharts.NET.Tests.SCION.SCXML
 
     static class SCXMLEcmascript
     {
-        internal static Statechart<EcmaScriptContext> TestXML(string scxmlDefinition)
-        {
-            var definition = XElement.Parse(scxmlDefinition);
-            XName NSd(string name) => definition.GetDefaultNamespace() + name;
-            var engine = new Engine();
-
-            var datamodel = definition.Element(NSd("datamodel"));
-            var context = datamodel != null ? GetInitialContext(datamodel, engine, NSd) : null;
-            return new Statechart<EcmaScriptContext>(context, GetRootStateNodeDefinition(definition, engine, NSd));
-        }
-
-        private static StateNode GetRootStateNodeDefinition(
-            XElement definition,
-            Engine engine,
-            Func<string, XName> NSd)
-        {
-            var parallel = definition.Elements().FirstOrDefault(element => element.Name == NSd("parallel"));
-            var topStates = definition.Elements().Where(element => element.Name == NSd("state") || element.Name == NSd("parallel"));
-            var root = new XElement("state", new object[] { new XAttribute("id", "root")}.Concat(topStates));
-
-            return parallel == null
-                ? GetStateNodeDefinition(root, engine, NSd)
-                : GetStateNodeDefinition(parallel, engine, NSd);
-        }
-
-        private static StateNode GetStateNodeDefinition(XElement definition, Engine engine, Func<string, XName> NSd)
-        {
-            ////var events = definition.Elements(NSd("transition")).Select(e => new EventDefinition<Statecharts.NET.Event>()
-            ////{
-            ////    Event = new NET.Event(e.Attribute("event")?.Value),
-            ////    Transitions = new[]
-            ////    {
-            ////        new UnguardedEventTransitionDefinition()
-            ////        {
-            ////            Targets = new[]
-            ////            {
-            ////                new SiblingTargetDefinition()
-            ////                {
-            ////                    Key = new NamedStateNodeKey(e.Attribute("target")?.Value)
-            ////                }
-            ////            }
-            ////        }
-            ////    }
-            ////});
-            switch (definition)
+        private static Dictionary<string, Func<object>> elementConstructors =
+            new Dictionary<string, Func<object>>
             {
-                ////case { } when definition.Name == NSd("scxml"):
-                ////    return new ICompoundStateNodeDefinition()
-                ////    {
-                ////        Name = definition.Attribute("name")?.Value ?? "root",
-                ////        InitialTransition = new InitialTransitionDefinition()
-                ////        {
-                ////            Target = new ChildTargetDefinition()
-                ////            {
-                ////                Key = new NamedStateNodeKey(definition.Attribute("initial")?.Value ?? definition.Substates(NSd).FirstOrDefault()?.Attribute("id")?.Value)
-                ////            }
-                ////        },
-                ////        States = definition.Substates(NSd).Select(element => GetStateNodeDefinition(element, engine, NSd)),
-                ////        Events = events
-                ////    };
-                ////case { } when definition.Name == NSd("state") && definition.Substates(NSd).Any():
-                ////    return new ICompoundStateNodeDefinition()
-                ////    {
-                ////        Name = definition.Attribute("id")?.Value ?? "FUCK",
-                ////        Events = events
-                ////    };
-                case { } when definition.Name == NSd("state") && !definition.Substates(NSd).Any():
-                    return new Tests.Definition.AtomicStateNode
-                        (definition.Attribute("id")?.Value ?? "FUCK", transitions: null /* TODO: transitions */);
-                ////case { } when definition.Name == NSd("parallel"):
-                ////    return new IOrthogonalStateNodeDefinition();
-                ////case { } when definition.Name == NSd("final"):
-                ////    return new IFinalStateNodeDefinition();
-                default:
-                    return null; // TODO: error handling
+                { "scxml", ConstructStatechart },
+                { "datamodel", ConstructContext },
+                { "state", ConstructAtomicState }
+            };
+        private static Dictionary<(Type, string), Action<object, string>> attributeSetters =
+            new Dictionary<(Type, string), Action<object, string>>
+            {
+                { (typeof(Statechart), "xmlns"), IntentionallyIgnore },
+                { (typeof(Statechart), "version"), IntentionallyIgnore },
+                { (typeof(Statechart), "datamodel"), IntentionallyIgnore },
+                { (typeof(Statechart), "initial"), EraseType<Statechart>(SetStatechartInitialAttribute) },
+                { (typeof(AtomicStateNode), "id"), EraseType<AtomicStateNode>(SetStateNodeName) }
+    };
+        private static Dictionary<(Type, Type), Action<object, object>> elementSetters =
+            new Dictionary<(Type, Type), Action<object, object>>
+            {
+                { (typeof(Statechart), typeof(EcmaScriptContext)), EraseTypes<Statechart, EcmaScriptContext>(SetStatechartInitialContext) },
+                { (typeof(Statechart), typeof(AtomicStateNode)), EraseTypes<Statechart, AtomicStateNode>(AddStateNode) } // TODO: switch to StateNode
+            };
+
+        private static void SetStatechartInitialContext(Statechart statechart, EcmaScriptContext initialContext)
+        { }
+        //=> statechart.InitialContext = initialContext;
+
+        private static void AddStateNode(Statechart statechart, AtomicStateNode initialContext)
+        { }
+
+
+        private static object ConstructStatechart() => new Statechart();
+        private static object ConstructContext() => new EcmaScriptContext {Engine = new Engine()};
+        private static object ConstructAtomicState() => new AtomicStateNode();
+
+        private static Action<object, string> EraseType<T>(Action<T, string> setter)
+            => (@object, value) => setter((T) @object, value);
+        private static Action<object, object> EraseTypes<T1, T2>(Action<T1, T2> setter)
+            => (object1, object2) => setter((T1)object1, (T2)object2);
+        private static void IntentionallyIgnore(object o, string value) { }
+
+        private static void SetStatechartInitialAttribute(Statechart statechart,
+            string initialStateNode)
+        { }
+            //=> ((CompoundStateNode) statechart.RootStateNode).InitialTransition = new InitialTransition(new ChildTarget(initialStateNode));
+
+        private static void SetStateNodeName(AtomicStateNode stateNode, string name) =>
+            stateNode.SetName(name);
+
+        internal static Statecharts.NET.Definition.Statechart<EcmaScriptContext> ParseStatechart(string scxmlDefinition)
+        {
+            ////XName NSd(string name) => definition.GetDefaultNamespace() + name; TODO: use this
+            static object RecurseElement(object parent, XElement xElement)
+            {
+                var element = elementConstructors[xElement.Name.LocalName]();
+                foreach (var attribute in xElement.Attributes())
+                    attributeSetters[(element.GetType(), attribute.Name.LocalName)](element, attribute.Value);
+                foreach(var children in xElement.Elements())
+                    RecurseElement(element, children);
+                if(parent != null) elementSetters[(parent.GetType(), element.GetType())](parent, element);
+                return element;
             }
+
+            var statechart = RecurseElement(null, XElement.Parse(scxmlDefinition)) as Statechart;
+            return new Statecharts.NET.Definition.Statechart<EcmaScriptContext>(new EcmaScriptContext(), new Tests.Definition.AtomicStateNode());
         }
 
         private static EcmaScriptContext GetInitialContext(XElement datamodel, Engine engine, Func<string, XName> NSd)

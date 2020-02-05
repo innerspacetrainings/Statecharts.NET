@@ -35,7 +35,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML
         private static void TestStatechart(Test test)
         {
             var scxmlDefinition = File.ReadAllText(test.Path);
-            var definition = SCXMLEcmascript.TestXML(scxmlDefinition);
+            var definition = SCXMLEcmascript.ParseStatechart(scxmlDefinition);
             var parsed = definition.Parse();
 
             Assert.IsType<ExecutableStatechart<EcmaScriptContext>>(parsed);
