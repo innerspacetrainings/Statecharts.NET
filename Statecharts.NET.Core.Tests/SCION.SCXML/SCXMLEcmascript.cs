@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 using Jint;
 using Jint.Native;
 using Statecharts.NET.Definition;
 
-namespace Statecharts.NET.SCION.SCXML.Tests
+namespace Statecharts.NET.Tests.SCION.SCXML
 {
     internal class EcmaScriptContext : IEquatable<EcmaScriptContext>
     {
         public Engine Engine { get; set; }
 
-        public bool Equals(EcmaScriptContext other) => other != null && Engine == other.Engine; // TODO: not optimal
+        public bool Equals(EcmaScriptContext other) => other != null && Engine.Global.GetOwnProperties().Equals(other.Engine.Global.GetOwnProperties()); // TODO: validate that this works
 
         public override string ToString()
             => $"EcmaScriptContext: (Retries = TODO)"; // TODO: serialize the stuff
@@ -35,7 +34,7 @@ namespace Statecharts.NET.SCION.SCXML.Tests
 
             var datamodel = definition.Element(NSd("datamodel"));
             var context = datamodel != null ? GetInitialContext(datamodel, engine, NSd) : null;
-            return Language.Statechart.WithInitialContext(context).WithRootState(GetStateNodeDefinition(definition));
+            return new Statechart<EcmaScriptContext>(context, GetRootStateNodeDefinition(definition, engine, NSd));
         }
 
         private static StateNode GetRootStateNodeDefinition(
@@ -52,7 +51,7 @@ namespace Statecharts.NET.SCION.SCXML.Tests
                 : GetStateNodeDefinition(parallel, engine, NSd);
         }
 
-        private static IBaseStateNodeDefinition GetStateNodeDefinition(XElement definition, Engine engine, Func<string, XName> NSd)
+        private static StateNode GetStateNodeDefinition(XElement definition, Engine engine, Func<string, XName> NSd)
         {
             ////var events = definition.Elements(NSd("transition")).Select(e => new EventDefinition<Statecharts.NET.Event>()
             ////{
@@ -93,12 +92,9 @@ namespace Statecharts.NET.SCION.SCXML.Tests
                 ////        Name = definition.Attribute("id")?.Value ?? "FUCK",
                 ////        Events = events
                 ////    };
-                ////case { } when definition.Name == NSd("state") && !definition.Substates(NSd).Any():
-                ////    return new IAtomicStateNodeDefinition()
-                ////    {
-                ////        Name = definition.Attribute("id")?.Value ?? "FUCK",
-                ////        Events = events
-                ////    };
+                case { } when definition.Name == NSd("state") && !definition.Substates(NSd).Any():
+                    return new Tests.Definition.AtomicStateNode
+                        (definition.Attribute("id")?.Value ?? "FUCK", transitions: null /* TODO: transitions */);
                 ////case { } when definition.Name == NSd("parallel"):
                 ////    return new IOrthogonalStateNodeDefinition();
                 ////case { } when definition.Name == NSd("final"):
