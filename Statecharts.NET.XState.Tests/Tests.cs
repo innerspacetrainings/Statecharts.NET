@@ -20,7 +20,7 @@ namespace Statecharts.NET.XState.Tests
         private static void TestSerialization<TContext>(Definition.Statechart<TContext> statechart)
             where TContext : IEquatable<TContext>, IXStateSerializable
         {
-            var schema = JSchema.Parse(File.ReadAllText(Path.GetRelativePath(Directory.GetCurrentDirectory(), $"XState/machine.schema.json")));
+            var schema = JSchema.Parse(File.ReadAllText(Path.GetRelativePath(Directory.GetCurrentDirectory(), $"machine.schema.json")));
             var definition = JObject.Parse(statechart.AsXStateVisualizerV5Definition());
 
             Assert.True(definition.IsValid(schema));

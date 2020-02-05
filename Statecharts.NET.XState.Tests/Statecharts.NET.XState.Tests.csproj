@@ -19,4 +19,10 @@
     <ProjectReference Include="..\Statecharts.NET.XState\Statecharts.NET.XState.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="machine.schema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
