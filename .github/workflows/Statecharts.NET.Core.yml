@@ -3,7 +3,7 @@ name: Statecharts.NET.Core
 on: [push]
 
 jobs:
-  test:
+  "Test":
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -14,7 +14,7 @@ jobs:
     - name: Test
       run: dotnet test Statecharts.NET.Core.Tests
       
-  build:
+  "Release Build":
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
