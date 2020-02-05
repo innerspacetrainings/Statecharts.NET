@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Statecharts.NET.SCION.SCXML.Tests;
 
 namespace Statecharts.NET.Tests.SCION.SCXML
 {
