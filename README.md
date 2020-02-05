@@ -6,12 +6,12 @@
 - [x] Create an Interpreter
 - [x] Set up [scion-scxml/test-framework](https://gitlab.com/scion-scxml/test-framework)
 - [x] Set up easier Testing using xUnit (using Theories)
-- [ ] Clean up the File/Project Hierarchy
-- [ ] Add xstate-like "Invoked Services"
-- [ ] Create the DSL
-- [ ] Build Unity-Integration
+- [x] Clean up the File/Project Hierarchy
+- [x] Add xstate-like "Invoked Services"
+- [x] Create the DSL
+- [x] Build Unity-Integration
 - ...
-- [ ] Fix the xstate Serialization
+- [x] Fix the xstate Serialization
 - [ ] Finish SCXML EcmaScript Parser
 - [ ] Fix the Algorithm
 - ...
