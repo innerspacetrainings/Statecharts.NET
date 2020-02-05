@@ -3,7 +3,7 @@ using Statecharts.NET.XState;
 using static Statecharts.NET.XState.JPropertyConstructorFunctions;
 
 
-namespace Statecharts.NET.Tests.XState
+namespace Statecharts.NET.XState.Tests
 {
     class DemoContext : IEquatable<DemoContext>, IXStateSerializable
     {

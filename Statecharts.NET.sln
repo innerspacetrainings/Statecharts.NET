@@ -9,15 +9,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Research.md = Research.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET", "Statecharts.NET\Statecharts.NET.csproj", "{2AB196F4-E2B9-424E-A957-A4C5600E384B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Core", "Statecharts.NET.Core\Statecharts.NET.Core.csproj", "{2AB196F4-E2B9-424E-A957-A4C5600E384B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Demo", "Statecharts.NET.Demo\Statecharts.NET.Demo.csproj", "{2AF48A52-944B-4B09-89F5-0BB400603B23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Core.Tests", "Statecharts.NET.Core.Tests\Statecharts.NET.Core.Tests.csproj", "{C710E619-E730-483A-B6D4-F66853711A22}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Demos", "Statecharts.NET.Demo\Statecharts.NET.Demos.csproj", "{2AF48A52-944B-4B09-89F5-0BB400603B23}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Language", "Statecharts.NET.Language\Statecharts.NET.Language.csproj", "{72401C57-5422-4EC8-8FCD-19EC1A7E6D94}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.XState", "Statecharts.NET.XState\Statecharts.NET.XState.csproj", "{708EB39C-BDD9-46E0-9F33-709574000AEF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Tests", "Statecharts.NET.Tests\Statecharts.NET.Tests.csproj", "{C710E619-E730-483A-B6D4-F66853711A22}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statecharts.NET.Language", "Statecharts.NET.Language\Statecharts.NET.Language.csproj", "{72401C57-5422-4EC8-8FCD-19EC1A7E6D94}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Statecharts.NET.XState.Tests", "Statecharts.NET.XState.Tests\Statecharts.NET.XState.Tests.csproj", "{4991BF4E-64D7-4D42-A678-F25C58E77FC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{72401C57-5422-4EC8-8FCD-19EC1A7E6D94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72401C57-5422-4EC8-8FCD-19EC1A7E6D94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72401C57-5422-4EC8-8FCD-19EC1A7E6D94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4991BF4E-64D7-4D42-A678-F25C58E77FC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4991BF4E-64D7-4D42-A678-F25C58E77FC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4991BF4E-64D7-4D42-A678-F25C58E77FC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4991BF4E-64D7-4D42-A678-F25C58E77FC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

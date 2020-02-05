@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
@@ -17,11 +18,14 @@ namespace Statecharts.NET.Interpreter
         private Queue<Model.Event> internalEvents = new Queue<Model.Event>(); // TODO: https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp
         private Queue<Model.Event> externalEvents = new Queue<Model.Event>();
         private StateConfiguration stateConfiguration;
+        private Dictionary<StateNode, CancellationTokenSource> serviceCancellationTokens = new Dictionary<StateNode, CancellationTokenSource>();
         private TContext context;
+
+        private ILogger logger = new ConsoleLogger();
 
         public ExecutableStatechart<TContext> StateChart { get; set; }
 
-        // TODO: think whether this can be modeled with a StartedService to prevent doing stuff with an uninitialized Statechart
+        // TODO: think whether this can be modeled with a StartedMachine to prevent doing stuff with an uninitialized Statechart
         public State<TContext> Start() => Start(StateConfiguration.NotInitialized);
         public State<TContext> Start(StateConfiguration configuration)
         {
@@ -86,6 +90,8 @@ namespace Statecharts.NET.Interpreter
             {
                 var enteredStateNodes = StateChart.GetStateNodes(enteredStatesKeys);
                 var exitedStateNodes = StateChart.GetStateNodes(exitedStatesKeys);
+                //foreach(var token in exitedStateNodes.Select(sn => serviceCancellationTokens[sn]))
+                //    token.Cancel();
                 var eventsRaisedByExiting = exitedStateNodes.Select(stateNode => ExecuteActionBlock(stateNode.ExitActions)).ToList();
                 var eventsRaisedOnTransition = transition.Match(forbidden => Enumerable.Empty<Model.IEvent>(), unguarded => ExecuteActionBlock(unguarded.Actions), guarded => ExecuteActionBlock(guarded.Actions));
                 var eventsRaisedByEntering = enteredStateNodes.Select(stateNode => ExecuteActionBlock(stateNode.EntryActions)).ToList();
@@ -112,7 +118,7 @@ namespace Statecharts.NET.Interpreter
                     // TODO: where to get EventData from
                     send => { }, 
                     raise => { },
-                    log => { },
+                    log => logger.Log(log.Message(context, default)),
                     assign => assign.Mutation(context, default),
                     sideEffect => sideEffect.Function(context, default));
 

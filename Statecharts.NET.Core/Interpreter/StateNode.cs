@@ -93,6 +93,7 @@ namespace Statecharts.NET.Interpreter
         public StateNodeKey Key { get; }
         internal int Depth { get; }
         public IEnumerable<Definition.Transition> Transitions { get; protected set; }
+        public IEnumerable<Service> Services { get; }
         public StateNode Parent { get; }
         public IEnumerable<Model.Action> EntryActions { get; }
         public IEnumerable<Model.Action> ExitActions { get; }
@@ -108,6 +109,7 @@ namespace Statecharts.NET.Interpreter
             Depth = Parent?.Depth + 1 ?? 0;
 
             Transitions = definition.GetTransitions();
+            Services = definition.GetServices();
 
             EntryActions = definition.EntryActions != null ? definition.EntryActions.ToModelActions() : Enumerable.Empty<Model.Action>();
             ExitActions = definition.ExitActions != null ? definition.ExitActions.ToModelActions() : Enumerable.Empty<Model.Action>();

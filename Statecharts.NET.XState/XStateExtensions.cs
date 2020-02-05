@@ -60,7 +60,7 @@ namespace Statecharts.NET.XState
             var transitions = definition.GetTransitions().Select(
                 transition => transition
                     .Match(
-                        forbidden => (forbidden.Event.EventName, "undefined"),
+                        forbidden => (forbidden.Event.EventName, SimpleValue("undefined", true)),
                         unguarded => Unguarded(unguarded.Event, unguarded.Targets),
                         unguarded => Unguarded(unguarded.Event, unguarded.Targets),
                         unguarded => Unguarded(new Model.NamedEvent("[THINK]"), unguarded.Targets),

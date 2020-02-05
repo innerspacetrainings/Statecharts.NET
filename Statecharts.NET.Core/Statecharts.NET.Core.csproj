@@ -5,6 +5,8 @@
     <ApplicationIcon />
     <OutputType>Library</OutputType>
     <StartupObject />
+    <AssemblyName>Statecharts.NET.Core</AssemblyName>
+    <RootNamespace>Statecharts.NET</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

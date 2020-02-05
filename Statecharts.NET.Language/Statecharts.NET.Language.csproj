@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Statecharts.NET\Statecharts.NET.csproj" />
+    <ProjectReference Include="..\Statecharts.NET.Core\Statecharts.NET.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

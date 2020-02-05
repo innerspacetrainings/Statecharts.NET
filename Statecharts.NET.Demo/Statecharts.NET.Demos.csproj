@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Statecharts.NET.Core\Statecharts.NET.Core.csproj" />
     <ProjectReference Include="..\Statecharts.NET.Language\Statecharts.NET.Language.csproj" />
     <ProjectReference Include="..\Statecharts.NET.XState\Statecharts.NET.XState.csproj" />
-    <ProjectReference Include="..\Statecharts.NET\Statecharts.NET.csproj" />
   </ItemGroup>
 
 </Project>

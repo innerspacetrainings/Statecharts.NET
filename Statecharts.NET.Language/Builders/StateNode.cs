@@ -89,11 +89,11 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public Final AsFinal() => new Final(DefinitionData);
     }
-    public class WithTransitions : WithServices
+    public class WithTransitions : WithInvocations
     {
         internal WithTransitions(string name) : base(name) { }
 
-        public WithServices WithInvocations(
+        public WithInvocations WithInvocations(
             Definition.Service service,
             params Definition.Service[] services)
         {
@@ -101,11 +101,11 @@ namespace Statecharts.NET.Language.Builders.StateNode
             return this;
         }
     }
-    public class WithServices : Definition.AtomicStateNode
+    public class WithInvocations : Definition.AtomicStateNode
     {
         private protected DefinitionData DefinitionData { get; }
 
-        internal WithServices(string name) => DefinitionData = new DefinitionData(name);
+        internal WithInvocations(string name) => DefinitionData = new DefinitionData(name);
 
         public override string Name => DefinitionData.Name;
         public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;

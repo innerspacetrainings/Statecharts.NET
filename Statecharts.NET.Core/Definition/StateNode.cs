@@ -28,6 +28,10 @@ namespace Statecharts.NET.Definition
             stateNode.Match(
                 final => Enumerable.Empty<Transition>(),
                 nonFinal => nonFinal.Transitions);
+        public static IEnumerable<Service> GetServices(this StateNode stateNode) =>
+            stateNode.Match(
+                final => Enumerable.Empty<Service>(),
+                nonFinal => nonFinal.Services);
 
         public static TResult Match<TResult>(this StateNode stateNode, Func<FinalStateNode, TResult> final, Func<NonFinalStateNode, TResult> nonFinal) =>
             stateNode.Match(nonFinal, final, nonFinal, nonFinal);

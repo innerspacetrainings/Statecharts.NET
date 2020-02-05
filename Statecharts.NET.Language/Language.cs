@@ -90,12 +90,12 @@ namespace Statecharts.NET.Language
             => new AssignAction<TContext>(mutation);
         public static AssignAction<TContext, TData> Assign<TContext, TData>(System.Action<TContext, TData> mutation)
             => new AssignAction<TContext, TData>(mutation);
-        public static SideEffectAction Run(System.Action action)
-            => new SideEffectAction(action);
-        public static SideEffectAction<TContext> Run<TContext>(System.Action<TContext> action)
-            => new SideEffectAction<TContext>(action);
-        public static SideEffectAction<TContext, TData> Run<TContext, TData>(System.Action<TContext, TData> action)
-            => new SideEffectAction<TContext, TData>(action);
+        public static SideEffectAction Run(System.Action sideEffect)
+            => new SideEffectAction(sideEffect);
+        public static SideEffectAction<TContext> Run<TContext>(System.Action<TContext> sideEffect)
+            => new SideEffectAction<TContext>(sideEffect);
+        public static SideEffectAction<TContext, TData> Run<TContext, TData>(System.Action<TContext, TData> sideEffect)
+            => new SideEffectAction<TContext, TData>(sideEffect);
     }
     public static class Helpers
     {
@@ -124,7 +124,7 @@ namespace Statecharts.NET.Language
             Definition.Transition transition,
             params Definition.Transition[] transitions)
             => new Builders.StateNode.WithName(name).WithTransitions(transition, transitions);
-        public static Builders.StateNode.WithServices WithInvocations(
+        public static Builders.StateNode.WithInvocations WithInvocations(
             this string name,
             Definition.Service service,
             params Definition.Service[] services)

@@ -3,12 +3,10 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using Statecharts.NET.Language;
-using Statecharts.NET.XState;
 using Xunit;
-using static Statecharts.NET.Language.Keywords;
 
 
-namespace Statecharts.NET.Tests.XState
+namespace Statecharts.NET.XState.Tests
 {
 
     public class Tests
