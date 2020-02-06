@@ -42,12 +42,30 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
         {
             static object RecurseElement(object parent, XElement xElement)
             {
-                var element = ElementConstructors[xElement.Name.LocalName]();
+                static object Construct(XElement xElement)
+                {
+                    var name = xElement.Name.LocalName;
+                    try { return ElementConstructors[name](); }
+                    catch (System.Exception) { throw new System.Exception($"No Constructor registered for \"{name}\""); }
+                }
+                static void SetAttribute(object element, XAttribute attribute)
+                {
+                    var name = attribute.Name.LocalName;
+                    try { AttributeSetters[(element.GetType(), name)](element, attribute.Value); }
+                    catch (System.Exception) { throw new System.Exception($"No Attribute setter registered on \"{element.GetType()}\" for \"{name}\""); }
+                }
+                static void SetElement(object parent, object element)
+                {
+                    try { ElementSetters[(parent.GetType(), element.GetType())](parent, element); }
+                    catch (System.Exception) { throw new System.Exception($"No Element setter registered on \"{parent.GetType()}\" for \"{element.GetType()}\""); }
+                }
+
+                var element = Construct(xElement);
                 foreach (var attribute in xElement.Attributes())
-                    AttributeSetters[(element.GetType(), attribute.Name.LocalName)](element, attribute.Value);
+                    SetAttribute(element, attribute);
                 foreach(var children in xElement.Elements())
                     RecurseElement(element, children);
-                if(parent != null) ElementSetters[(parent.GetType(), element.GetType())](parent, element);
+                if(parent != null) SetElement(parent, element);
                 return element;
             }
 
