@@ -67,3 +67,14 @@
 	- [ ] CurrentConfiguration (unify, expose)
 	- [ ] `RootStateNodeKey` find a way to preserve the Statechart's name
 	- [ ] Get real Statechart Id
+
+- Blog About
+	- Testing using SCION.Tests & JInt
+	- XElement to T Mapper
+	- CataFold
+	- params min 1 parameter
+	- params OneOf
+	- OneOf Treeshaking
+	- Builder without .Build()
+	- Builder with Order of With Functions (+ git advantages)
+	- Builder with skippable With Functions
