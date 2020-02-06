@@ -11,25 +11,14 @@ namespace Statecharts.NET.Tests.Definition
     internal class AtomicStateNode : Statecharts.NET.Definition.AtomicStateNode
     {
         internal string _name;
-
-        public AtomicStateNode(
-            string name = null,
-            IEnumerable<OneOf<Action, ContextAction>> entryActions = null,
-            IEnumerable<OneOf<Action, ContextAction>> exitActions = null,
-            IEnumerable<Transition> transitions = null,
-            IEnumerable<Service> services = null)
-        {
-            _name = name;
-            EntryActions = entryActions ?? Enumerable.Empty<OneOf<Action, ContextAction>>();
-            ExitActions = exitActions ?? Enumerable.Empty<OneOf<Action, ContextAction>>();
-            Transitions = transitions ?? Enumerable.Empty<Transition>();
-            Services = services ?? Enumerable.Empty<Service>();
-        }
+        internal IEnumerable<OneOf<Action, ContextAction>> _entryActions = Enumerable.Empty<OneOf<Action, ContextAction>>();
+        internal IEnumerable<OneOf<Action, ContextAction>> _exitActions = Enumerable.Empty<OneOf<Action, ContextAction>>();
+        internal IEnumerable<Transition> _transitions = Enumerable.Empty<Transition>();
 
         public override string Name => _name;
-        public override IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
-        public override IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
-        public override IEnumerable<Transition> Transitions { get; }
+        public override IEnumerable<OneOf<Action, ContextAction>> EntryActions => _entryActions;
+        public override IEnumerable<OneOf<Action, ContextAction>> ExitActions => _exitActions;
+        public override IEnumerable<Transition> Transitions => _transitions;
         public override IEnumerable<Service> Services { get; }
     }
 

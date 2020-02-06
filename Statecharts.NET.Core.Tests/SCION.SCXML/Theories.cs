@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Statecharts.NET.Tests.SCION.SCXML.ECMAScript;
 using Xunit;
 
 namespace Statecharts.NET.Tests.SCION.SCXML
@@ -35,12 +36,12 @@ namespace Statecharts.NET.Tests.SCION.SCXML
         private static void TestStatechart(Test test)
         {
             var scxmlDefinition = File.ReadAllText(test.Path);
-            var definition = SCXMLEcmascript.ParseStatechart(scxmlDefinition);
+            var definition = SCXMLECMAScriptParser.ParseStatechart(scxmlDefinition);
             var parsed = definition.Parse();
 
-            Assert.IsType<ExecutableStatechart<EcmaScriptContext>>(parsed);
+            Assert.IsType<ExecutableStatechart<ECMAScriptContext>>(parsed);
 
-            var service = (parsed as ExecutableStatechart<EcmaScriptContext>).Interpret();
+            var service = (parsed as ExecutableStatechart<ECMAScriptContext>).Interpret();
 
             Assert.Equal(service.Start().Ids(), test.Script.InitialConfiguration);
 

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Statecharts.NET.Tests.SCION.SCXML
+namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
 {
-
     public class Test
     {
         public Test(string name, string path, TestScript script)

@@ -13,14 +13,14 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
     {
         internal Option<string> Name { get; set; }
         internal Option<string> InitialStateNodeName { get; set; }
-        internal Option<EcmaScriptContext> InitialContext { get; set; }
+        internal Option<ECMAScriptContext> InitialContext { get; set; }
         internal IList<StateNode> StateNodes { get; } = new List<StateNode>();
 
         internal void AddStateNade(StateNode stateNode) => StateNodes.Add(stateNode);
 
-        internal Statechart<EcmaScriptContext> AsRealDefinition()
+        internal Statechart<ECMAScriptContext> AsRealDefinition()
         {
-            var initialContext = InitialContext.ValueOr(new EcmaScriptContext(new Engine()));
+            var initialContext = InitialContext.ValueOr(new ECMAScriptContext(new Engine()));
             var rootStateNode = new Tests.Definition.CompoundStateNode
             {
                 _name = Name.ValueOr("root"),
@@ -28,7 +28,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
                 _initialTransition = new InitialTransition(new ChildTarget(InitialStateNodeName.ValueOr(StateNodes.First().Name)))
             };
 
-            return new Statechart<EcmaScriptContext>(initialContext, rootStateNode);
+            return new Statechart<ECMAScriptContext>(initialContext, rootStateNode);
         }
     }
 }
