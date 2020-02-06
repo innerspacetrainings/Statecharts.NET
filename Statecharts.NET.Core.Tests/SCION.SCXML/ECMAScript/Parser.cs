@@ -26,13 +26,16 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
                 { (typeof(Statechart), "version"), IntentionallyIgnore },
                 { (typeof(Statechart), "datamodel"), IntentionallyIgnore },
                 { (typeof(Statechart), "initial"), EraseType<Statechart>(Attribute.SetStatechartInitial) },
-                { (typeof(AtomicStateNode), "id"), EraseType<AtomicStateNode>(Attribute.SetStateNodeName) }
+                { (typeof(AtomicStateNode), "id"), EraseType<AtomicStateNode>(Attribute.SetStateNodeName) },
+                { (typeof(Transition), "event"), EraseType<Transition>(Attribute.SetTransitionEvent) },
+                { (typeof(Transition), "target"), EraseType<Transition>(Attribute.SetTransitionTarget) }
             };
         private static Dictionary<(System.Type, System.Type), System.Action<object, object>> ElementSetters =>
             new Dictionary<(System.Type, System.Type), System.Action<object, object>>
             {
                 { (typeof(Statechart), typeof(ECMAScriptContext)), EraseTypes<Statechart, ECMAScriptContext>(Element.SetStatechartInitialContext) },
-                { (typeof(Statechart), typeof(AtomicStateNode)), EraseTypes<Statechart, Statecharts.NET.Definition.StateNode>(Element.StatechartAddStateNode) }
+                { (typeof(Statechart), typeof(AtomicStateNode)), EraseTypes<Statechart, Statecharts.NET.Definition.StateNode>(Element.StatechartAddStateNode) },
+                { (typeof(AtomicStateNode), typeof(Transition)), EraseTypes<AtomicStateNode, Transition>(Element.StateNodeAddTransition) }
             };
 
         internal static Statecharts.NET.Definition.Statechart<ECMAScriptContext> ParseStatechart(string scxmlDefinition)
@@ -49,7 +52,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
             }
 
             var statechart = RecurseElement(null, XElement.Parse(scxmlDefinition)) as Statechart;
-            return statechart?.AsRealDefinition();
+            return statechart?.AsStatechartDefinition();
         }
 
         #region Helpers

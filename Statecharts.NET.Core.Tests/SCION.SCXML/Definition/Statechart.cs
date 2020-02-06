@@ -18,7 +18,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
 
         internal void AddStateNade(StateNode stateNode) => StateNodes.Add(stateNode);
 
-        internal Statechart<ECMAScriptContext> AsRealDefinition()
+        internal Statechart<ECMAScriptContext> AsStatechartDefinition()
         {
             var initialContext = InitialContext.ValueOr(new ECMAScriptContext(new Engine()));
             var rootStateNode = new Tests.Definition.CompoundStateNode

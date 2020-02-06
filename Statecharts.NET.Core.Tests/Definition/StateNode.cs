@@ -13,7 +13,7 @@ namespace Statecharts.NET.Tests.Definition
         internal string _name;
         internal IEnumerable<OneOf<Action, ContextAction>> _entryActions = Enumerable.Empty<OneOf<Action, ContextAction>>();
         internal IEnumerable<OneOf<Action, ContextAction>> _exitActions = Enumerable.Empty<OneOf<Action, ContextAction>>();
-        internal IEnumerable<Transition> _transitions = Enumerable.Empty<Transition>();
+        internal readonly IList<Transition> _transitions = new List<Transition>();
 
         public override string Name => _name;
         public override IEnumerable<OneOf<Action, ContextAction>> EntryActions => _entryActions;
