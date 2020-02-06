@@ -6,23 +6,20 @@ using Jint;
 using Jint.Native;
 using Statecharts.NET.Tests.Definition;
 using Statecharts.NET.Tests.SCION.SCXML.Definition;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Tests.SCION.SCXML
 {
     internal class EcmaScriptContext : IEquatable<EcmaScriptContext>
     {
-        public Engine Engine { get; set; }
+        public Engine Engine { get; }
+
+        public EcmaScriptContext(Engine engine) => Engine = engine;
 
         public bool Equals(EcmaScriptContext other) => other != null && Engine.Global.GetOwnProperties().Equals(other.Engine.Global.GetOwnProperties()); // TODO: validate that this works
 
         public override string ToString()
             => $"EcmaScriptContext: (Retries = TODO)"; // TODO: serialize the stuff
-    }
-
-    internal static class XmlExtensions
-    {
-        internal static IEnumerable<XElement> Substates(this XElement definition, Func<string, XName> NSd)
-            => definition.Elements().Where(element => new [] {"state", "parallel", "final"}.Select(NSd).Contains(element.Name));
     }
 
     static class SCXMLEcmascript
@@ -42,24 +39,22 @@ namespace Statecharts.NET.Tests.SCION.SCXML
                 { (typeof(Statechart), "datamodel"), IntentionallyIgnore },
                 { (typeof(Statechart), "initial"), EraseType<Statechart>(SetStatechartInitialAttribute) },
                 { (typeof(AtomicStateNode), "id"), EraseType<AtomicStateNode>(SetStateNodeName) }
-    };
+            };
         private static Dictionary<(Type, Type), Action<object, object>> elementSetters =
             new Dictionary<(Type, Type), Action<object, object>>
             {
                 { (typeof(Statechart), typeof(EcmaScriptContext)), EraseTypes<Statechart, EcmaScriptContext>(SetStatechartInitialContext) },
-                { (typeof(Statechart), typeof(AtomicStateNode)), EraseTypes<Statechart, AtomicStateNode>(AddStateNode) } // TODO: switch to StateNode
+                { (typeof(Statechart), typeof(AtomicStateNode)), EraseTypes<Statechart, Statecharts.NET.Definition.StateNode>(AddStateNode) }
             };
 
         private static void SetStatechartInitialContext(Statechart statechart, EcmaScriptContext initialContext)
-        { }
-        //=> statechart.InitialContext = initialContext;
+            => statechart.InitialContext = initialContext.ToOption();
 
-        private static void AddStateNode(Statechart statechart, AtomicStateNode initialContext)
-        { }
-
+        private static void AddStateNode(Statechart statechart, Statecharts.NET.Definition.StateNode stateNode)
+            => statechart.AddStateNade(stateNode);
 
         private static object ConstructStatechart() => new Statechart();
-        private static object ConstructContext() => new EcmaScriptContext {Engine = new Engine()};
+        private static object ConstructContext() => new EcmaScriptContext(new Engine());
         private static object ConstructAtomicState() => new AtomicStateNode();
 
         private static Action<object, string> EraseType<T>(Action<T, string> setter)
@@ -68,17 +63,14 @@ namespace Statecharts.NET.Tests.SCION.SCXML
             => (object1, object2) => setter((T1)object1, (T2)object2);
         private static void IntentionallyIgnore(object o, string value) { }
 
-        private static void SetStatechartInitialAttribute(Statechart statechart,
-            string initialStateNode)
-        { }
-            //=> ((CompoundStateNode) statechart.RootStateNode).InitialTransition = new InitialTransition(new ChildTarget(initialStateNode));
+        private static void SetStatechartInitialAttribute(Statechart statechart, string initialStateNode)
+            => statechart.InitialStateNodeName = initialStateNode.ToOption();
 
         private static void SetStateNodeName(AtomicStateNode stateNode, string name) =>
-            stateNode.SetName(name);
+            stateNode._name = name;
 
         internal static Statecharts.NET.Definition.Statechart<EcmaScriptContext> ParseStatechart(string scxmlDefinition)
         {
-            ////XName NSd(string name) => definition.GetDefaultNamespace() + name; TODO: use this
             static object RecurseElement(object parent, XElement xElement)
             {
                 var element = elementConstructors[xElement.Name.LocalName]();
@@ -91,7 +83,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML
             }
 
             var statechart = RecurseElement(null, XElement.Parse(scxmlDefinition)) as Statechart;
-            return new Statecharts.NET.Definition.Statechart<EcmaScriptContext>(new EcmaScriptContext(), new Tests.Definition.AtomicStateNode());
+            return statechart?.AsRealDefinition();
         }
 
         private static EcmaScriptContext GetInitialContext(XElement datamodel, Engine engine, Func<string, XName> NSd)
@@ -111,7 +103,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML
                             : JsValue.Undefined);
             }
 
-            return new EcmaScriptContext {Engine = engine};
+            return new EcmaScriptContext(engine);
         }
     }
 }

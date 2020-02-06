@@ -10,7 +10,7 @@ namespace Statecharts.NET.Tests.Definition
 {
     internal class AtomicStateNode : Statecharts.NET.Definition.AtomicStateNode
     {
-        private string _name;
+        internal string _name;
 
         public AtomicStateNode(
             string name = null,
@@ -31,7 +31,22 @@ namespace Statecharts.NET.Tests.Definition
         public override IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
         public override IEnumerable<Transition> Transitions { get; }
         public override IEnumerable<Service> Services { get; }
+    }
 
-        internal void SetName(string name) => _name = name;
+    internal class CompoundStateNode : Statecharts.NET.Definition.CompoundStateNode
+    {
+        internal string _name;
+        internal IEnumerable<StateNode> _states;
+        internal InitialTransition _initialTransition;
+        internal IEnumerable<Transition> _transitions = Enumerable.Empty<Transition>();
+
+        public override string Name => _name;
+        public override IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
+        public override IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
+        public override IEnumerable<Transition> Transitions => _transitions;
+        public override IEnumerable<Service> Services { get; }
+        public override IEnumerable<StateNode> States => _states;
+        public override InitialTransition InitialTransition => _initialTransition;
+        public override Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; }
     }
 }
