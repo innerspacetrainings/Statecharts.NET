@@ -17,7 +17,11 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
                 { "scxml", Construct.Statechart },
                 { "datamodel", Construct.Context },
                 { "state", Construct.AtomicState },
-                { "transition", Construct.Transition }
+                { "transition", Construct.Transition },
+                { "data", Construct.ContextDataEntry },
+                { "onentry", Construct.EntryActions },
+                { "log", Construct.LogAction },
+                { "assign", Construct.AssignAction }
             };
         private static Dictionary<(System.Type, string), System.Action<object, string>> AttributeSetters =>
             new Dictionary<(System.Type, string), System.Action<object, string>>
@@ -28,15 +32,27 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
                 { (typeof(Statechart), "initial"), EraseType<Statechart>(Attribute.SetStatechartInitial) },
                 { (typeof(AtomicStateNode), "id"), EraseType<AtomicStateNode>(Attribute.SetStateNodeName) },
                 { (typeof(Transition), "event"), EraseType<Transition>(Attribute.SetTransitionEvent) },
-                { (typeof(Transition), "target"), EraseType<Transition>(Attribute.SetTransitionTarget) }
-            };
+                { (typeof(Transition), "target"), EraseType<Transition>(Attribute.SetTransitionTarget) },
+                { (typeof(ContextDataEntry), "id"), EraseType<ContextDataEntry>(Attribute.SetContextDataEntryId) },
+                { (typeof(ContextDataEntry), "expr"), EraseType<ContextDataEntry>(Attribute.SetContextDataEntryExpression) },
+                { (typeof(LogAction), "expr"), EraseType<LogAction>(Attribute.SetLogExpression) },
+                { (typeof(LogAction), "label"), EraseType<LogAction>(Attribute.SetLogLabel) },
+                { (typeof(AssignAction), "location"), EraseType<AssignAction>(Attribute.SetAssignProperty) },
+                { (typeof(AssignAction), "expr"), EraseType<AssignAction>(Attribute.SetAssignExpression) }
+    };
         private static Dictionary<(System.Type, System.Type), System.Action<object, object>> ElementSetters =>
             new Dictionary<(System.Type, System.Type), System.Action<object, object>>
             {
                 { (typeof(Statechart), typeof(ECMAScriptContext)), EraseTypes<Statechart, ECMAScriptContext>(Element.SetStatechartInitialContext) },
                 { (typeof(Statechart), typeof(AtomicStateNode)), EraseTypes<Statechart, Statecharts.NET.Definition.StateNode>(Element.StatechartAddStateNode) },
-                { (typeof(AtomicStateNode), typeof(Transition)), EraseTypes<AtomicStateNode, Transition>(Element.StateNodeAddTransition) }
-            };
+                { (typeof(AtomicStateNode), typeof(Transition)), EraseTypes<AtomicStateNode, Transition>(Element.StateNodeAddTransition) },
+                { (typeof(AtomicStateNode), typeof(EntryActions)), EraseTypes<AtomicStateNode, EntryActions>(Element.StateNodeSetEntryActions) },
+                { (typeof(ECMAScriptContext), typeof(ContextDataEntry)), EraseTypes<ECMAScriptContext, ContextDataEntry>(Element.ContextAddProperty) },
+                { (typeof(Transition), typeof(LogAction)), EraseTypes<Transition, LogAction>(Element.TransitionAddLogAction) },
+                { (typeof(Transition), typeof(AssignAction)), EraseTypes<Transition, AssignAction>(Element.TransitionAddAssignAction) },
+                { (typeof(EntryActions), typeof(LogAction)), EraseTypes<EntryActions, LogAction>(Element.EntryActionsAddLogAction) },
+                { (typeof(EntryActions), typeof(AssignAction)), EraseTypes<EntryActions, AssignAction>(Element.EntryActionsAddAssignAction) }
+    };
 
         internal static Statecharts.NET.Definition.Statechart<ECMAScriptContext> ParseStatechart(string scxmlDefinition)
         {
@@ -52,12 +68,12 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
                 {
                     var name = attribute.Name.LocalName;
                     try { AttributeSetters[(element.GetType(), name)](element, attribute.Value); }
-                    catch (System.Exception) { throw new System.Exception($"No Attribute setter registered on \"{element.GetType()}\" for \"{name}\""); }
+                    catch (System.Exception) { throw new System.Exception($"Attribute-Setter {element.GetType().Name}.Set(\"{name}\") missing"); }
                 }
                 static void SetElement(object parent, object element)
                 {
                     try { ElementSetters[(parent.GetType(), element.GetType())](parent, element); }
-                    catch (System.Exception) { throw new System.Exception($"No Element setter registered on \"{parent.GetType()}\" for \"{element.GetType()}\""); }
+                    catch (System.Exception) { throw new System.Exception($"Element-Setter {parent.GetType().Name}.Set({element.GetType().Name}) missing"); }
                 }
 
                 var element = Construct(xElement);
@@ -82,24 +98,11 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
         #endregion
         
         // TODO: remove
-        private static ECMAScriptContext GetInitialContext(XElement datamodel, Engine engine, System.Func<string, XName> NSd)
+        private static void TestJInt()
         {
-            var properties = datamodel.Elements().Where(element => element.Name == NSd("data"));
-            foreach (var property in properties)
-            {
-                var id = property.Attribute("id")?.Value;
-                var valueExpression = property.Attribute("expr")?.Value;
-                var test = engine.Execute("(() => ({p1: 'v1', p2: 'v2'}))()").GetCompletionValue().ToObject();
-                var test2 = engine.Execute("(function() {return 3;})()").GetCompletionValue().ToObject();
-                if (id != null)
-                    engine.SetValue(
-                        id,
-                        valueExpression != null
-                            ? engine.Execute(valueExpression).GetCompletionValue()
-                            : JsValue.Undefined);
-            }
-
-            return new ECMAScriptContext(engine);
+            var test1 = new Engine().Execute("(() => ({p1: 'v1', p2: 'v2'}))()").GetCompletionValue().ToObject();
+            var test2 = new Engine().Execute("(function() {return 3;})()").GetCompletionValue().ToObject();
+            var test3 = new Engine().Execute("({p1: 'v1', p2: 'v2'})").GetCompletionValue().ToObject();
         }
     }
 }

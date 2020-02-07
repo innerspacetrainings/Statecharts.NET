@@ -14,5 +14,17 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions
             transition._event = @event;
         public static void SetTransitionTarget(Transition transition, string target) =>
             transition._target = target;
+        public static void SetContextDataEntryId(ContextDataEntry entry, string id) =>
+            entry.Id = id;
+        public static void SetContextDataEntryExpression(ContextDataEntry entry, string expression) =>
+            entry.ValueExpression = expression.ToOption();
+        public static void SetLogExpression(LogAction logAction, string expression) =>
+            logAction.Expression = expression;
+        public static void SetLogLabel(LogAction logAction, string label) =>
+            logAction.Label = label;
+        public static void SetAssignProperty(AssignAction assignAction, string property) =>
+            assignAction.Property = property;
+        public static void SetAssignExpression(AssignAction assignAction, string expression) =>
+            assignAction.Expression = expression;
     }
 }
