@@ -1,5 +1,7 @@
 ﻿# Statecharts.NET
 
+![Statecharts.NET.Core](https://github.com/innerspacetrainings/Statecharts.NET/workflows/Statecharts.NET.Core/badge.svg)
+
 ## Roadmap
 - [x] Model the Statechart Types
 - [x] Build basic xstate Serialization
