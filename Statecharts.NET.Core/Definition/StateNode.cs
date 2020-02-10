@@ -26,12 +26,12 @@ namespace Statecharts.NET.Definition
 
         public static IEnumerable<Transition> GetTransitions(this StateNode stateNode) =>
             stateNode.Match(
-                final => Enumerable.Empty<Transition>(),
-                nonFinal => nonFinal.Transitions);
+                final => StateNode.NoTransitions,
+                nonFinal => nonFinal.Transitions).ValueOr(Enumerable.Empty<Transition>());
         public static IEnumerable<Service> GetServices(this StateNode stateNode) =>
             stateNode.Match(
-                final => Enumerable.Empty<Service>(),
-                nonFinal => nonFinal.Services);
+                final => StateNode.NoServices,
+                nonFinal => nonFinal.Services).ValueOr(Enumerable.Empty<Service>());
 
         public static TResult Match<TResult>(this StateNode stateNode, Func<FinalStateNode, TResult> final, Func<NonFinalStateNode, TResult> nonFinal) =>
             stateNode.Match(nonFinal, final, nonFinal, nonFinal);
@@ -45,6 +45,11 @@ namespace Statecharts.NET.Definition
         public abstract Option<IEnumerable<OneOf<Action, ContextAction>>> ExitActions { get; }
 
         public override string ToString() => $"{Name} ({GetType().Name.Replace("Definition.StateNode`1", string.Empty)})";
+
+        public static Option<IEnumerable<OneOf<Action, ContextAction>>> NoActions => Option.None<IEnumerable<OneOf<Action, ContextAction>>>();
+        public static Option<IEnumerable<Transition>> NoTransitions => Option.None<IEnumerable<Transition>>();
+        public static Option<IEnumerable<Service>> NoServices => Option.None<IEnumerable<Service>>();
+        public static Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> NoDoneTransition => Option.None<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>>();
     }
 
     public abstract class FinalStateNode : StateNode {}
@@ -65,6 +70,6 @@ namespace Statecharts.NET.Definition
     public abstract class OrthogonalStateNode : NonFinalStateNode
     {
         public abstract IEnumerable<StateNode> States { get; }
-        public abstract Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; } // TODO: think about done data
+        public abstract Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; } // TODO: think about done data
     }
 }
