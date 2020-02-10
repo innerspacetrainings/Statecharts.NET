@@ -18,17 +18,17 @@ namespace Statecharts.NET.Tests.Shared.Definition
             IEnumerable<Service> services)
         {
             Name = name;
-            EntryActions = entryActions;
-            ExitActions = exitActions;
-            Transitions = transitions;
-            Services = services;
+            EntryActions = entryActions.ToOption();
+            ExitActions = exitActions.ToOption();
+            Transitions = transitions.ToOption();
+            Services = services.ToOption();
         }
 
         public override string Name { get; }
-        public override IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
-        public override IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
-        public override IEnumerable<Transition> Transitions { get; }
-        public override IEnumerable<Service> Services { get; }
+        public override Option<IEnumerable<OneOf<Action, ContextAction>>> EntryActions { get; }
+        public override Option<IEnumerable<OneOf<Action, ContextAction>>> ExitActions { get; }
+        public override Option<IEnumerable<Transition>> Transitions { get; }
+        public override Option<IEnumerable<Service>> Services { get; }
     }
 
     internal class CompoundStateNodeDefinition : Statecharts.NET.Definition.CompoundStateNode
@@ -44,10 +44,10 @@ namespace Statecharts.NET.Tests.Shared.Definition
             Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> doneTransition)
         {
             Name = name;
-            EntryActions = entryActions;
-            ExitActions = exitActions;
-            Transitions = transitions;
-            Services = services;
+            EntryActions = entryActions.ToOption();
+            ExitActions = exitActions.ToOption();
+            Transitions = transitions.ToOption();
+            Services = services.ToOption();
             States = states;
             InitialTransition = initialTransition;
             DoneTransition = doneTransition;
@@ -55,10 +55,10 @@ namespace Statecharts.NET.Tests.Shared.Definition
 
         public override string Name { get; }
 
-        public override IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
-        public override IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
-        public override IEnumerable<Transition> Transitions { get; }
-        public override IEnumerable<Service> Services { get; }
+        public override Option<IEnumerable<OneOf<Action, ContextAction>>> EntryActions { get; }
+        public override Option<IEnumerable<OneOf<Action, ContextAction>>> ExitActions { get; }
+        public override Option<IEnumerable<Transition>> Transitions { get; }
+        public override Option<IEnumerable<Service>> Services { get; }
         public override IEnumerable<StateNode> States { get; }
         public override InitialTransition InitialTransition { get; }
         public override Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; }
@@ -72,12 +72,12 @@ namespace Statecharts.NET.Tests.Shared.Definition
             IEnumerable<OneOf<Action, ContextAction>> exitActions)
         {
             Name = name;
-            EntryActions = entryActions;
-            ExitActions = exitActions;
+            EntryActions = entryActions.ToOption();
+            ExitActions = exitActions.ToOption();
         }
 
         public override string Name { get; }
-        public override IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
-        public override IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
+        public override Option<IEnumerable<OneOf<Action, ContextAction>>> EntryActions { get; }
+        public override Option<IEnumerable<OneOf<Action, ContextAction>>> ExitActions { get; }
     }
 }

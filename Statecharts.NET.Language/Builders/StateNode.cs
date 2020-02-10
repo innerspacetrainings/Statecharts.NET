@@ -108,10 +108,10 @@ namespace Statecharts.NET.Language.Builders.StateNode
         internal WithInvocations(string name) => DefinitionData = new DefinitionData(name);
 
         public override string Name => DefinitionData.Name;
-        public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
+        public override Option<IEnumerable<Definition.Transition>> Transitions => DefinitionData.Transitions.ToOption();
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> EntryActions => DefinitionData.EntryActions.ToOption();
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> ExitActions => DefinitionData.ExitActions.ToOption();
+        public override Option<IEnumerable<Definition.Service>> Services => DefinitionData.Services.ToOption();
 
         public Compound AsCompound() => new Compound(DefinitionData);
         public Orthogonal AsOrthogonal() => new Orthogonal(DefinitionData);
@@ -125,8 +125,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
             => DefinitionData = data;
 
         public override string Name => DefinitionData.Name;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions => DefinitionData.ExitActions;
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> EntryActions => DefinitionData.EntryActions.ToOption();
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> ExitActions => DefinitionData.ExitActions.ToOption();
     }
 
     public class Compound
@@ -192,10 +192,10 @@ namespace Statecharts.NET.Language.Builders.StateNode
             => DefinitionData = compoundWithInitialActions.DefinitionData;
 
         public override string Name => DefinitionData.Name;
-        public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
+        public override Option<IEnumerable<Definition.Transition>> Transitions => DefinitionData.Transitions.ToOption();
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> EntryActions => DefinitionData.EntryActions.ToOption();
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> ExitActions => DefinitionData.ExitActions.ToOption();
+        public override Option<IEnumerable<Definition.Service>> Services => DefinitionData.Services.ToOption();
         public override Definition.InitialTransition InitialTransition => DefinitionData.InitialTransition;
         public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
         public override Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
@@ -241,10 +241,10 @@ namespace Statecharts.NET.Language.Builders.StateNode
             new CompoundWithDoneTransitionWithActions(this, action, actions);
 
         public override string Name => DefinitionData.Name;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> EntryActions => DefinitionData.EntryActions.ToOption();
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> ExitActions => DefinitionData.ExitActions.ToOption();
+        public override Option<IEnumerable<Definition.Transition>> Transitions => DefinitionData.Transitions.ToOption();
+        public override Option<IEnumerable<Definition.Service>> Services => DefinitionData.Services.ToOption();
         public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
         public override InitialTransition InitialTransition => DefinitionData.InitialTransition;
         public override Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
@@ -261,10 +261,10 @@ namespace Statecharts.NET.Language.Builders.StateNode
         }
 
         public override string Name => DefinitionData.Name;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> EntryActions => DefinitionData.EntryActions.ToOption();
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> ExitActions => DefinitionData.ExitActions.ToOption();
+        public override Option<IEnumerable<Definition.Transition>> Transitions => DefinitionData.Transitions.ToOption();
+        public override Option<IEnumerable<Definition.Service>> Services => DefinitionData.Services.ToOption();
         public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
         public override InitialTransition InitialTransition => DefinitionData.InitialTransition;
         public override Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
@@ -295,10 +295,10 @@ namespace Statecharts.NET.Language.Builders.StateNode
             => DefinitionData = orthogonal.DefinitionData;
 
         public override string Name => DefinitionData.Name;
-        public override IEnumerable<Definition.Transition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<Definition.Service> Services => DefinitionData.Services;
+        public override Option<IEnumerable<Definition.Transition>> Transitions => DefinitionData.Transitions.ToOption();
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> EntryActions => DefinitionData.EntryActions.ToOption();
+        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> ExitActions => DefinitionData.ExitActions.ToOption();
+        public override Option<IEnumerable<Definition.Service>> Services => DefinitionData.Services.ToOption();
         public override IEnumerable<Definition.StateNode> States => DefinitionData.States;
         public override Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition =>
             Option.None<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>>();

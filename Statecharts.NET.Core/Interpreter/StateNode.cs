@@ -111,8 +111,8 @@ namespace Statecharts.NET.Interpreter
             Transitions = definition.GetTransitions();
             Services = definition.GetServices();
 
-            EntryActions = definition.EntryActions != null ? definition.EntryActions.ToModelActions() : Enumerable.Empty<Model.Action>();
-            ExitActions = definition.ExitActions != null ? definition.ExitActions.ToModelActions() : Enumerable.Empty<Model.Action>();
+            EntryActions = definition.EntryActions.Map(actions => actions.ToModelActions()).ValueOr(Enumerable.Empty<Model.Action>());
+            ExitActions = definition.ExitActions.Map(actions => actions.ToModelActions()).ValueOr(Enumerable.Empty<Model.Action>());
         }
 
         public override string ToString() => $"{Id} ({GetType().Name.Replace("Interpreter.StateNode`1", string.Empty).Replace("StateNode", string.Empty).ToLowerInvariant()})";

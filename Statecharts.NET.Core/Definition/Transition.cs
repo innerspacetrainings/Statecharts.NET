@@ -9,10 +9,10 @@ namespace Statecharts.NET.Definition
     {
         public InitialTransition(ChildTarget target) => Target = target;
 
-        public InitialTransition(ChildTarget target, Option<IEnumerable<OneOf<Action, ContextAction>>> actions)
+        public InitialTransition(ChildTarget target, IEnumerable<OneOf<Action, ContextAction>> actions)
         {
             Target = target;
-            Actions = actions;
+            Actions = actions.ToOption();
         }
 
         public virtual ChildTarget Target { get; }

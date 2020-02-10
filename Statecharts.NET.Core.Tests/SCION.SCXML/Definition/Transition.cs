@@ -40,12 +40,12 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         {
             Event = @event;
             Targets = targets;
-            Actions = actions;
+            Actions = actions.ToOption();
         }
 
         public override Event Event { get; }
         public override IEnumerable<Target> Targets { get; }
-        public override IEnumerable<Action> Actions { get; }
+        public override Option<IEnumerable<Action>> Actions { get; }
     }
     internal class GuardedTransition : Statecharts.NET.Definition.GuardedContextTransition
     {
@@ -54,12 +54,12 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
             Event = @event;
             Guard = guard;
             Targets = targets;
-            Actions = actions;
+            Actions = actions.ToOption();
         }
 
         public override Event Event { get; }
         public override OneOf<InStateGuard, ConditionContextGuard> Guard { get; }
         public override IEnumerable<Target> Targets { get; }
-        public override IEnumerable<OneOf<Action, ContextAction>> Actions { get; }
+        public override Option<IEnumerable<OneOf<Action, ContextAction>>> Actions { get; }
     }
 }

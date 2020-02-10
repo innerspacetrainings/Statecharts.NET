@@ -39,7 +39,7 @@ namespace Statecharts.NET
                 compound.InitialTransition = new Interpreter.InitialTransition(
                     compound,
                     compound.ResolveTarget(definition.InitialTransition.Target),
-                    definition.InitialTransition.Actions);
+                    definition.InitialTransition.Actions.ValueOr(Enumerable.Empty<OneOf<Definition.Action, Definition.ContextAction>>()));
                 return compound;
             }
             Interpreter.OrthogonalStateNode CreateOrthogonalStateNode(Definition.OrthogonalStateNode definition)
@@ -102,12 +102,12 @@ namespace Statecharts.NET
                 => stateNode.Transitions.Select(
                     transition => transition.Match<Interpreter.Transition>(
                         definition => new Interpreter.ForbiddenTransition(stateNode, definition.Event),
-                        definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
-                        definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
-                        definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
-                        definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
-                        definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions),
-                        definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions)));
+                        definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions.ValueOr(Enumerable.Empty<Definition.Action>())),
+                        definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions.ValueOr(Enumerable.Empty<OneOf<Definition.Action, ContextAction>>())),
+                        definition => new Interpreter.UnguardedTransition(stateNode, definition.Event, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions.ValueOr(Enumerable.Empty<OneOf<Definition.Action, ContextAction, ContextDataAction>>())),
+                        definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions.ValueOr(Enumerable.Empty<Definition.Action>())),
+                        definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions.ValueOr(Enumerable.Empty<OneOf<Definition.Action, ContextAction>>())),
+                        definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions.ValueOr(Enumerable.Empty<OneOf<Definition.Action, ContextAction, ContextDataAction>>()))));
 
             InitialContext = initialContext;
             var descendants = rootNode.GetDescendants().ToArray();

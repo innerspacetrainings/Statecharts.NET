@@ -85,13 +85,13 @@ namespace Statecharts.NET.XState
             onDoneTransition.SwitchSome(properties.Add);
 
             // actions
-            var entryCount = definition.EntryActions.Count();
-            var exitCount = definition.ExitActions.Count();
+            var entryCount = definition.EntryActions.Map(actions => actions.Count()).ValueOr(0);
+            var exitCount = definition.ExitActions.Map(actions => actions.Count()).ValueOr(0);
             if(entryCount > 0) properties.Add(("entry", entryCount == 1 ? "1 Action" : $"{entryCount} Actions"));
             if(exitCount > 0) properties.Add(("exit", exitCount == 1 ? "1 Action" : $"{exitCount} Actions"));
 
-            IEnumerable<ObjectValue> MapServices(NonFinalStateNode stateNode) =>
-                stateNode.Services.Select(service =>
+            Option<IEnumerable<ObjectValue>> MapServices(NonFinalStateNode stateNode) =>
+                stateNode.Services.Map(s => s.Select(service =>
                 {
                     var idProperty = service.Id.Map<JSProperty>(id => ("id", id));
                     var onErrorProperty = service.OnErrorTransition.Map(transition => transition.Match(
@@ -111,10 +111,10 @@ namespace Statecharts.NET.XState
                         .Where(property => property.HasValue).Select(property => property.ValueOr(default(JSProperty)));
 
                     return ObjectValue(serviceProperties);
-                });
+                }));
 
             // services
-            var services = definition.Match(_ => Enumerable.Empty<ObjectValue>(), MapServices).ToList();
+            var services = definition.Match(_ => Option.None<IEnumerable<ObjectValue>>(), MapServices).ValueOr(Enumerable.Empty<ObjectValue>()).ToList(); // TODO: probably rethink this Optional unfolding
             if (services.Any()) properties.Add(("invoke", ArrayValue(services)));
 
             return properties;
