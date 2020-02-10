@@ -9,6 +9,8 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions
             statechart.InitialStateNodeName = initialStateNode.ToOption();
         internal static void SetStateNodeName(PartialStateNode stateNode, string name) =>
             stateNode.Name = name;
+        internal static void SetStateNodeName(FinalStateNode stateNode, string name) =>
+            stateNode.Name = name;
         public static void SetTransitionEvent(Transition transition, string @event) =>
             transition._event = @event;
         public static void SetTransitionTarget(Transition transition, string target) =>

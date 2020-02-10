@@ -43,13 +43,13 @@ namespace Statecharts.NET.Tests.Shared.Definition
             InitialTransition initialTransition,
             Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> doneTransition)
         {
-            Name = name;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             EntryActions = entryActions.ToOption();
             ExitActions = exitActions.ToOption();
             Transitions = transitions.ToOption();
             Services = services.ToOption();
             States = states;
-            InitialTransition = initialTransition;
+            InitialTransition = initialTransition ?? throw new ArgumentNullException(nameof(initialTransition));
             DoneTransition = doneTransition;
         }
 

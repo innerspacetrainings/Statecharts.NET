@@ -29,6 +29,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
                 { (typeof(Statechart), "datamodel"), IntentionallyIgnore },
                 { (typeof(Statechart), "initial"), EraseType<Statechart>(Attribute.SetStatechartInitial) },
                 { (typeof(PartialStateNode), "id"), EraseType<PartialStateNode>(Attribute.SetStateNodeName) },
+                { (typeof(FinalStateNode), "id"), EraseType<FinalStateNode>(Attribute.SetStateNodeName) },
                 { (typeof(Transition), "event"), EraseType<Transition>(Attribute.SetTransitionEvent) },
                 { (typeof(Transition), "target"), EraseType<Transition>(Attribute.SetTransitionTarget) },
                 { (typeof(ContextDataEntry), "id"), EraseType<ContextDataEntry>(Attribute.SetContextDataEntryId) },
@@ -42,10 +43,12 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
             new Dictionary<(System.Type, System.Type), System.Action<object, object>>
             {
                 { (typeof(Statechart), typeof(ECMAScriptContext)), EraseTypes<Statechart, ECMAScriptContext>(Element.SetStatechartInitialContext) },
-                { (typeof(Statechart), typeof(PartialStateNode)), EraseTypes<Statechart, PartialStateNode>(Element.StatechartAddStateNode) },
+                { (typeof(Statechart), typeof(PartialStateNode)), EraseTypes<Statechart, StateNode>(Element.StatechartAddStateNode) },
+                { (typeof(Statechart), typeof(FinalStateNode)), EraseTypes<Statechart, StateNode>(Element.StatechartAddStateNode) },
                 { (typeof(PartialStateNode), typeof(Transition)), EraseTypes<PartialStateNode, Transition>(Element.StateNodeAddTransition) },
                 { (typeof(PartialStateNode), typeof(EntryActions)), EraseTypes<PartialStateNode, EntryActions>(Element.StateNodeSetEntryActions) },
                 { (typeof(PartialStateNode), typeof(PartialStateNode)), EraseTypes<PartialStateNode, PartialStateNode>(Element.StateNodeAddChildren) },
+                { (typeof(FinalStateNode), typeof(EntryActions)), EraseTypes<FinalStateNode, EntryActions>(Element.StateNodeSetEntryActions) },
                 { (typeof(ECMAScriptContext), typeof(ContextDataEntry)), EraseTypes<ECMAScriptContext, ContextDataEntry>(Element.ContextAddProperty) },
                 { (typeof(Transition), typeof(LogAction)), EraseTypes<Transition, LogAction>(Element.TransitionAddLogAction) },
                 { (typeof(Transition), typeof(AssignAction)), EraseTypes<Transition, AssignAction>(Element.TransitionAddAssignAction) },

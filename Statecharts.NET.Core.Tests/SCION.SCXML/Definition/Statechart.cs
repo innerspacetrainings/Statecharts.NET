@@ -15,7 +15,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         internal Option<string> Name { get; set; }
         internal Option<string> InitialStateNodeName { get; set; }
         internal Option<ECMAScriptContext> InitialContext { get; set; }
-        internal IList<StateNode> StateNodes { get; } = new List<StateNode>();
+        internal IList<Statecharts.NET.Definition.StateNode> StateNodes { get; } = new List<Statecharts.NET.Definition.StateNode>();
 
         internal Statechart<ECMAScriptContext> AsStatechartDefinition()
         {

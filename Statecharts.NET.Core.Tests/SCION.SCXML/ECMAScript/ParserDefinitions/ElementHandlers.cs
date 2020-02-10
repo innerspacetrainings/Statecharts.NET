@@ -8,11 +8,13 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions
     {
         internal static void SetStatechartInitialContext(Statechart statechart, ECMAScriptContext initialContext)
             => statechart.InitialContext = initialContext.ToOption();
-        internal static void StatechartAddStateNode(Statechart statechart, PartialStateNode stateNode)
+        internal static void StatechartAddStateNode(Statechart statechart, StateNode stateNode)
             => statechart.StateNodes.Add(stateNode.AsDefinition());
         internal static void StateNodeAddTransition(PartialStateNode stateNode, Transition transition)
             => stateNode.Transitions.Add(transition.AsTransitionDefinition());
         public static void StateNodeSetEntryActions(PartialStateNode stateNode, EntryActions entryActions)
+            => stateNode.EntryActions = entryActions.Actions;
+        public static void StateNodeSetEntryActions(FinalStateNode stateNode, EntryActions entryActions)
             => stateNode.EntryActions = entryActions.Actions;
         public static void StateNodeAddChildren(PartialStateNode stateNode, PartialStateNode children)
             => stateNode.Children.Add(children.AsDefinition());

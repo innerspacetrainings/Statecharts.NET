@@ -10,16 +10,8 @@ namespace Statecharts.NET.Tests.SCION.SCXML
     public class Theories
     {
         [Theory]
-        [MemberData(nameof(GetTestSuite), "assign")]
-        public void Assign(Test test) => TestStatechart(test);
-        
-        [Theory]
         [MemberData(nameof(GetTestSuite), "basic")]
         public void Basic(Test test) => TestStatechart(test);
-
-        [Theory]
-        [MemberData(nameof(GetTestSuite), "data")]
-        public void Data(Test test) => TestStatechart(test);
 
         [Theory]
         [MemberData(nameof(GetTestSuite), "default-initial-state")]
@@ -28,10 +20,6 @@ namespace Statecharts.NET.Tests.SCION.SCXML
         [Theory]
         [MemberData(nameof(GetTestSuite), "documentOrder")]
         public void DocumentOrder(Test test) => TestStatechart(test);
-
-        [Theory]
-        [MemberData(nameof(GetTestSuite), "targetless-transition")]
-        public void TargetlessTransition(Test test) => TestStatechart(test);
 
         private static void TestStatechart(Test test)
         {
@@ -43,10 +31,10 @@ namespace Statecharts.NET.Tests.SCION.SCXML
 
             var service = (parsed as ExecutableStatechart<ECMAScriptContext>).Interpret();
 
-            Assert.Equal(service.Start().Ids(), test.Script.InitialConfiguration);
+            Assert.Equal(test.Script.InitialConfiguration, service.Start().Ids().ToList());
 
             foreach (var step in test.Script.Steps)
-                Assert.Equal(service.Send(new Model.NamedEvent(step.Event.Name)).Ids(), step.NextConfiguration);
+                Assert.Equal(step.NextConfiguration, service.Send(new Model.NamedEvent(step.Event.Name)).Ids().ToList());
         }
         public static TheoryData<Test> GetTestSuite(string _case)
         {
