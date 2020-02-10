@@ -50,7 +50,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML
                     new Test(
                         test.name,
                         $"{test.path}.scxml",
-                        JsonConvert.DeserializeObject<TestScript>(File.ReadAllText($"{test.path}.json"))));
+                        File.ReadAllText($"{test.path}.json")));
 
             var theoryData = new TheoryData<Test>();
             foreach(var test in testConfigurations)

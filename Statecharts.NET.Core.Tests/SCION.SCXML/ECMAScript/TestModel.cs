@@ -1,22 +1,40 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
+using Xunit.Abstractions;
 
 namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
 {
-    public class Test
+    public class Test : IXunitSerializable
     {
-        public Test(string name, string path, TestScript script)
+        private string testScriptContent;
+
+        public Test() { }
+        public Test(string name, string path, string testScript) : this()
         {
             Name = name;
             Path = path;
-            Script = script;
+            testScriptContent = testScript;
         }
 
         public override string ToString() => Name;
 
-        internal string Name { get; }
-        internal string Path { get; }
-        public TestScript Script { get; }
+        internal string Name { get; private set; }
+        internal string Path { get; private set; }
+        public TestScript Script => JsonConvert.DeserializeObject<TestScript>(testScriptContent);
+
+        public void Deserialize(IXunitSerializationInfo info)
+        {
+            Name = info.GetValue<string>("name");
+            Path = info.GetValue<string>("path");
+            testScriptContent = info.GetValue<string>("testScriptContent");
+        }
+
+        public void Serialize(IXunitSerializationInfo info)
+        {
+            info.AddValue("name", Name, typeof(string));
+            info.AddValue("path", Path, typeof(string));
+            info.AddValue("testScriptContent", testScriptContent, typeof(string));
+        }
     }
 
     public class TestScript
