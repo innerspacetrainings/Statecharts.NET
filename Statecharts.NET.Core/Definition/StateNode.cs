@@ -41,8 +41,8 @@ namespace Statecharts.NET.Definition
         OneOfBase<AtomicStateNode, FinalStateNode, CompoundStateNode, OrthogonalStateNode>
     {
         public abstract string Name { get; }
-        public abstract IEnumerable<OneOf<Action, ContextAction>> EntryActions { get; }
-        public abstract IEnumerable<OneOf<Action, ContextAction>> ExitActions { get; }
+        public abstract Option<IEnumerable<OneOf<Action, ContextAction>>> EntryActions { get; }
+        public abstract Option<IEnumerable<OneOf<Action, ContextAction>>> ExitActions { get; }
 
         public override string ToString() => $"{Name} ({GetType().Name.Replace("Definition.StateNode`1", string.Empty)})";
     }
@@ -50,8 +50,8 @@ namespace Statecharts.NET.Definition
     public abstract class FinalStateNode : StateNode {}
     public abstract class NonFinalStateNode : StateNode
     {
-        public abstract IEnumerable<Transition> Transitions { get; }
-        public abstract IEnumerable<Service> Services { get; }
+        public abstract Option<IEnumerable<Transition>> Transitions { get; }
+        public abstract Option<IEnumerable<Service>> Services { get; }
     }
     public abstract class AtomicStateNode : NonFinalStateNode
     {
