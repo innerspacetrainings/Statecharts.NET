@@ -183,19 +183,21 @@ namespace Statecharts.NET.Interpreter
             bool Matches(OneOf<Model.Event, Model.CustomDataEvent> @event) => @event.Equals(nextEvent); // TODO: Equals vs. == (https://docs.microsoft.com/en-us/previous-versions/ms173147(v=vs.90)?redirectedfrom=MSDN)
             bool IsEnabled(GuardedTransition guarded)
                 => guarded.Guard.Match(
-                    inline => false, // TODO: proper inState check
+                    @in => false, // TODO: proper inState check
                     guard => guard.Condition.Invoke(context),
                     dataGuard => dataGuard.Condition.Invoke(context, null)); // TODO: pass Data to Event
             bool SourceStateIsActive(Transition transition)
                 => stateConfiguration.Contains(transition.Source);
             bool TransitionShouldBeTaken(Transition transition) => transition.Match(
-                    forbidden => false, // TODO: remove others if first was forbidden
-                    unguarded =>Matches(unguarded.Event),
+                    forbidden => Matches(forbidden.Event),
+                    unguarded => Matches(unguarded.Event),
                     guarded => Matches(guarded.Event) && IsEnabled(guarded));
 
             return StateChart.Transitions
                 .Where(SourceStateIsActive)
-                .Where(TransitionShouldBeTaken);
+                .GroupBy(transition => transition.Source)
+                .Select(grouping => grouping.FirstOrDefault(TransitionShouldBeTaken))
+                .Where(transition => transition != null);
         }
     }
 
