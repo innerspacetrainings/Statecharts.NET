@@ -1,5 +1,4 @@
 ﻿using Jint.Native;
-using Statecharts.NET.Tests.Definition;
 using Statecharts.NET.Tests.SCION.SCXML.Definition;
 using Statecharts.NET.Utilities;
 
@@ -9,12 +8,14 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions
     {
         internal static void SetStatechartInitialContext(Statechart statechart, ECMAScriptContext initialContext)
             => statechart.InitialContext = initialContext.ToOption();
-        internal static void StatechartAddStateNode(Statechart statechart, Statecharts.NET.Definition.StateNode stateNode)
-            => statechart.AddStateNade(stateNode);
-        internal static void StateNodeAddTransition(AtomicStateNode stateNode, Transition transition)
-            => stateNode._transitions.Add(transition.AsTransitionDefinition());
-        public static void StateNodeSetEntryActions(AtomicStateNode stateNode, EntryActions entryActions)
-            => stateNode._entryActions = entryActions.Actions;
+        internal static void StatechartAddStateNode(Statechart statechart, PartialStateNode stateNode)
+            => statechart.StateNodes.Add(stateNode.AsDefinition());
+        internal static void StateNodeAddTransition(PartialStateNode stateNode, Transition transition)
+            => stateNode.Transitions.Add(transition.AsTransitionDefinition());
+        public static void StateNodeSetEntryActions(PartialStateNode stateNode, EntryActions entryActions)
+            => stateNode.EntryActions = entryActions.Actions;
+        public static void StateNodeAddChildren(PartialStateNode stateNode, PartialStateNode children)
+            => stateNode.Children.Add(children.AsDefinition());
         public static void ContextAddProperty(ECMAScriptContext context, ContextDataEntry entry)
             => context.Engine.SetValue(
                 entry.Id,
