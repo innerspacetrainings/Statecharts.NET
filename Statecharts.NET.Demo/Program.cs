@@ -71,12 +71,12 @@ namespace Statecharts.NET.Demo
             {
                 case ExecutableStatechart<FetchContext> statechart:
                     var service = statechart.Interpret();
-                    var state = service.Start();
-                    LogState(state);
+                    var started = service.Start();
+                    LogState(started.State);
                     while (true)
                     {
                         var eventType = Console.ReadLine();
-                        state = service.Send(new NamedEvent(eventType?.ToUpper()));
+                        var state = service.Send(new NamedEvent(eventType?.ToUpper()));
                         LogState(state);
                     }
                 default:

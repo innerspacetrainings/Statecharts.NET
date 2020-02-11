@@ -31,7 +31,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML
 
             var service = (parsed as ExecutableStatechart<ECMAScriptContext>).Interpret();
 
-            Assert.Equal(test.Script.InitialConfiguration, service.Start().Ids().ToList());
+            Assert.Equal(test.Script.InitialConfiguration, service.Start().State.Ids().ToList());
 
             foreach (var step in test.Script.Steps)
                 Assert.Equal(step.NextConfiguration, service.Send(new Model.NamedEvent(step.Event.Name)).Ids().ToList());

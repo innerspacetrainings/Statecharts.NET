@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using Statecharts.NET.Model;
+using System.Threading.Tasks;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
@@ -22,20 +22,21 @@ namespace Statecharts.NET.Interpreter
         private TContext context;
 
         private ILogger logger = new ConsoleLogger();
+        private TaskCompletionSource<object> taskSource = new TaskCompletionSource<object>();
 
         public ExecutableStatechart<TContext> StateChart { get; set; }
 
         // TODO: think whether this can be modeled with a StartedMachine to prevent doing stuff with an uninitialized Statechart
-        public State<TContext> Start() => Start(StateConfiguration.NotInitialized);
-        public State<TContext> Start(StateConfiguration configuration)
+        public StartResult<TContext> Start() => Start(StateConfiguration.NotInitialized);
+        public StartResult<TContext> Start(StateConfiguration configuration)
         {
             stateConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             context = StateChart.InitialContext;
             Console.WriteLine($"{Environment.NewLine}Starting...");
             var steps = Execute();
-            return new State<TContext>(stateConfiguration, context);
+            return new StartResult<TContext>(new State<TContext>(stateConfiguration, context), taskSource.Task);
         }
-        public State<TContext> Send(NamedEvent @event)
+        public State<TContext> Send(Model.NamedEvent @event)
         {
             Console.WriteLine($"{Environment.NewLine}Enqueuing {@event.EventName}...");
             externalEvents.Enqueue(@event);
@@ -110,7 +111,7 @@ namespace Statecharts.NET.Interpreter
         // TODO: raised Events
         private IEnumerable<Model.IEvent> ExecuteActionBlock(IEnumerable<Model.Action> actions)
         {
-            var events = new List<Event>();
+            var events = new List<Model.Event>();
 
             foreach (var action in actions)
                 action.Switch(
@@ -166,18 +167,20 @@ namespace Statecharts.NET.Interpreter
             => transitions.SelectMany(transition =>
                 transition.GetTargets().Select(target =>
                 {
-                    if(@event == null) Debug.WriteLine("TODO: CreateSteps(...) was called with NULL event, remodel this"); // TODO: remodel
                     var lca = (transition.Source, target).LeastCommonAncestor();
                     var lastBeforeLCA = transition.Source.OneBeneath(lca);
                     var exited = lastBeforeLCA.Append(lastBeforeLCA.GetDescendants()).Where(stateConfiguration.Contains);
                     var entered = target.Append(target.AncestorsUntil(lca).Reverse());
-                    return transition.Match<MicroStep>( // TODO: refactor the similarity
-                        forbidden => null, // TODO: WTF, needs remodelling
-                        unguarded => new EventStep(@event, transition, entered.Ids(), exited.Ids()), 
-                        guarded => new EventStep(@event, transition, entered.Ids(), exited.Ids()));
-                }));
 
-        // TODO: don't take all transitions (https://gitlab.com/scion-scxml/test-framework/blob/master/test/documentOrder/documentOrder0.scxml)
+                    MicroStep NoStep() => null;
+                    EventStep EventStep() => new EventStep(@event, transition, entered.Ids(), exited.Ids());
+                    
+                    return transition.Match(
+                        forbidden => NoStep(),
+                        unguarded => EventStep(),
+                        guarded => EventStep());
+                })).Where(step => step != null);
+
         private IEnumerable<Transition> SelectTransitions(OneOf<Model.Event, Model.CustomDataEvent> nextEvent)
         {
             bool Matches(OneOf<Model.Event, Model.CustomDataEvent> @event) => @event.Equals(nextEvent); // TODO: Equals vs. == (https://docs.microsoft.com/en-us/previous-versions/ms173147(v=vs.90)?redirectedfrom=MSDN)
@@ -192,12 +195,15 @@ namespace Statecharts.NET.Interpreter
                     forbidden => Matches(forbidden.Event),
                     unguarded => Matches(unguarded.Event),
                     guarded => Matches(guarded.Event) && IsEnabled(guarded));
+            StateNode TransitionSource(Transition transition) => transition.Source;
+            Transition FirstMatching(IGrouping<StateNode, Transition> transitions) => transitions.FirstOrDefault(TransitionShouldBeTaken);
+            bool TransitionWasDefined(Transition transition) => transition != null;
 
             return StateChart.Transitions
                 .Where(SourceStateIsActive)
-                .GroupBy(transition => transition.Source)
-                .Select(grouping => grouping.FirstOrDefault(TransitionShouldBeTaken))
-                .Where(transition => transition != null);
+                .GroupBy(TransitionSource)
+                .Select(FirstMatching)
+                .Where(TransitionWasDefined);
         }
     }
 

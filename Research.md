@@ -16,6 +16,7 @@ building DSLs in C#: https://www.codemag.com/Article/0902041/Building-Domain-Spe
 statecharts comments: https://www.bcobb.net/hacker-school-read-along-statecharts/#fn1
 C# async antipatterns: https://markheath.net/post/async-antipatterns
 C# monads and links: https://devblogs.microsoft.com/pfxteam/tasks-monads-and-linq/
+C# TaskCompletionSource<void>: https://stackoverflow.com/questions/11969208/non-generic-taskcompletionsource-or-alternative
 
 
 ## Sismic Statechart Algorithm
