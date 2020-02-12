@@ -8,7 +8,8 @@ namespace Statecharts.NET.Interpreter
 
     internal class InitializationStep : MicroStep
     {
-        public StateNodeId RootStateId => new StateNodeId(new RootStateNodeKey(string.Empty)); // TODO: fix this
+        public InitializationStep(StateNode rootState) => RootState = rootState;
+        public StateNode RootState { get; }
     }
     internal class StabilizationStep : MicroStep
     {

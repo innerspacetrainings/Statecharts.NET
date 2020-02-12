@@ -7,6 +7,7 @@ using Statecharts.NET.Model;
 using Statecharts.NET.XState;
 using static Statecharts.NET.XState.JPropertyConstructorFunctions;
 using static Statecharts.NET.Language.Keywords;
+using Service = Statecharts.NET.Definition.Service;
 
 namespace Statecharts.NET.Demo
 {
@@ -58,7 +59,16 @@ namespace Statecharts.NET.Demo
                         "sheeeesh".AsFinal(),
                         "failure".WithTransitions(
                                 On("RETRY").TransitionTo.Sibling("loading")
-                                    .WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++)))));
+                                    .WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++)))
+                            .WithInvocations(
+                                Language.Service.DefineTask(async token => {
+                                    Console.WriteLine(0);
+                                    await System.Threading.Tasks.Task.Delay(1000);
+                                    Console.WriteLine(1);
+                                }).OnSuccess.TransitionTo.Sibling("sheeeesh"),
+                                Language.Service.DefineActivity(
+                                    () => Console.WriteLine("started"),
+                                    () => Console.WriteLine("stopped")))));
 
         private static void Main()
         {

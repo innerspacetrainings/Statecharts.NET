@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,6 +48,18 @@ namespace Statecharts.NET.Interpreter
             var microSteps = ComputeMicroSteps().ToList();
             var macroStep = ExecuteMicrosteps(microSteps);
             // TODO: (Service) invoke all services here
+            var enteredStateNodes = macroStep.EnteredStateNodes
+                .Select(stateNode => (stateNode, services: stateNode.Services))
+                .Where(entry => entry.services.Any());
+
+            foreach (var (stateNode, services) in enteredStateNodes)
+            {
+                var cts = new CancellationTokenSource();
+                foreach (var service in services)
+                    service.Invoke(cts.Token);
+                serviceCancellationTokens.Add(stateNode, cts);
+            }
+
             return macroStep;
         }
         internal MacroStep ExecuteMicrosteps(IEnumerable<MicroStep> microSteps)
@@ -94,8 +105,8 @@ namespace Statecharts.NET.Interpreter
             }
             void ApplyInitialStep(InitializationStep step)
             {
-                ExecuteEntryActionsFor(StateChart.GetStateNode(step.RootStateId));
-                stateConfiguration = stateConfiguration.With(step.RootStateId);
+                ExecuteEntryActionsFor(step.RootState);
+                stateConfiguration = stateConfiguration.With(step.RootState.Id);
             }
             void ApplyStabilizationStep(StabilizationStep step)
             {
@@ -143,7 +154,7 @@ namespace Statecharts.NET.Interpreter
 
         internal IEnumerable<MicroStep> ComputeMicroSteps()
         {
-            if (stateConfiguration.IsNotInitialized) return new InitializationStep().Yield();
+            if (stateConfiguration.IsNotInitialized) return new InitializationStep(StateChart.RootNode).Yield();
             var @event = events.Dequeue();
             var transitions = SelectTransitions(@event);
             var computedSteps = CreateSteps(@event, transitions);

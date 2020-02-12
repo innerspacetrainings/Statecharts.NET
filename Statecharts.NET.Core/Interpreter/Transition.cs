@@ -50,7 +50,7 @@ namespace Statecharts.NET.Interpreter
     {
         public OneOf<Model.Event, Model.CustomDataEvent> Event { get; }
         public IEnumerable<StateNode> Targets { get; }
-        public IEnumerable<Model.Action> Actions { get; }
+        public new IEnumerable<Model.Action> Actions { get; }
 
         public UnguardedTransition(
             StateNode source,
@@ -101,7 +101,7 @@ namespace Statecharts.NET.Interpreter
         public OneOf<Model.Event, Model.CustomDataEvent> Event { get; }
         public OneOf<Model.InStateGuard, Model.ConditionContextGuard, Model.ConditionContextDataGuard> Guard { get; }
         public IEnumerable<StateNode> Targets { get; }
-        public IEnumerable<Model.Action> Actions { get; }
+        public new IEnumerable<Model.Action> Actions { get; }
 
         private GuardedTransition(
             StateNode source,

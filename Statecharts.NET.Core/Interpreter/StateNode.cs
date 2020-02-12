@@ -109,7 +109,7 @@ namespace Statecharts.NET.Interpreter
             Depth = Parent?.Depth + 1 ?? 0;
 
             Transitions = definition.GetTransitions();
-            Services = definition.GetServices();
+            Services = definition.GetServices().Select(Service.FromDefinition);
 
             EntryActions = definition.EntryActions.Map(actions => actions.ToModelActions()).ValueOr(Enumerable.Empty<Model.Action>());
             ExitActions = definition.ExitActions.Map(actions => actions.ToModelActions()).ValueOr(Enumerable.Empty<Model.Action>());
