@@ -10,7 +10,7 @@ namespace Statecharts.NET.Interpreter
 
         public Service(Model.Task<object> task) => _task = task;
 
-        public void Invoke(CancellationToken cancellationToken)
+        public Task<object> Invoke(CancellationToken cancellationToken)
             => _task(cancellationToken);
 
         public static Service FromDefinition(Definition.Service serviceDefinition)
@@ -25,7 +25,11 @@ namespace Statecharts.NET.Interpreter
 
             return serviceDefinition.Match(
                 CreateServiceFromActivity,
-                task => new Service(cancellationToken => task.Task(cancellationToken) as Task<object>),
+                task => new Service(async cancellationToken =>
+                {
+                    await task.Task(cancellationToken);
+                    return default;
+                }),
                 dataTask => new Service(dataTask.Task));
         }
     }

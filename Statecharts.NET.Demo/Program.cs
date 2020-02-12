@@ -45,7 +45,6 @@ namespace Statecharts.NET.Demo
                                 "nana".WithTransitions(On("SERIOUSLY").TransitionTo.Absolute("fetch", "failure"))),
                         "loading"
                             .WithEntryActions<FetchContext>(
-                                Run<FetchContext>(context => Console.WriteLine($"Entered loading state with context: {context}")),
                                 Run(() => Console.WriteLine("parameterless Actions also compile *party*")),
                                 //Run(() => throw new Exception("haha, i killed you")),
                                 Raise("raise"),
@@ -62,9 +61,9 @@ namespace Statecharts.NET.Demo
                                     .WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++)))
                             .WithInvocations(
                                 Language.Service.DefineTask(async token => {
-                                    Console.WriteLine(0);
-                                    await System.Threading.Tasks.Task.Delay(1000);
-                                    Console.WriteLine(1);
+                                    Console.WriteLine("waiting 3 seconds");
+                                    await System.Threading.Tasks.Task.Delay(3000, token);
+                                    Console.WriteLine("waiting finished");
                                 }).OnSuccess.TransitionTo.Sibling("sheeeesh"),
                                 Language.Service.DefineActivity(
                                     () => Console.WriteLine("started"),

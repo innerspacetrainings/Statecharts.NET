@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
@@ -31,6 +32,7 @@ namespace Statecharts.NET.Interpreter
         }
         public State<TContext> Send(Model.NamedEvent @event)
         {
+            Console.WriteLine($"{@event} sent");
             events.EnqueueExternal(@event);
             var steps = Execute();
             return new State<TContext>(stateConfiguration, context);
@@ -56,7 +58,22 @@ namespace Statecharts.NET.Interpreter
             {
                 var cts = new CancellationTokenSource();
                 foreach (var service in services)
-                    service.Invoke(cts.Token);
+                {
+                    var s = service.Invoke(cts.Token);
+                    s.ContinueWith(task =>
+                    {
+                        switch (task.Status)
+                        {
+                            case TaskStatus.RanToCompletion:
+                                Send(new NamedEvent("service.finished"));
+                                break;
+                            case TaskStatus.Faulted:
+                                Send(new NamedEvent("service.failed"));
+                                break;
+                        }
+                    }, cts.Token);
+                }
+
                 serviceCancellationTokens.Add(stateNode, cts);
             }
 
@@ -118,6 +135,8 @@ namespace Statecharts.NET.Interpreter
                 ExecuteExitActionsFor(exitedStates.ToArray());
                 foreach (var token in exitedStates.Select(sn => serviceCancellationTokens.GetValue(sn)).NotNull())
                     token.Cancel();
+                foreach (var stateNode in exitedStates)
+                    serviceCancellationTokens.Remove(stateNode);
                 ExecuteActionBlock(transition.Actions);
                 ExecuteEntryActionsFor(enteredStates.ToArray());
                 stateConfiguration = stateConfiguration.Without(exitedStates.Ids()).With(enteredStates.Ids());
