@@ -46,6 +46,7 @@ namespace Statecharts.NET.Demo
                             .WithEntryActions<FetchContext>(
                                 Run<FetchContext>(context => Console.WriteLine($"Entered loading state with context: {context}")),
                                 Run(() => Console.WriteLine("parameterless Actions also compile *party*")),
+                                //Run(() => throw new Exception("haha, i killed you")),
                                 Raise("raise"),
                                 Send("send"),
                                 Log<FetchContext>(context => $"Entered loading state with context: {context}"))

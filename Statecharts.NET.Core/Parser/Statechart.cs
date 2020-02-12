@@ -123,9 +123,9 @@ namespace Statecharts.NET
         public IEnumerable<Interpreter.StateNode> GetStateNodes(StateConfiguration configuration)
             => GetStateNodes(configuration.StateNodeIds);
         public IEnumerable<Interpreter.StateNode> GetStateNodes(IEnumerable<StateNodeId> stateNodeIds)
-            => stateNodeIds.Select(id => _stateNodes[id]);
+            => stateNodeIds.Select(GetStateNode);
 
-        public Interpreter.StateNode GetStateNode(StateNodeId id)
+        internal Interpreter.StateNode GetStateNode(StateNodeId id)
             => _stateNodes[id];
 
         private Interpreter.StateNode ResolveTarget(

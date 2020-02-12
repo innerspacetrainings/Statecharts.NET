@@ -26,10 +26,16 @@ namespace Statecharts.NET.Interpreter
         internal Transition(StateNode source) => Source = source ?? throw new ArgumentNullException(nameof(source));
 
         public IEnumerable<StateNode> GetTargets() =>
-            this.Match(
+            Match(
                 forbidden => Enumerable.Empty<StateNode>(),
                 unguarded => unguarded.Targets,
                 guarded => guarded.Targets);
+
+        public IEnumerable<Model.Action> Actions =>
+            Match(
+                forbidden => Enumerable.Empty<Model.Action>(),
+                unguarded => unguarded.Actions,
+                guarded => guarded.Actions);
     }
 
     public class ForbiddenTransition : Transition

@@ -8,15 +8,10 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
 {
-    // TODO: CurrentConfig/CurrentState
-
-    // TODO: roadmap: invoke Services | rethink Events | unify Micro/Macrosteps
-
     public class Machine<TContext>
         where TContext : IEquatable<TContext>
     {
-        private Queue<Model.Event> internalEvents = new Queue<Model.Event>(); // TODO: https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp
-        private Queue<Model.Event> externalEvents = new Queue<Model.Event>();
+        private EventQueue events = new EventQueue();
         private StateConfiguration stateConfiguration;
         private Dictionary<StateNode, CancellationTokenSource> serviceCancellationTokens = new Dictionary<StateNode, CancellationTokenSource>();
         private TContext context;
@@ -32,18 +27,30 @@ namespace Statecharts.NET.Interpreter
         {
             stateConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             context = StateChart.InitialContext;
-            Console.WriteLine($"{Environment.NewLine}Starting...");
             var steps = Execute();
             return new StartResult<TContext>(new State<TContext>(stateConfiguration, context), taskSource.Task);
         }
         public State<TContext> Send(Model.NamedEvent @event)
         {
-            Console.WriteLine($"{Environment.NewLine}Enqueuing {@event.EventName}...");
-            externalEvents.Enqueue(@event);
+            events.EnqueueExternal(@event);
             var steps = Execute();
             return new State<TContext>(stateConfiguration, context);
         }
 
+        // like 'sismic.execute_once'
+        internal IList<MacroStep> Execute()
+        {
+            var steps = new List<MacroStep>();
+            do steps.Add(ExecuteMacrostep()); while (!events.IsEmpty);
+            return steps;
+        }
+        internal MacroStep ExecuteMacrostep()
+        {
+            var microSteps = ComputeMicroSteps().ToList();
+            var macroStep = ExecuteMicrosteps(microSteps);
+            // TODO: (Service) invoke all services here
+            return macroStep;
+        }
         internal MacroStep ExecuteMicrosteps(IEnumerable<MicroStep> microSteps)
         {
             var executedSteps = new List<MicroStep>();
@@ -69,99 +76,79 @@ namespace Statecharts.NET.Interpreter
                 .Select(stateNode => stateNode.Match(
                     atomic => null,
                     final => null, // TODO: correctly handle final states according to SCXML
-                    compound => new StabilizationStep(compound.InitialTransition.Target.Append(compound.InitialTransition.Target.GetDescendants()).Select(a => a.Id)), // TODO: https://github.com/davidkpiano/xstate/issues/675
-                    orthogonal => new StabilizationStep(orthogonal.StateNodes.Select(state => state.Id))))
+                    compound => new StabilizationStep(compound.InitialTransition.Target.Append(compound.InitialTransition.Target.GetDescendants())), // TODO: https://github.com/davidkpiano/xstate/issues/675
+                    orthogonal => new StabilizationStep(orthogonal.StateNodes)))
                 .FirstOrDefault();
 
         private MicroStep ApplyStep(MicroStep microStep)
         {
+            void ExecuteEntryActionsFor(params StateNode[] stateNodes)
+            {
+                foreach (var stateNode in stateNodes)
+                    ExecuteActionBlock(stateNode.EntryActions);
+            }
+            void ExecuteExitActionsFor(params StateNode[] stateNodes)
+            {
+                foreach (var stateNode in stateNodes)
+                    ExecuteActionBlock(stateNode.ExitActions);
+            }
             void ApplyInitialStep(InitializationStep step)
             {
-                var enteredStateNodes = StateChart.GetStateNode(step.RootStateId).Yield();
-                var eventsRaisedByEntering = enteredStateNodes.Select(stateNode => ExecuteActionBlock(stateNode.EntryActions)).ToList();
+                ExecuteEntryActionsFor(StateChart.GetStateNode(step.RootStateId));
                 stateConfiguration = stateConfiguration.With(step.RootStateId);
             }
             void ApplyStabilizationStep(StabilizationStep step)
             {
-                var enteredStateNodes = StateChart.GetStateNodes(step.EnteredStatesIds);
-                var eventsRaisedByEntering = enteredStateNodes.Select(stateNode => ExecuteActionBlock(stateNode.EntryActions)).ToList();
-                stateConfiguration = stateConfiguration.With(step.EnteredStatesIds);
+                ExecuteEntryActionsFor(step.EnteredStates.ToArray());
+                stateConfiguration = stateConfiguration.With(step.EnteredStates.Ids());
             }
-            void ApplyStep(IList<StateNodeId> enteredStatesKeys, IList<StateNodeId> exitedStatesKeys, Transition transition)
+            void ApplyStep(IList<StateNode> enteredStates, IList<StateNode> exitedStates, Transition transition)
             {
-                var enteredStateNodes = StateChart.GetStateNodes(enteredStatesKeys);
-                var exitedStateNodes = StateChart.GetStateNodes(exitedStatesKeys);
-                //foreach(var token in exitedStateNodes.Select(sn => serviceCancellationTokens[sn]))
-                //    token.Cancel();
-                var eventsRaisedByExiting = exitedStateNodes.Select(stateNode => ExecuteActionBlock(stateNode.ExitActions)).ToList();
-                var eventsRaisedOnTransition = transition.Match(forbidden => Enumerable.Empty<Model.IEvent>(), unguarded => ExecuteActionBlock(unguarded.Actions), guarded => ExecuteActionBlock(guarded.Actions));
-                var eventsRaisedByEntering = enteredStateNodes.Select(stateNode => ExecuteActionBlock(stateNode.EntryActions)).ToList();
-                stateConfiguration = stateConfiguration.Without(exitedStatesKeys).With(enteredStatesKeys);
+                ExecuteExitActionsFor(exitedStates.ToArray());
+                ExecuteActionBlock(transition.Actions);
+                ExecuteEntryActionsFor(enteredStates.ToArray());
+                foreach (var token in exitedStates.Select(sn => serviceCancellationTokens.GetValue(sn)).NotNull())
+                    token.Cancel();
+                stateConfiguration = stateConfiguration.Without(exitedStates.Ids()).With(enteredStates.Ids());
             }
 
             microStep.Switch(
                 ApplyInitialStep,
                 ApplyStabilizationStep,
-                immediate => ApplyStep(immediate.EnteredStatesIds.ToList(), immediate.ExitedStatesIds.ToList(), immediate.Transition),
-                @event => ApplyStep(@event.EnteredStatesIds.ToList(), @event.ExitedStatesIds.ToList(), @event.Transition));
+                immediate => ApplyStep(immediate.EnteredStates.ToList(), immediate.ExitedStates.ToList(), immediate.Transition),
+                @event => ApplyStep(@event.EnteredStates.ToList(), @event.ExitedStates.ToList(), @event.Transition));
             return microStep; // TODO: raised/sent events
         }
 
-        // TODO: https://github.com/davidkpiano/xstate/issues/603
-        // TODO: raised Events
-        private IEnumerable<Model.IEvent> ExecuteActionBlock(IEnumerable<Model.Action> actions)
+        private void ExecuteActionBlock(IEnumerable<Model.Action> actions)
         {
-            var events = new List<Model.Event>();
-
             foreach (var action in actions)
-                action.Switch(
-                    // TODO: actually execute the Actions
+                try
+                {
                     // TODO: where to get EventData from
-                    send => { }, 
-                    raise => { },
-                    log => logger.Log(log.Message(context, default)),
-                    assign => assign.Mutation(context, default),
-                    sideEffect => sideEffect.Function(context, default));
-
-            return events; // TODO: return actual raised events
-        }
-
-        // like 'sismic.execute_once'
-        internal MacroStep ExecuteMacrostep()
-        {
-            var microSteps = ComputeMicroSteps().ToList();
-            var macroStep = ExecuteMicrosteps(microSteps);
-            return macroStep;
-        }
-
-        internal IEnumerable<MacroStep> Execute()
-        {
-            var steps = new List<MacroStep>();
-            var macroStep = ExecuteMacrostep();
-            while (macroStep.MicroSteps.Count() != 0) // TODO: make this prettier
-            {
-                steps.Add(macroStep);
-                macroStep = ExecuteMacrostep();
-            }
-            return steps;
+                    action.Switch(
+                        send => events.EnqueueExternal(new Model.NamedEvent(send.EventName)),
+                        raise => events.EnqueueInternal(new Model.NamedEvent(raise.EventName)),
+                        log => logger.Log(log.Message(context, default)),
+                        assign => assign.Mutation(context, default),
+                        sideEffect => sideEffect.Function(context, default));
+                }
+                catch (Exception exception)
+                {
+                    // TODO: error handling: place Event 'error.execution' (with Exception as Data) on internal Event Queue, only raise the exception, if no handler was defined
+                    // TODO: System.InvalidOperationException: 'An attempt was made to transition a task to a final state when it had already completed.'
+                    taskSource.SetException(exception);
+                }
         }
 
         internal IEnumerable<MicroStep> ComputeMicroSteps()
         {
             if (stateConfiguration.IsNotInitialized) return new InitializationStep().Yield();
-            var @event = SelectEvent();
+            var @event = events.Dequeue();
             var transitions = SelectTransitions(@event);
             var computedSteps = CreateSteps(@event, transitions);
             return computedSteps;
         }
-
-        private Model.Event SelectEvent()
-            => internalEvents.Count > 0
-                ? internalEvents.Dequeue()
-                : externalEvents.Count > 0
-                    ? externalEvents.Dequeue()
-                    : null;
-            //=> internalEvents.Concat(externalEvents).FirstOrDefault();
 
         private IEnumerable<MicroStep> CreateSteps(Model.Event @event, IEnumerable<Transition> transitions)
             => transitions.SelectMany(transition =>
@@ -173,7 +160,7 @@ namespace Statecharts.NET.Interpreter
                     var entered = target.Append(target.AncestorsUntil(lca).Reverse());
 
                     MicroStep NoStep() => null;
-                    EventStep EventStep() => new EventStep(@event, transition, entered.Ids(), exited.Ids());
+                    EventStep EventStep() => new EventStep(@event, transition, entered, exited);
                     
                     return transition.Match(
                         forbidden => NoStep(),
@@ -204,66 +191,6 @@ namespace Statecharts.NET.Interpreter
                 .GroupBy(TransitionSource)
                 .Select(FirstMatching)
                 .Where(TransitionWasDefined);
-        }
-    }
-
-    internal class MacroStep
-    {
-        public MacroStep(IEnumerable<MicroStep> microSteps)
-        {
-            MicroSteps = microSteps;
-        }
-
-        public IEnumerable<MicroStep> MicroSteps { get; }
-    }
-    
-    internal abstract class MicroStep : OneOfBase<InitializationStep, StabilizationStep, ImmediateStep, EventStep> { }
-    internal class InitializationStep : MicroStep
-    {
-        public StateNodeId RootStateId => new StateNodeId(new RootStateNodeKey(string.Empty)); // TODO: fix this
-    }
-    internal class StabilizationStep : MicroStep
-    {
-        public IEnumerable<StateNodeId> EnteredStatesIds { get; }
-
-        public StabilizationStep(IEnumerable<StateNodeId> enteredStatesIds)
-        {
-            EnteredStatesIds = enteredStatesIds ?? throw new ArgumentNullException(nameof(enteredStatesIds));
-        }
-    }
-    internal class ImmediateStep : MicroStep
-    {
-        public UnguardedTransition Transition { get; }
-        public IEnumerable<StateNodeId> EnteredStatesIds { get; }
-        public IEnumerable<StateNodeId> ExitedStatesIds { get; }
-
-        public ImmediateStep(
-            UnguardedTransition transition,
-            IEnumerable<StateNodeId> enteredStatesIds,
-            IEnumerable<StateNodeId> exitedStatesIds)
-        {
-            Transition = transition ?? throw new ArgumentNullException(nameof(transition));
-            EnteredStatesIds = enteredStatesIds ?? throw new ArgumentNullException(nameof(enteredStatesIds));
-            ExitedStatesIds = exitedStatesIds ?? throw new ArgumentNullException(nameof(exitedStatesIds));
-        }
-    }
-    internal class EventStep : MicroStep
-    {
-        public Model.Event Event { get; }
-        public Transition Transition { get; }
-        public IEnumerable<StateNodeId> EnteredStatesIds { get; }
-        public IEnumerable<StateNodeId> ExitedStatesIds { get; }
-
-        public EventStep(
-            Model.Event @event,
-            Transition transition,
-            IEnumerable<StateNodeId> enteredStatesIds,
-            IEnumerable<StateNodeId> exitedStatesIds)
-        {
-            Event = @event ?? throw new ArgumentNullException(nameof(@event));
-            Transition = transition ?? throw new ArgumentNullException(nameof(transition));
-            EnteredStatesIds = enteredStatesIds ?? throw new ArgumentNullException(nameof(enteredStatesIds));
-            ExitedStatesIds = exitedStatesIds ?? throw new ArgumentNullException(nameof(exitedStatesIds));
         }
     }
 }
