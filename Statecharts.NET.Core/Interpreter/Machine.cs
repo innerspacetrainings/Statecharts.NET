@@ -116,10 +116,10 @@ namespace Statecharts.NET.Interpreter
             void ApplyStep(IList<StateNode> enteredStates, IList<StateNode> exitedStates, Transition transition)
             {
                 ExecuteExitActionsFor(exitedStates.ToArray());
-                ExecuteActionBlock(transition.Actions);
-                ExecuteEntryActionsFor(enteredStates.ToArray());
                 foreach (var token in exitedStates.Select(sn => serviceCancellationTokens.GetValue(sn)).NotNull())
                     token.Cancel();
+                ExecuteActionBlock(transition.Actions);
+                ExecuteEntryActionsFor(enteredStates.ToArray());
                 stateConfiguration = stateConfiguration.Without(exitedStates.Ids()).With(enteredStates.Ids());
             }
 
