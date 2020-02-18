@@ -36,13 +36,13 @@ namespace Statecharts.NET.Interpreter
     }
     internal class EventStep : MicroStep
     {
-        public Model.Event Event { get; }
+        public Model.IEvent Event { get; }
         public Transition Transition { get; }
         public IEnumerable<StateNode> EnteredStates { get; }
         public IEnumerable<StateNode> ExitedStates { get; }
 
         public EventStep(
-            Model.Event @event,
+            Model.IEvent @event,
             Transition transition,
             IEnumerable<StateNode> enteredStates,
             IEnumerable<StateNode> exitedStates)

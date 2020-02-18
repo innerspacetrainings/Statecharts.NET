@@ -1,26 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Statecharts.NET.Model;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
 {
     internal class EventQueue
     {
-        private Queue<Model.Event> internalEvents = new Queue<Model.Event>(); // TODO: https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp
-        private Queue<Model.Event> externalEvents = new Queue<Model.Event>();
+        private readonly Queue<IEvent> _externalEvents = new Queue<IEvent>();
+        private readonly Queue<IEvent> _internalEvents = new Queue<IEvent>();
 
-        public Model.Event Dequeue()
-            => internalEvents.Count > 0
-                ? internalEvents.Dequeue()
-                : externalEvents.Count > 0
-                    ? externalEvents.Dequeue()
-                    : null;
+        public Option<IEvent> Dequeue()
+            => _internalEvents.Count > 0
+                ? _internalEvents.Dequeue().ToOption()
+                : _externalEvents.Count > 0
+                    ? _externalEvents.Dequeue().ToOption()
+                    : Option.None<IEvent>();
 
-        public bool IsEmpty => !internalEvents.Any() && !externalEvents.Any();
+        public bool IsEmpty => !_internalEvents.Any() && !_externalEvents.Any();
 
-        public void EnqueueExternal(NamedEvent @event) => externalEvents.Enqueue(@event);
-        public void EnqueueInternal(NamedEvent @event) => internalEvents.Enqueue(@event);
+        public void EnqueueExternal(IEvent @event) => _externalEvents.Enqueue(@event);
+        public void EnqueueInternal(NamedEvent @event) => _internalEvents.Enqueue(@event);
     }
 }

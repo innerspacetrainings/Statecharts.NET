@@ -5,7 +5,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 <#
-var maxGenerics = 10;
+var arities = new[] { 3, 4, 5, 7 };
 
 string GenerateForArity(int arity, string template, string separator) =>
     string.Join(separator, Enumerable.Range(0, arity).Select(position => string.Format(template, position)));
@@ -16,27 +16,34 @@ using System;
 
 namespace Statecharts.NET.Utilities
 {
-<#foreach(var arity in Enumerable.Range(2, maxGenerics))
-{#>
-    public struct OneOf<<#= Generics(arity) #>>
+<#foreach(var arity in arities){#>
+    public class OneOfBase<<#= Generics(arity) #>>
     {
-        readonly int _index;
-        <#= GenerateForArity(arity, "readonly T{0} _value{0};", $"{Environment.NewLine}        ") #>
+        private readonly int _index;
+        <#= GenerateForArity(arity, "private readonly T{0} _value{0};", $"{Environment.NewLine}        ") #>
 
-        private OneOf(int index, <#= GenerateForArity(arity, "T{0} value{0} = default", ", ") #>)
+        private OneOfBase(int index, <#= GenerateForArity(arity, "T{0} value{0} = default", ", ") #>)
         {
             _index = index;
             <#= GenerateForArity(arity, "_value{0} = value{0};", $"{Environment.NewLine}            ") #>
         }
 
-        <#= GenerateForArity(arity, $"public static implicit operator OneOf<{Generics(arity)}>(T{{0}} t) => new OneOf<{Generics(arity)}>({{0}}, value{{0}}: t);", $"{Environment.NewLine}        ") #>
+        protected OneOfBase()
+        {
+            switch (this)
+            {
+                <#= GenerateForArity(arity, $"case T{{0}} _: _index = {{0}}; _value{{0}} = (T{{0}})(object)this; return;", $"{Environment.NewLine}                ") #>
+            }
+        }
+
+        <#= GenerateForArity(arity, $"public static implicit operator OneOfBase<{Generics(arity)}>(T{{0}} t) => new OneOfBase<{Generics(arity)}>({{0}}, value{{0}}: t);", $"{Environment.NewLine}        ") #>
 
         public TResult Match<TResult>(<#= GenerateForArity(arity, "Func<T{0}, TResult> f{0}", ", ") #>)
         {
             switch (_index)
             {
                 <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: return f{{0}}(_value{{0}});", $"{Environment.NewLine}                ") #>
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
 
@@ -45,11 +52,11 @@ namespace Statecharts.NET.Utilities
             switch (_index)
             {
                 <#= GenerateForArity(arity, $"case {{0}} when f{{0}} != null: f{{0}}(_value{{0}}); return;", $"{Environment.NewLine}                ") #>
-                default: throw new InvalidOperationException();
+                default: throw new InvalidOperationException("Unexpected index, which indicates a problem in the OneOfBase codegen.");
             }
         }
 
-        private bool Equals(OneOf<<#= Generics(arity) #>> other)
+        private bool Equals(OneOfBase<<#= Generics(arity) #>> other)
         {
             if (_index != other._index) return false;
             switch (_index)
@@ -60,11 +67,11 @@ namespace Statecharts.NET.Utilities
         }
 
         public override bool Equals(object obj) =>
-            !(obj is null) && obj is OneOf<<#= Generics(arity) #>> other && Equals(other);
+            ReferenceEquals(this, obj) || (!(obj is null) && obj is OneOfBase<<#= Generics(arity) #>> other && Equals(other));
 
         public override string ToString()
         {
-            string FormatValue<T>(Type type, T value) => $"{type.FullName}: {value.ToString()}";
+            string FormatValue<T>(Type type, T value) => $"{type.FullName}"; // TODO: {value?.ToString()}
             switch (_index)
             {
                 <#= GenerateForArity(arity, $"case {{0}}: return FormatValue(typeof(T{{0}}), _value{{0}});", $"{Environment.NewLine}                ") #>
@@ -84,6 +91,5 @@ namespace Statecharts.NET.Utilities
             }
         }
     }
-    
 <#}#>
 }

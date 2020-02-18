@@ -8,6 +8,8 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
 {
+    // TODO: rethink events | continuation (services, final) | fix guards/immediate
+
     public class Machine<TContext>
         where TContext : IEquatable<TContext>
     {
@@ -30,7 +32,10 @@ namespace Statecharts.NET.Interpreter
             var steps = Execute();
             return new StartResult<TContext>(new State<TContext>(stateConfiguration, context), taskSource.Task);
         }
+
         public State<TContext> Send(Model.NamedEvent @event)
+            => Send(@event as ISendableEvent);
+        private State<TContext> Send(ISendableEvent @event)
         {
             Console.WriteLine($"{@event} sent");
             events.EnqueueExternal(@event);
@@ -65,7 +70,7 @@ namespace Statecharts.NET.Interpreter
                         switch (task.Status)
                         {
                             case TaskStatus.RanToCompletion:
-                                Send(new NamedEvent("service.finished"));
+                                Send(new NamedEvent($"service.finished {task.Result}"));
                                 break;
                             case TaskStatus.Faulted:
                                 Send(new NamedEvent("service.failed"));
@@ -180,7 +185,7 @@ namespace Statecharts.NET.Interpreter
             return computedSteps;
         }
 
-        private IEnumerable<MicroStep> CreateSteps(Model.Event @event, IEnumerable<Transition> transitions)
+        private IEnumerable<MicroStep> CreateSteps(IEvent @event, IEnumerable<Transition> transitions)
             => transitions.SelectMany(transition =>
                 transition.GetTargets().Select(target =>
                 {
@@ -198,9 +203,9 @@ namespace Statecharts.NET.Interpreter
                         guarded => EventStep());
                 })).Where(step => step != null);
 
-        private IEnumerable<Transition> SelectTransitions(OneOf<Model.Event, Model.CustomDataEvent> nextEvent)
+        private IEnumerable<Transition> SelectTransitions(IEvent nextEvent)
         {
-            bool Matches(OneOf<Model.Event, Model.CustomDataEvent> @event) => @event.Equals(nextEvent); // TODO: Equals vs. == (https://docs.microsoft.com/en-us/previous-versions/ms173147(v=vs.90)?redirectedfrom=MSDN)
+            bool Matches(OneOf<Event, CustomDataEvent> @event) => @event.Match<IEvent>(e => e, e => e).Equals(nextEvent); // TODO: Equals vs. == (https://docs.microsoft.com/en-us/previous-versions/ms173147(v=vs.90)?redirectedfrom=MSDN)
             bool IsEnabled(GuardedTransition guarded)
                 => guarded.Guard.Match(
                     @in => false, // TODO: proper inState check

@@ -10,29 +10,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="_Utilities\OneOfBase.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>OneOfBase.tt</DependentUpon>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="_Utilities\OneOf.cs">
+    <Compile Update="Utilities\OneOf.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>OneOf.tt</DependentUpon>
     </Compile>
-    <Compile Update="_Utilities\OneOfBase.cs">
+    <Compile Update="Utilities\OneOfBase.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>OneOfBase.tt</DependentUpon>
     </Compile>
-    <Compile Update="_Utilities\OneOfUnion.cs">
+    <Compile Update="Utilities\OneOfUnion.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>OneOfUnion.tt</DependentUpon>
@@ -40,15 +32,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="_Utilities\OneOf.tt">
+    <None Update="Utilities\OneOf.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>OneOf.cs</LastGenOutput>
     </None>
-    <None Update="_Utilities\OneOfBase.tt">
+    <None Update="Utilities\OneOfBase.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>OneOfBase.cs</LastGenOutput>
     </None>
-    <None Update="_Utilities\OneOfUnion.tt">
+    <None Update="Utilities\OneOfUnion.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>OneOfUnion.cs</LastGenOutput>
     </None>

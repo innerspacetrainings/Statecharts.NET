@@ -4,13 +4,14 @@ using Statecharts.NET.Utilities;
 namespace Statecharts.NET.Model
 {
     public interface IEvent : IEquatable<IEvent> { }
+    public interface ISendableEvent : IEvent { }
 
     public abstract class Event : OneOfBase<NamedEvent, ImmediateEvent, DelayedEvent>, IEvent
     {
         public virtual bool Equals(IEvent other) => this.Match(Equals, Equals, Equals);
     }
 
-    public class NamedEvent : Event
+    public class NamedEvent : Event, ISendableEvent
     {
         public string EventName { get; }
         public NamedEvent(string eventName) => EventName = eventName;
@@ -31,13 +32,13 @@ namespace Statecharts.NET.Model
         public override bool Equals(IEvent other) => other is ImmediateEvent;
         public override string ToString() => "Immediately";
     }
-    public class DelayedEvent : Event {
+    public class DelayedEvent : Event, ISendableEvent {
         public TimeSpan Delay { get; }
         public DelayedEvent(TimeSpan delay) => Delay = delay;
 
         public override bool Equals(IEvent other) => other == this; // TODO: think of this
     }
-    public class CustomDataEvent : IEvent // TODO: think of this, probably inherit NamedEvent and only add Data
+    public class CustomDataEvent : ISendableEvent // TODO: think of this, probably inherit NamedEvent and only add Data
     {
         public string EventName { get; }
         public object Data { get; }
@@ -59,10 +60,10 @@ namespace Statecharts.NET.Model
 
         public override int GetHashCode() => EventName != null ? EventName.GetHashCode() : 0;
     }
-    public class ServiceSuccessEvent : IEvent {
+    public class ServiceSuccessEvent : ISendableEvent {
         public bool Equals(IEvent other) => throw new NotImplementedException();
     }
-    public class ServiceErrorEvent : IEvent
+    public class ServiceErrorEvent : ISendableEvent
     {
         public bool Equals(IEvent other) => throw new NotImplementedException();
     }
