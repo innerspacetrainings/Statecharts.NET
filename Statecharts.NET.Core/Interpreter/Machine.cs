@@ -138,7 +138,7 @@ namespace Statecharts.NET.Interpreter
             void ApplyStep(IList<StateNode> enteredStates, IList<StateNode> exitedStates, Transition transition)
             {
                 ExecuteExitActionsFor(exitedStates.ToArray());
-                foreach (var token in exitedStates.Select(sn => serviceCancellationTokens.GetValue(sn)).NotNull())
+                foreach (var token in exitedStates.Select(sn => serviceCancellationTokens.GetValue(sn)).WhereNotNull())
                     token.Cancel();
                 foreach (var stateNode in exitedStates)
                     serviceCancellationTokens.Remove(stateNode);
@@ -219,13 +219,12 @@ namespace Statecharts.NET.Interpreter
                     guarded => Matches(guarded.Event) && IsEnabled(guarded));
             StateNode TransitionSource(Transition transition) => transition.Source;
             Transition FirstMatching(IGrouping<StateNode, Transition> transitions) => transitions.FirstOrDefault(TransitionShouldBeTaken);
-            bool TransitionWasDefined(Transition transition) => transition != null;
 
             return StateChart.Transitions
                 .Where(SourceStateIsActive)
                 .GroupBy(TransitionSource)
                 .Select(FirstMatching)
-                .Where(TransitionWasDefined);
+                .WhereNotNull();
         }
     }
 }

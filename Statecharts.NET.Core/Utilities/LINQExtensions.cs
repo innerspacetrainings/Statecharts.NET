@@ -40,7 +40,7 @@ namespace Statecharts.NET.Utilities
         public static TV GetValue<TK, TV>(this IDictionary<TK, TV> dict, TK key, TV defaultValue = default)
             => dict.TryGetValue(key, out var value) ? value : defaultValue;
 
-        public static IEnumerable<T> NotNull<T>(this IEnumerable<T> source)
+        public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T> source)
             => source.Where(o => o != null);
     }
 }
