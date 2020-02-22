@@ -180,9 +180,12 @@ namespace Statecharts.NET.Interpreter
         {
             if (stateConfiguration.IsNotInitialized) return new InitializationStep(StateChart.RootNode).Yield();
             var @event = events.Dequeue();
-            var transitions = SelectTransitions(@event);
-            var computedSteps = CreateSteps(@event, transitions);
-            return computedSteps;
+            return @event.Match(e =>
+            {
+                var transitions = SelectTransitions(e);
+                var computedSteps = CreateSteps(e, transitions);
+                return computedSteps;
+            }, Enumerable.Empty<MicroStep>);
         }
 
         private IEnumerable<MicroStep> CreateSteps(IEvent @event, IEnumerable<Transition> transitions)

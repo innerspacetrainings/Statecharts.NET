@@ -19,8 +19,8 @@ namespace Statecharts.NET.Language
 
         public override Model.Task Task { get; }
         public override Option<string> Id => DefinitionData.Id;
-        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition>> OnErrorTransition => DefinitionData.OnErrorTransition;
-        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition>> OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
+        public override Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition>> OnErrorTransition => DefinitionData.OnErrorTransition;
+        public override Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition>> OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
 
         public object WithId => throw new NotImplementedException();
         public Builders.TaskService.WithOnSuccess OnSuccess => new Builders.TaskService.WithOnSuccess(this);
@@ -38,7 +38,7 @@ namespace Statecharts.NET.Language
 
         public override Activity Activity { get; }
         public override Option<string> Id => DefinitionData.Id;
-        public override Option<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => DefinitionData.OnErrorTransition;
+        public override Option<OneOfUnion<Definition.Transition, Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => DefinitionData.OnErrorTransition;
 
         public Builders.ActivityService.WithId WithId(string id) => new Builders.ActivityService.WithId(this, id);
         public Builders.ActivityService.WithOnError OnError => new Builders.ActivityService.WithOnError(this);
@@ -49,14 +49,14 @@ namespace Statecharts.NET.Language.Builders.Service
     internal class DefinitionData
     {
         public Option<string> Id { get; set; }
-        public Option<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition { get; set; }
-        public Option<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnSuccessDefinition { get; set; }
+        public Option<OneOfUnion<Definition.Transition, Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition { get; set; }
+        public Option<OneOfUnion<Definition.Transition, Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnSuccessDefinition { get; set; }
 
         public DefinitionData()
         {
             Id = Option.None<string>();
-            OnErrorTransition = Option.None<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>>();
-            OnSuccessDefinition = Option.None<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>>();
+            OnErrorTransition = Option.None<OneOfUnion<Definition.Transition, Definition.UnguardedTransition, Definition.UnguardedContextTransition>>();
+            OnSuccessDefinition = Option.None<OneOfUnion<Definition.Transition, Definition.UnguardedTransition, Definition.UnguardedContextTransition>>();
         }
     }
 }
@@ -92,13 +92,13 @@ namespace Statecharts.NET.Language.Builders.TaskService
         internal WithOnSuccessTransition(WithOnSuccessTransitionTo service, Target target, params Target[] targets)
         {
             Service = service.Service;
-            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>>(WithEvent.OnServiceSuccess().TransitionTo.Multiple(target, targets));
+            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<Definition.Transition, Definition.UnguardedTransition, Definition.UnguardedContextTransition>>(WithEvent.OnServiceSuccess().TransitionTo.Multiple(target, targets));
         }
 
         public override Model.Task Task => Service.Task;
         public override Option<string> Id => Service.DefinitionData.Id;
-        public override Option<OneOf<UnguardedTransition, UnguardedContextTransition>> OnSuccessDefinition => Service.DefinitionData.OnSuccessDefinition;
-        public override Option<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
+        public override Option<OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition>> OnSuccessDefinition => Service.DefinitionData.OnSuccessDefinition;
+        public override Option<OneOfUnion<Definition.Transition, Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
     }
 }
 namespace Statecharts.NET.Language.Builders.ActivityService
@@ -115,7 +115,7 @@ namespace Statecharts.NET.Language.Builders.ActivityService
 
         public override Activity Activity => Service.Activity;
         public override Option<string> Id => Service.DefinitionData.Id;
-        public override Option<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
+        public override Option<OneOfUnion<Definition.Transition, Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
 
         public WithOnError OnError => new WithOnError(this);
     }
@@ -150,11 +150,11 @@ namespace Statecharts.NET.Language.Builders.ActivityService
         internal WithOnErrorTransition(WithOnErrorTransitionTo service, Target target, params Target[] targets)
         {
             Service = service.Service;
-            Service.DefinitionData.OnErrorTransition = Option.From<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>>(WithEvent.OnServiceError().TransitionTo.Multiple(target, targets));
+            Service.DefinitionData.OnErrorTransition = Option.From<OneOfUnion<Definition.Transition, Definition.UnguardedTransition, Definition.UnguardedContextTransition>>(WithEvent.OnServiceError().TransitionTo.Multiple(target, targets));
         }
 
         public override Activity Activity => Service.Activity;
         public override Option<string> Id => Service.DefinitionData.Id;
-        public override Option<OneOf<Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
+        public override Option<OneOfUnion<Definition.Transition, Definition.UnguardedTransition, Definition.UnguardedContextTransition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
     }
 }

@@ -109,10 +109,10 @@ namespace Statecharts.NET.Interpreter
             Depth = Parent?.Depth + 1 ?? 0;
 
             Transitions = definition.GetTransitions();
-            definition.GetServices().SelectMany(service => service.Match<object>(
-                activity => activity.OnErrorTransition.Yield(),
-                task => task.OnSuccessDefinition.Append(task.OnErrorTransition),
-                dataTask => dataTask.OnSuccessDefinition.Append(dataTask.OnErrorTransition)));
+            //definition.GetServices().SelectMany(service => service.Match<object>(
+            //    activity => activity.OnErrorTransition.Yield(),
+            //    task => task.OnSuccessDefinition.Append(task.OnErrorTransition),
+            //    dataTask => dataTask.OnSuccessDefinition.Append(dataTask.OnErrorTransition)));
             Services = definition.GetServices().Select(Service.FromDefinition);
 
             EntryActions = definition.EntryActions.Map(actions => actions.ToModelActions()).ValueOr(Enumerable.Empty<Model.Action>());
