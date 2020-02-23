@@ -54,11 +54,12 @@ namespace Statecharts.NET.Interpreter
 
         public void Send(ISendableEvent @event)
         {
-            IEnumerable<ISendableEvent> Apply(MicroStep microstep)
+            (IEnumerable<ISendableEvent> sentEvents, IEnumerable<Exception> executionErrors) Apply(MicroStep microstep)
             {
-                IEnumerable<ISendableEvent> ExecuteActionBlock(IEnumerable<Action> actions)
+                (IEnumerable<ISendableEvent> events, Option<Exception> exception) ExecuteActionBlock(ActionBlock actions)
                 {
                     var sentEvents = new Queue<ISendableEvent>();
+                    var exception = Option.None<Exception>();
                     try
                     {
                         foreach (var action in actions)
@@ -70,20 +71,18 @@ namespace Statecharts.NET.Interpreter
                                 assign => assign.Mutation(_context, default),
                                 sideEffect => sideEffect.Function(_context, default));
                     }
-                    catch (Exception exception)
+                    catch (Exception e)
                     {
-                        // TODO: error handling: place Event 'error.execution' (with Exception as Data) on internal Event Queue, only raise the exception, if no handler was defined
-                        _taskSource.TrySetException(exception);
+                        exception = e.ToOption();
                     }
-
-                    return sentEvents;
+                    return (sentEvents, exception);
                 }
-                IEnumerable<ISendableEvent> ExecuteActionBlocks(IEnumerable<IEnumerable<Action>> actionBlocks)
+                (IEnumerable<ISendableEvent> sentEvents, IEnumerable<Exception> executionErrors) ExecuteActionBlocks(IEnumerable<ActionBlock> actionBlocks)
                 {
-                    var sentEvents = new List<ISendableEvent>();
-                    foreach (var actionBlock in actionBlocks)
-                        sentEvents.AddRange(ExecuteActionBlock(actionBlock));
-                    return sentEvents;
+                    var result = new List<(IEnumerable<ISendableEvent> sentEvents, Option<Exception> executionErrors)>();
+                    foreach (var actions in actionBlocks)
+                        result.Add(ExecuteActionBlock(actions));
+                    return (result.SelectMany(o => o.sentEvents), result.Select(o => o.executionErrors).WhereSome());
                 }
                 void StopServices()
                 {
@@ -98,15 +97,17 @@ namespace Statecharts.NET.Interpreter
                 }
 
                 // (1) execute exit actions
-                var eventsFromExiting = ExecuteActionBlocks(microstep.ExitedStates.Select(state => state.ExitActions));
+                var (eventsFromExiting, exceptionsFromExiting) = ExecuteActionBlocks(microstep.ExitedStates.Select(stateNode => stateNode.ExitActions));
                 // (2) stop running services
                 StopServices();
                 // (3) execute transition actions
-                var eventsFromTransition = microstep.Transition.Match(transition => ExecuteActionBlock(transition.Actions), Enumerable.Empty<ISendableEvent>);
+                var (eventsFromTransition, exceptionFromTransition) = microstep.Transition.Match(transition => ExecuteActionBlock(transition.Actions), () => (Enumerable.Empty<ISendableEvent>(), Option.None<Exception>()));
                 // (4) execute entry actions
-                var eventsFromEntering = ExecuteActionBlocks(microstep.EnteredStates.Select(state => state.EntryActions));
+                var (eventsFromEntering, exceptionsFromEntering) = ExecuteActionBlocks(microstep.EnteredStates.Select(state => state.EntryActions));
 
-                return eventsFromEntering.Concat(eventsFromTransition).Concat(eventsFromExiting);
+                return (
+                    sentEvents: eventsFromEntering.Concat(eventsFromTransition).Concat(eventsFromExiting),
+                    executionErrors: exceptionsFromEntering.Concat(exceptionFromTransition.YieldValue()).Concat(exceptionsFromExiting));
             }
             void StartServices(Macrostep macrostep)
             {
@@ -141,20 +142,35 @@ namespace Statecharts.NET.Interpreter
                 foreach (var microstep in macrostep)
                 {
                     // (1) execute actions & stop services
-                    foreach (var sentEvent in Apply(microstep)) events.Enqueue(sentEvent);
+                    var (sentEvents, executionExceptions) = Apply(microstep);
+                    foreach (var sentEvent in sentEvents) events.Enqueue(sentEvent);
                     // (2) update state configuration
                     _stateConfiguration = _stateConfiguration.Without(microstep.ExitedStates.Ids()).With(microstep.EnteredStates.Ids());
+                    // (3) handle execution errors
+                    //TODO: foreach (var exception in executionExceptions) macrostep.AddErrorStep(_statechart.ResolveError(CurrentState, new ExecutionErrorEvent(exception)));
                 }
                 StartServices(macrostep);
             }
         }
 
-        public Task Start(State<TContext> state)
-        {
-            _stateConfiguration = state.StateConfiguration;
-            _context = state.Context;
+        internal Task StartFrom(State<TContext> state) => Start(
+            state.StateConfiguration,
+            state.Context,
+            () => StartServices()); // TODO: think about this
+        internal Task StartFromRootState() => Start(
+            new StateConfiguration(_statechart.RootNode.Yield().Ids()),
+            _statechart.InitialContext,
+            () => Send(InitEvent)); // TODO: generate Init Event Transition when Parsing
 
-            Send(InitEvent);
+        private Task Start(
+            StateConfiguration stateConfiguration,
+            TContext context,
+            System.Action initAction)
+        {
+            _stateConfiguration = stateConfiguration;
+            _context = context;
+
+            initAction();
 
             return _taskSource.Task;
         }

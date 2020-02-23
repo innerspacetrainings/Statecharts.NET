@@ -37,10 +37,15 @@ namespace Statecharts.NET.Utilities
             yield return item;
         }
 
+        public static IEnumerable<T> YieldValue<T>(this Option<T> item) =>
+            item.Map(i => i.Yield()).ValueOr(Enumerable.Empty<T>());
+
         public static TV GetValue<TK, TV>(this IDictionary<TK, TV> dict, TK key, TV defaultValue = default)
             => dict.TryGetValue(key, out var value) ? value : defaultValue;
 
         public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T> source)
             => source.Where(o => o != null);
+        public static IEnumerable<T> WhereSome<T>(this IEnumerable<Option<T>> source)
+            => source.Where(o => o.HasValue).Select(o => o.Value);
     }
 }

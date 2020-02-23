@@ -140,11 +140,11 @@ namespace Statecharts.NET
         public Task Start() =>
             Start(CancellationToken.None);
         public Task Start(CancellationToken cancellationToken) =>
-            Start(new State<TContext>(StateConfiguration.NotInitialized, InitialContext), cancellationToken);
+            new RunningStatechart<TContext>(this, cancellationToken).StartFromRootState();
         public Task Start(State<TContext> state) =>
             Start(state, CancellationToken.None);
         public Task Start(State<TContext> state, CancellationToken cancellationToken) =>
-            new RunningStatechart<TContext>(this, cancellationToken).Start(state);
+            new RunningStatechart<TContext>(this, cancellationToken).StartFrom(state);
 
         [Pure]
         public State<TContext> ResolveNextState(State<TContext> state, ISendableEvent @event)
