@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Threading;
 using Statecharts.NET.Utilities;
 using Statecharts.NET.Definition;
 using Statecharts.NET.Interpreter;
+using Statecharts.NET.Model;
+using Task = System.Threading.Tasks.Task;
 
 namespace Statecharts.NET
 {
@@ -98,6 +102,11 @@ namespace Statecharts.NET
 
         public ExecutableStatechart(Interpreter.StateNode rootNode, TContext initialContext) : base(rootNode)
         {
+            Interpreter.StateNode ResolveTarget(Interpreter.StateNode fromStateNode, Target target)
+                => target.Match(
+                    absolute => GetStateNode(absolute.Id),
+                    sibling => GetStateNode(StateNodeId.Make(fromStateNode.Parent, sibling.Key)),
+                    child => GetStateNode(StateNodeId.Make(fromStateNode, child.Key)));
             IEnumerable<Interpreter.Transition> GetTransitions(Interpreter.StateNode stateNode)
                 => stateNode.Transitions.Select(
                     transition => transition.Match<Interpreter.Transition>(
@@ -127,13 +136,25 @@ namespace Statecharts.NET
 
         internal Interpreter.StateNode GetStateNode(StateNodeId id)
             => _stateNodes[id];
+        
+        public Task Start() =>
+            Start(CancellationToken.None);
+        public Task Start(CancellationToken cancellationToken) =>
+            Start(new State<TContext>(StateConfiguration.NotInitialized, InitialContext), cancellationToken);
+        public Task Start(State<TContext> state) =>
+            Start(state, CancellationToken.None);
+        public Task Start(State<TContext> state, CancellationToken cancellationToken) =>
+            new RunningStatechart<TContext>(this, cancellationToken).Start(state);
 
-        private Interpreter.StateNode ResolveTarget(
-            Interpreter.StateNode fromStateNode,
-            Model.Target target)
-            => target.Match(
-                absolute => GetStateNode(absolute.Id),
-                sibling => GetStateNode(StateNodeId.Make(fromStateNode.Parent, sibling.Key)),
-                child => GetStateNode(StateNodeId.Make(fromStateNode, child.Key)));
+        [Pure]
+        public State<TContext> ResolveNextState(State<TContext> state, ISendableEvent @event)
+            => Resolve(state, @event).state;
+        [Pure]
+        public Macrostep ResolveMacrostep(State<TContext> state, ISendableEvent @event)
+            => Resolve(state, @event).macrostep;
+
+        [Pure]
+        private (State<TContext> state, Macrostep macrostep) Resolve(State<TContext> state, ISendableEvent @event)
+            => throw new NotImplementedException();
     }
 }

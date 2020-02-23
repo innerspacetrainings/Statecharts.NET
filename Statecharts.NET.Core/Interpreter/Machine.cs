@@ -44,13 +44,13 @@ namespace Statecharts.NET.Interpreter
         }
 
         // like 'sismic.execute_once'
-        internal IList<MacroStep> Execute()
+        internal IList<Macrostep> Execute()
         {
-            var steps = new List<MacroStep>();
+            var steps = new List<Macrostep>();
             do steps.Add(ExecuteMacrostep()); while (!events.IsEmpty);
             return steps;
         }
-        internal MacroStep ExecuteMacrostep()
+        internal Macrostep ExecuteMacrostep()
         {
             var microSteps = ComputeMicroSteps().ToList();
             var macroStep = ExecuteMicrosteps(microSteps);
@@ -84,7 +84,7 @@ namespace Statecharts.NET.Interpreter
 
             return macroStep;
         }
-        internal MacroStep ExecuteMicrosteps(IEnumerable<MicroStep> microSteps)
+        internal Macrostep ExecuteMicrosteps(IEnumerable<MicroStep> microSteps)
         {
             var executedSteps = new List<MicroStep>();
             foreach (var microStep in microSteps)
@@ -92,7 +92,7 @@ namespace Statecharts.NET.Interpreter
                 executedSteps.Add(ApplyStep(microStep));
                 executedSteps.AddRange(Stabilize());
             }
-            return new MacroStep(executedSteps);
+            return new Macrostep(executedSteps);
         }
 
         private IEnumerable<MicroStep> Stabilize()

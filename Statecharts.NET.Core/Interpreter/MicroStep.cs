@@ -1,24 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Interpreter
 {
-    internal abstract class MicroStep : OneOfBase<InitializationStep, StabilizationStep, ImmediateStep, EventStep> { }
+    public abstract class MicroStep : OneOfBase<InitializationStep, StabilizationStep, ImmediateStep, EventStep>
+    {
+        public IEnumerable<StateNode> ExitedStates =>
+            Match(
+                _ => Enumerable.Empty<StateNode>(),
+                _ => Enumerable.Empty<StateNode>(),
+                _ => Enumerable.Empty<StateNode>(),
+                eventStep => eventStep.ExitedStates);
 
-    internal class InitializationStep : MicroStep
+        public IEnumerable<StateNode> EnteredStates =>
+            Match(
+                initializationStep => initializationStep.RootState.Yield(),
+                stabilizationStep => stabilizationStep.EnteredStates,
+                immediateStep => immediateStep.EnteredStates,
+                eventStep => eventStep.ExitedStates);
+
+        public Option<Transition> Transition =>
+            Match(
+                initializationStep => Option.None<Transition>(),
+                stabilizationStep => Option.None<Transition>(),
+                immediateStep => (immediateStep.Transition as Transition).ToOption(),
+                eventStep => eventStep.Transition.ToOption());
+    }
+
+    public class InitializationStep : MicroStep
     {
         public InitializationStep(StateNode rootState) => RootState = rootState;
         public StateNode RootState { get; }
     }
-    internal class StabilizationStep : MicroStep
+    public class StabilizationStep : MicroStep
     {
         public IEnumerable<StateNode> EnteredStates { get; }
 
         public StabilizationStep(IEnumerable<StateNode> enteredStates) =>
             EnteredStates = enteredStates ?? throw new ArgumentNullException(nameof(enteredStates));
     }
-    internal class ImmediateStep : MicroStep
+    public class ImmediateStep : MicroStep
     {
         public UnguardedTransition Transition { get; }
         public IEnumerable<StateNode> EnteredStates { get; }
@@ -34,7 +57,7 @@ namespace Statecharts.NET.Interpreter
             ExitedStates = exitedStates ?? throw new ArgumentNullException(nameof(exitedStates));
         }
     }
-    internal class EventStep : MicroStep
+    public class EventStep : MicroStep
     {
         public Model.IEvent Event { get; }
         public Transition Transition { get; }

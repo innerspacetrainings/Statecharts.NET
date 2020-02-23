@@ -6,9 +6,14 @@ namespace Statecharts.NET.Interpreter
 {
     public class Service
     {
+        public string Id { get; }
         private readonly Model.Task<object> _task;
 
-        public Service(Model.Task<object> task) => _task = task;
+        private Service(string id, Model.Task<object> task)
+        {
+            Id = id;
+            _task = task;
+        }
 
         public Task<object> Invoke(CancellationToken cancellationToken)
             => _task(cancellationToken);
@@ -16,7 +21,7 @@ namespace Statecharts.NET.Interpreter
         public static Service FromDefinition(Definition.Service serviceDefinition)
         {
             Service CreateServiceFromActivity(Definition.ActivityService service) =>
-                new Service(token =>
+                new Service(service.Id, token =>
                 {
                     token.Register(service.Activity.Stop);
                     service.Activity.Start(); // TODO: handle failure
@@ -25,12 +30,12 @@ namespace Statecharts.NET.Interpreter
 
             return serviceDefinition.Match(
                 CreateServiceFromActivity,
-                task => new Service(async cancellationToken =>
+                task => new Service(serviceDefinition.Id, async cancellationToken =>
                 {
                     await task.Task(cancellationToken);
                     return default;
                 }),
-                dataTask => new Service(dataTask.Task));
+                dataTask => new Service(serviceDefinition.Id, dataTask.Task));
         }
     }
 }
