@@ -3,6 +3,50 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
 {
+    #region Definition
+    public interface IEventDefinition : IEquatable<IEventDefinition> { }
+    public interface IDataEventDefinition : IEventDefinition
+    {
+        object Data { get; }
+    }
+    public class NamedEventDefinition
+    {
+        public string EventName { get; }
+        public NamedEventDefinition(string eventName) => EventName = eventName;
+        public override string ToString() => $"@\"{EventName}\"";
+    }
+    public class NamedDataEventDefinition : NamedEventDefinition
+    {
+        public object Data { get; }
+        public NamedDataEventDefinition(string eventName, object data) : base(eventName) => Data = data;
+        public override string ToString() => $"@\"{EventName}\" (Data={Data})";
+    }
+    public class ImmediateEventDefinition
+    {
+        public override string ToString() => "Immediately";
+    }
+    public class DelayedEventDefinition
+    {
+        public TimeSpan Delay { get; }
+        public DelayedEventDefinition(TimeSpan delay) => Delay = delay;
+        public override string ToString() => $"After: {Delay.TotalSeconds} seconds";
+    }
+    public class ServiceSuccessEventDefinition
+    {
+        public override string ToString() => "Service.Success";
+    }
+    public class ServiceErrorEventDefinition
+    {
+        public override string ToString() => "Service.Error";
+    }
+    public class DoneEventDefinition
+    {
+        public override string ToString() => "Done";
+    }
+    #endregion
+
+
+    // TODO: take a look into this
     public interface IEvent : IEquatable<IEvent> { }
     public interface ISendableEvent : IEvent { }
 

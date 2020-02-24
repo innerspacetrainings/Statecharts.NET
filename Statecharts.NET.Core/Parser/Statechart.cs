@@ -62,38 +62,7 @@ namespace Statecharts.NET
         }
     }
 
-    public abstract class ParsedStatechart<TContext>
-        where TContext : IEquatable<TContext>
-    {
-        public Interpreter.StateNode RootNode { get; set; }
-
-        public string Id => RootNode.Key.GetType().Name; // TODO: get real name here
-
-        public ParsedStatechart(Interpreter.StateNode rootNode)
-        {
-            RootNode = rootNode ?? throw new ArgumentNullException(nameof(rootNode));
-        }
-    }
-
-    class InvalidStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
-    {
-        public IEnumerable<StatechartDefinitionError> Errors { get; }
-
-        public InvalidStatechart(Interpreter.StateNode rootNode, IEnumerable<StatechartDefinitionError> errors) : base(rootNode)
-        {
-            Errors = errors;
-        }
-    }
-
-    class ValidStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
-    {
-        public IEnumerable<StatechartHole> Holes { get; }
-
-        public ValidStatechart(Interpreter.StateNode rootNode, IEnumerable<StatechartHole> holes) : base(rootNode)
-        {
-            Holes = holes;
-        }
-    }
+    
 
     public class ExecutableStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
     {
