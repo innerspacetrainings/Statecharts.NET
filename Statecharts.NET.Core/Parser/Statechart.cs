@@ -146,15 +146,57 @@ namespace Statecharts.NET
         public Task Start(State<TContext> state, CancellationToken cancellationToken) =>
             new RunningStatechart<TContext>(this, cancellationToken).StartFrom(state);
 
+        // TODO: think of this, should be like xstate.machine.transition
         [Pure]
         public State<TContext> ResolveNextState(State<TContext> state, ISendableEvent @event)
             => Resolve(state, @event).state;
         [Pure]
-        public Macrostep ResolveMacrostep(State<TContext> state, ISendableEvent @event)
-            => Resolve(state, @event).macrostep;
+        public IEnumerable<MicroStep> ResolveSingleEvent(State<TContext> state, IEvent @event)
+            => Resolve(state, @event).microSteps;
 
         [Pure]
-        private (State<TContext> state, Macrostep macrostep) Resolve(State<TContext> state, ISendableEvent @event)
-            => throw new NotImplementedException();
+        private (State<TContext> state, IEnumerable<MicroStep> microSteps) Resolve(State<TContext> state, IEvent @event)
+        {
+            var transitions = SelectTransitions(state, @event);
+            var microsteps = ComputeMicrosteps(transitions, state, @event);
+            return (null, microsteps);
+        }
+
+        private IEnumerable<Interpreter.Transition> SelectTransitions(State<TContext> state, IEvent nextEvent)
+        {
+            bool Matches(OneOf<Event, CustomDataEvent> @event) => @event.Match<IEvent>(e => e, e => e).Equals(nextEvent); // TODO: Equals vs. == (https://docs.microsoft.com/en-us/previous-versions/ms173147(v=vs.90)?redirectedfrom=MSDN)
+            bool IsEnabled(Interpreter.GuardedTransition guarded)
+                => guarded.Guard.Match(
+                    @in => false, // TODO: proper inState check
+                    guard => guard.Condition.Invoke(state.Context),
+                    dataGuard => dataGuard.Condition.Invoke(state.Context, null)); // TODO: pass Data to Event
+            bool SourceStateIsActive(Interpreter.Transition transition)
+                => state.StateConfiguration.Contains(transition.Source);
+            bool TransitionShouldBeTaken(Interpreter.Transition transition) => transition.Match(
+                forbidden => Matches(forbidden.Event),
+                unguarded => Matches(unguarded.Event),
+                guarded => Matches(guarded.Event) && IsEnabled(guarded));
+            Interpreter.StateNode TransitionSource(Interpreter.Transition transition) => transition.Source;
+            Interpreter.Transition FirstMatching(IGrouping<Interpreter.StateNode, Interpreter.Transition> transitions) => transitions.FirstOrDefault(TransitionShouldBeTaken);
+
+            return Transitions
+                .Where(SourceStateIsActive)
+                .GroupBy(TransitionSource)
+                .Select(FirstMatching)
+                .WhereNotNull();
+        }
+        private IEnumerable<MicroStep> ComputeMicrosteps(IEnumerable<Interpreter.Transition> transitions, State<TContext> state, IEvent @event)
+            => transitions
+                .Where(transition => transition.Match(forbidden => false, unguarded => true, guarded => true))
+                .SelectMany(transition =>
+                transition.GetTargets().Select(target =>
+                {
+                    var lca = (transition.Source, target).LeastCommonAncestor();
+                    var lastBeforeLCA = transition.Source.OneBeneath(lca);
+                    var exited = lastBeforeLCA.Append(lastBeforeLCA.GetDescendants()).Where(state.StateConfiguration.Contains);
+                    var entered = target.Append(target.AncestorsUntil(lca).Reverse());
+
+                    return new EventStep(@event, transition, entered, exited);
+                }));
     }
 }
