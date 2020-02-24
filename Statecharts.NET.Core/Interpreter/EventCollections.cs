@@ -40,7 +40,7 @@ namespace Statecharts.NET.Interpreter
         public static EventQueue WithSentEvent(ISendableEvent initialEvent)
         {
             var eventQueue = new EventQueue();
-            eventQueue.EnqueueOnNextStep(initialEvent);
+            eventQueue.Enqueue(new NextStep(initialEvent));
             return eventQueue;
         }
         public IEvent Dequeue() => _queue.Dequeue().AsBase().Event;
@@ -49,7 +49,6 @@ namespace Statecharts.NET.Interpreter
             var @event = new Stabilization(InitEvent);
             _queue.Enqueue(@event, @event.Priority);
         }
-
         public void Enqueue(CurrentStep @event) => _queue.Enqueue(@event, @event.Priority);
         public void Enqueue(NextStep @event) => _queue.Enqueue(@event, @event.Priority);
         public bool IsNotEmpty => _queue.Any();
@@ -60,7 +59,6 @@ namespace Statecharts.NET.Interpreter
             .Map(queuedEvent => queuedEvent.Match(stabilization => true, currentStep => true, nextStep => false))
             .ValueOr(true);
     }
-
     internal class EventList : IEnumerable<OneOf<CurrentStep, NextStep>>
     {
         private readonly List<OneOf<CurrentStep, NextStep>> _events;

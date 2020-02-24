@@ -12,16 +12,16 @@ namespace Statecharts.NET.Interpreter
         public IEnumerable<StateNode> EnteredStateNodes { get; }
         public IEnumerable<StateNode> ExitedStateNodes { get; }
 
-        public EventStep(
+        public MicroStep(
             Model.IEvent @event,
             Transition transition,
-            IEnumerable<StateNode> enteredStates,
-            IEnumerable<StateNode> exitedStates)
+            IEnumerable<StateNode> enteredStateNodes,
+            IEnumerable<StateNode> exitedStateNodes)
         {
             Event = @event ?? throw new ArgumentNullException(nameof(@event));
             Transition = transition ?? throw new ArgumentNullException(nameof(transition));
-            EnteredStates = enteredStates ?? throw new ArgumentNullException(nameof(enteredStates));
-            ExitedStates = exitedStates ?? throw new ArgumentNullException(nameof(exitedStates));
+            EnteredStateNodes = enteredStateNodes ?? throw new ArgumentNullException(nameof(enteredStateNodes));
+            ExitedStateNodes = exitedStateNodes ?? throw new ArgumentNullException(nameof(exitedStateNodes));
         }
 
         public IEnumerable<ActionBlock> EnteredActionBlocks =>

@@ -33,9 +33,9 @@ namespace Statecharts.NET.Interpreter
 
         public ActionBlock Actions =>
             Match(
-                forbidden => Enumerable.Empty<Model.Action>(),
-                unguarded => unguarded.Actions,
-                guarded => guarded.Actions);
+                forbidden => ActionBlock.Empty(),
+                unguarded => ActionBlock.From(unguarded.Actions),
+                guarded => ActionBlock.From(guarded.Actions));
     }
 
     public class ForbiddenTransition : Transition
