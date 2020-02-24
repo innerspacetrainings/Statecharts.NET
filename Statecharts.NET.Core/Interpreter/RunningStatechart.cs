@@ -1,31 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
+using Action = System.Action;
 using Task = System.Threading.Tasks.Task;
 
 namespace Statecharts.NET.Interpreter
 {
     internal static class ReadabilityExtensions
     {
-        internal static Queue<T> AsQueue<T>(this T t) => new Queue<T>(t.Yield());
-        [Pure] internal static IEnumerable<StateNode> GetEnteredStateNodes(this MacroStep macroStep) =>
-            macroStep.Aggregate(Enumerable.Empty<StateNode>(), (entered, step) => step.Match(
-                init => entered.Append(init.RootState),
-                stabilization => entered.Concat(stabilization.EnteredStates),
-                immediate => entered.Except(immediate.ExitedStates).Concat(immediate.EnteredStates),
-                @event => entered.Except(@event.ExitedStates).Concat(@event.EnteredStates)));
         internal static void CancelAll(this Dictionary<StateNode, CancellationTokenSource> cancellationTokens)
             => cancellationTokens.Values.ToList().ForEach(token => token.Cancel());
-
         internal static IEnumerable<StateNode> GetEnteredStateNodes(this IEnumerable<MicroStep> microSteps)
-            => microSteps.SelectMany(step => step.EnteredStates);
+            => microSteps.SelectMany(step => step.EnteredStateNodes);
         internal static IEnumerable<StateNode> GetExitedStateNodes(this IEnumerable<MicroStep> microSteps)
-            => microSteps.SelectMany(step => step.ExitedStates);
+            => microSteps.SelectMany(step => step.ExitedStateNodes);
     }
 
     public class RunningStatechart<TContext> where TContext : IEquatable<TContext>
@@ -38,7 +30,7 @@ namespace Statecharts.NET.Interpreter
         private TContext _context;
 
         // TODO: config object
-        private readonly ILogger logger = new ConsoleLogger();
+        private readonly ILogger _logger = new ConsoleLogger();
 
         private State<TContext> CurrentState => new State<TContext>(_stateConfiguration, _context);
 
@@ -48,14 +40,10 @@ namespace Statecharts.NET.Interpreter
             _taskSource = new TaskCompletionSource<object>();
             _serviceCancellationTokens = new Dictionary<StateNode, CancellationTokenSource>();
 
-            cancellationToken.Register(() =>
-            {
-                _serviceCancellationTokens.CancelAll();
-                _taskSource.TrySetCanceled();
-            });
+            statechart.RegisterDoneAction(CompleteSuccessfully);
+            cancellationToken.Register(CompleteCancelled);
         }
 
-        // TODO: IMPORTANT!
         private EventList ExecuteActionBlock(ActionBlock actions)
         {
             var result = EventList.Empty();
@@ -66,7 +54,7 @@ namespace Statecharts.NET.Interpreter
                     action.Switch(
                         send => result.AddForNextStep(new NamedEvent(send.EventName)),
                         raise => result.AddForCurrentStep(new NamedEvent(raise.EventName)),
-                        log => logger.Log(log.Message(_context, default)),
+                        log => _logger.Log(log.Message(_context, default)),
                         assign => assign.Mutation(_context, default),
                         sideEffect => sideEffect.Function(_context, default));
             }
@@ -76,20 +64,21 @@ namespace Statecharts.NET.Interpreter
             }
             return result;
         }
-        private EventList Apply(MicroStep microstep, Func<ActionBlock, EventList> executeSingle)
+        private EventList Apply(MicroStep microStep, Func<ActionBlock, EventList> fExecute)
         {
-            EventList ExecuteMultiple(IEnumerable<ActionBlock> actionBlocks) =>
-                EventList.From(actionBlocks.SelectMany(executeSingle).ToList());
-
             var events = EventList.Empty();
-            // (1) execute exit actions
-            events.AddRange(ExecuteMultiple(microstep.ExitedActionBlocks));
-            // (2) stop running services
-            StopServices(microstep);
-            // (3) execute transition actions
-            events.AddRange(executeSingle(microstep.TransitionActionBlock));
-            // (4) execute entry actions
-            events.AddRange(ExecuteMultiple(microstep.EnteredActionBlocks));
+
+            EventList ExecuteMultiple(IEnumerable<ActionBlock> actionBlocks) =>
+                EventList.From(actionBlocks.SelectMany(fExecute).ToList());
+            void ExecuteExitActions() => events.AddRange(ExecuteMultiple(microStep.ExitedActionBlocks));
+            void ExecuteTransitionActions() => events.AddRange(fExecute(microStep.TransitionActionBlock));
+            void ExecuteEntryActions() => events.AddRange(ExecuteMultiple(microStep.EnteredActionBlocks));
+            
+            ExecuteExitActions();
+            StopServices(microStep.ExitedStateNodes);
+            ExecuteTransitionActions();
+            ExecuteEntryActions();
+
             return events;
         }
 
@@ -114,7 +103,7 @@ namespace Statecharts.NET.Interpreter
                 // TODO: check state finishing and enqueue
             }
             void UpdateStateConfiguration(IReadOnlyCollection<MicroStep> microSteps) =>
-                _stateConfiguration = _stateConfiguration.Without(microSteps.GetEnteredStateNodes().Ids()).With(microSteps.GetEnteredStateNodes().Ids()); // TODO: Ids is ugly
+                _stateConfiguration = _stateConfiguration.Without(microSteps.GetEnteredStateNodes().Ids()).With(microSteps.GetExitedStateNodes().Ids()); // TODO: Ids is ugly
             void UpdateMacroStep(MacroStep macroStep, IEnumerable<MicroStep> microSteps) =>
                 macroStep.Add(microSteps);
 
@@ -130,7 +119,7 @@ namespace Statecharts.NET.Interpreter
                     UpdateStateConfiguration(microSteps);
                     UpdateMacroStep(macroStep, microSteps);
                 }
-                StartServices(macroStep);
+                StartServices(macroStep.GetEnteredStateNodes());
             }
         }
 
@@ -156,10 +145,9 @@ namespace Statecharts.NET.Interpreter
             return _taskSource.Task;
         }
 
-        private void StartServices(MacroStep macrostep) // TODO: probably make this static
+        private void StartServices(IEnumerable<StateNode> stateNodes) // TODO: probably make this static
         {
-            var entered = macrostep
-                .GetEnteredStateNodes()
+            var entered = stateNodes
                 .Select(stateNode => (stateNode, services: stateNode.Services))
                 .Where(entry => entry.services.Any());
 
@@ -175,15 +163,15 @@ namespace Statecharts.NET.Interpreter
                                 Send(new ServiceSuccessEvent(service.Id, task.Result));
                                 break;
                             case TaskStatus.Faulted:
-                                Send(new ServiceErrorEvent(service.Id));
+                                Send(new ServiceErrorEvent(service.Id, task.Exception));
                                 break;
                         }
                     }, _serviceCancellationTokens[stateNode].Token);
             }
         }
-        private void StopServices(MicroStep microStep) // TODO: probably make this static
+        private void StopServices(IEnumerable<StateNode> stateNodes) // TODO: probably make this static
         {
-            foreach (var (stateNode, token) in microStep.ExitedStates
+            foreach (var (stateNode, token) in stateNodes
                 .Select(stateNode => (stateNode, cancellationTokenSource: _serviceCancellationTokens.GetValue(stateNode)))
                 .Where(o => o.cancellationTokenSource != null))
             {
@@ -191,5 +179,12 @@ namespace Statecharts.NET.Interpreter
                 _serviceCancellationTokens.Remove(stateNode);
             }
         }
+        private void Complete(Action finalAction)
+        {
+            _serviceCancellationTokens.CancelAll();
+            finalAction();
+        }
+        private void CompleteSuccessfully() => Complete(() => _taskSource.TrySetResult(null));
+        private void CompleteCancelled() => Complete(() => _taskSource.TrySetCanceled());
     }
 }

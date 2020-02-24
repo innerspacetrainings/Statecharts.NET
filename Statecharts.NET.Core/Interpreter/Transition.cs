@@ -31,7 +31,7 @@ namespace Statecharts.NET.Interpreter
                 unguarded => unguarded.Targets,
                 guarded => guarded.Targets);
 
-        public IEnumerable<Model.Action> Actions =>
+        public ActionBlock Actions =>
             Match(
                 forbidden => Enumerable.Empty<Model.Action>(),
                 unguarded => unguarded.Actions,

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Definition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
+using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET.Interpreter
 {
@@ -95,8 +97,8 @@ namespace Statecharts.NET.Interpreter
         public IEnumerable<Definition.Transition> Transitions { get; protected set; }
         public IEnumerable<Service> Services { get; }
         public StateNode Parent { get; }
-        public IEnumerable<Model.Action> EntryActions { get; }
-        public IEnumerable<Model.Action> ExitActions { get; }
+        public ActionBlock EntryActions { get; }
+        public ActionBlock ExitActions { get; }
         public bool HasParent => Parent != null;
         public string Name => Key.Map(_ => null, named => named.StateName);
 
@@ -126,6 +128,7 @@ namespace Statecharts.NET.Interpreter
         internal static StateNodeId MakeId(StateNode stateNode, NamedStateNodeKey key)
             => new StateNodeId(stateNode.Id, key);
     }
+
     public class FinalStateNode : StateNode
     {
         public FinalStateNode(StateNode parent, Definition.FinalStateNode definition) : base(parent, definition) { }

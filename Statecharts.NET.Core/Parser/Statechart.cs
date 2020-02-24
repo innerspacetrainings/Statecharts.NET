@@ -7,6 +7,7 @@ using Statecharts.NET.Utilities;
 using Statecharts.NET.Definition;
 using Statecharts.NET.Interpreter;
 using Statecharts.NET.Model;
+using Action = System.Action;
 using Task = System.Threading.Tasks.Task;
 
 namespace Statecharts.NET
@@ -97,6 +98,7 @@ namespace Statecharts.NET
     public class ExecutableStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
     {
         private readonly IDictionary<StateNodeId, Interpreter.StateNode> _stateNodes;
+        private Action _doneAction;
         public TContext InitialContext { get; }
         public IEnumerable<Interpreter.Transition> Transitions { get; }
 
@@ -119,6 +121,13 @@ namespace Statecharts.NET
                         definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions.ValueOr(Enumerable.Empty<OneOf<Definition.Action, ContextAction, ContextDataAction>>()))));
 
             InitialContext = initialContext;
+            RootNode.Transitions.Add(
+                new Interpreter.UnguardedTransition(
+                    RootNode,
+                    DoneEvent,
+                    RootNode.Yield(),
+                    (new Definition.SideEffectAction(() => _doneAction?.Invoke()) as Definition.Action).Yield()));
+
             var descendants = rootNode.GetDescendants().ToArray();
             _stateNodes = rootNode.Append(descendants)
                 .ToDictionary(stateNode => stateNode.Id, stateNode => stateNode);
@@ -136,6 +145,8 @@ namespace Statecharts.NET
 
         internal Interpreter.StateNode GetStateNode(StateNodeId id)
             => _stateNodes[id];
+
+        internal void RegisterDoneAction(System.Action action) => _doneAction = action;
         
         public Task Start() =>
             Start(CancellationToken.None);
