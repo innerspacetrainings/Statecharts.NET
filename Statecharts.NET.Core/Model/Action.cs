@@ -40,8 +40,8 @@ namespace Statecharts.NET.Model
 
     public class AssignActionDefinition : ActionDefinition
     {
-        public Action Mutation { get; }
-        public AssignActionDefinition(Action mutation) => Mutation = mutation;
+        public System.Action Mutation { get; }
+        public AssignActionDefinition(System.Action mutation) => Mutation = mutation;
     }
     public class AssignContextActionDefinition : ContextActionDefinition
     {
@@ -56,8 +56,8 @@ namespace Statecharts.NET.Model
 
     public class SideEffectActionDefinition : ActionDefinition
     {
-        public Action Function { get; }
-        public SideEffectActionDefinition(Action function) => Function = function;
+        public System.Action Function { get; }
+        public SideEffectActionDefinition(System.Action function) => Function = function;
     }
     public class SideEffectContextActionDefinition : ContextActionDefinition
     {
@@ -70,39 +70,7 @@ namespace Statecharts.NET.Model
         public SideEffectContextDataActionDefinition(Action<object, object> function) => Function = function;
     }
     #endregion
-
-    // TODO: refactor this
-    public static class ActionExtensionFunctions
-    {
-        internal static IEnumerable<Action> ToModelActions(this IEnumerable<Definition.Action> definitionActions)
-            => definitionActions.Select(Action.From);
-        internal static IEnumerable<Action> ToModelActions(this IEnumerable<OneOf<Definition.Action, Definition.ContextAction>> definitionActions)
-            => definitionActions.Select(action => action.Match(Action.From, Action.From));
-        internal static IEnumerable<Action> ToModelActions(this IEnumerable<OneOf<Definition.Action, Definition.ContextAction, Definition.ContextDataAction>> definitionActions)
-            => definitionActions.Select(action => action.Match(Action.From, Action.From, Action.From));
-    }
-
-    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction>
-    {
-        public static Action From(Definition.Action action) =>
-            action.Match(
-                send => new SendAction(send.EventName) as Action,
-                raise => new RaiseAction(raise.EventName),
-                log => new LogAction((context, data) => log.Label),
-                assign => new AssignAction((context, data) => assign.Mutation()),
-                sideEffect => new SideEffectAction((context, data) => sideEffect.Function()));
-        public static Action From(Definition.ContextAction action) =>
-            action.Match(
-                log => new LogAction((context, data) => log.Message(context)) as Action, 
-                assign => new AssignAction((context, data) => assign.Mutation(context)), 
-                sideEffect => new SideEffectAction((context, data) => sideEffect.Function(context)));
-        public static Action From(Definition.ContextDataAction action) =>
-            action.Match(
-                log => new LogAction(log.Message) as Action,
-                assign => new AssignAction(assign.Mutation),
-                sideEffect => new SideEffectAction(sideEffect.Function));
-    }
-
+    #region Executable
     public class SendAction : Action
     {
         public string EventName { get; }
@@ -127,5 +95,38 @@ namespace Statecharts.NET.Model
     {
         public Action<object, object> Function { get; }
         public SideEffectAction(Action<object, object> function) => Function = function;
+    }
+    #endregion
+
+    // TODO: refactor this
+    public static class ActionExtensionFunctions
+    {
+        internal static IEnumerable<Action> ToModelActions(this IEnumerable<ActionDefinition> definitionActions)
+            => definitionActions.Select(Action.From);
+        internal static IEnumerable<Action> ToModelActions(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> definitionActions)
+            => definitionActions.Select(action => action.Match(Action.From, Action.From));
+        internal static IEnumerable<Action> ToModelActions(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> definitionActions)
+            => definitionActions.Select(action => action.Match(Action.From, Action.From, Action.From));
+    }
+
+    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction>
+    {
+        public static Action From(ActionDefinition action) =>
+            action.Match(
+                send => new SendAction(send.EventName) as Action,
+                raise => new RaiseAction(raise.EventName),
+                log => new LogAction((context, data) => log.Label),
+                assign => new AssignAction((context, data) => assign.Mutation()),
+                sideEffect => new SideEffectAction((context, data) => sideEffect.Function()));
+        public static Action From(ContextActionDefinition action) =>
+            action.Match(
+                log => new LogAction((context, data) => log.Message(context)) as Action, 
+                assign => new AssignAction((context, data) => assign.Mutation(context)), 
+                sideEffect => new SideEffectAction((context, data) => sideEffect.Function(context)));
+        public static Action From(ContextDataActionDefinition action) =>
+            action.Match(
+                log => new LogAction(log.Message) as Action,
+                assign => new AssignAction(assign.Mutation),
+                sideEffect => new SideEffectAction(sideEffect.Function));
     }
 }

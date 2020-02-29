@@ -1,31 +1,49 @@
 ﻿using System;
-using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
 {
+    public interface ISendableEventDefinition : IEventDefinition
+    {
+        string Name { get; }
+    }
+    public interface ISendableEvent : IEvent
+    {
+        string Name { get; }
+    }
+    public interface ISendableDataEventDefinition<TData> : IDataEventDefinition
+    {
+        string Name { get; }
+    }
+    public interface ISendableDataEvent : IEvent
+    {
+        string Name { get; }
+        object Data { get; }
+    }
+
+
     #region Definition
-    public interface IEventDefinition : IEquatable<IEventDefinition> { }
+    public interface IEventDefinition { }
     public interface IDataEventDefinition : IEventDefinition
     {
         object Data { get; }
     }
-    public class NamedEventDefinition
+    public class NamedEventDefinition : IEventDefinition // TODO: ISendableEventDefinition
     {
-        public string EventName { get; }
-        public NamedEventDefinition(string eventName) => EventName = eventName;
-        public override string ToString() => $"@\"{EventName}\"";
+        public string Name { get; }
+        public NamedEventDefinition(string eventName) => Name = eventName;
+        public override string ToString() => $"@\"{Name}\"";
     }
-    public class NamedDataEventDefinition : NamedEventDefinition
+    public class NamedDataEventDefinition : NamedEventDefinition, IDataEventDefinition
     {
         public object Data { get; }
         public NamedDataEventDefinition(string eventName, object data) : base(eventName) => Data = data;
-        public override string ToString() => $"@\"{EventName}\" (Data={Data})";
+        public override string ToString() => $"@\"{Name}\" (Data={Data})";
     }
-    public class ImmediateEventDefinition
+    public class ImmediateEventDefinition : IEventDefinition
     {
         public override string ToString() => "Immediately";
     }
-    public class DelayedEventDefinition
+    public class DelayedEventDefinition : IEventDefinition
     {
         public TimeSpan Delay { get; }
         public DelayedEventDefinition(TimeSpan delay) => Delay = delay;
@@ -44,74 +62,63 @@ namespace Statecharts.NET.Model
         public override string ToString() => "Done";
     }
     #endregion
-
-
-    // TODO: take a look into this
-    public interface IEvent : IEquatable<IEvent> { }
-    public interface ISendableEvent : IEvent { }
-
-    public abstract class Event : OneOfBase<NamedEvent, ImmediateEvent, DelayedEvent>, IEvent
+    #region Executable
+    public interface IEvent : IEquatable<IEvent>
     {
-        public virtual bool Equals(IEvent other) => this.Match(Equals, Equals, Equals);
+        object Data { get; }
     }
-
-    public class NamedEvent : Event, ISendableEvent
+    public class IdEvent<TActualEvent> : IEvent
+        where TActualEvent : IdEvent<TActualEvent>
     {
-        public string EventName { get; }
-        public NamedEvent(string eventName) => EventName = eventName;
-
-        public override bool Equals(IEvent other) => other is NamedEvent @event && @event.EventName == EventName;
-
-        public override bool Equals(object obj)
-        {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((NamedEvent) obj);
-        }
-
-        public override int GetHashCode() => EventName != null ? EventName.GetHashCode() : 0;
-        public override string ToString() => $"@\"{EventName}\"";
+        private readonly string _id;
+        public virtual object Data => null;
+        protected IdEvent(string id) => _id = id;
+        public bool Equals(IEvent other) => other is TActualEvent @event && @event._id == _id;
     }
-    public class ImmediateEvent : Event {
-        public override bool Equals(IEvent other) => other is ImmediateEvent;
-        public override string ToString() => "Immediately";
-    }
-    public class DelayedEvent : Event, ISendableEvent {
-        public TimeSpan Delay { get; }
-        public DelayedEvent(TimeSpan delay) => Delay = delay;
-
-        public override bool Equals(IEvent other) => other == this; // TODO: think of this
-    }
-    public class CustomDataEvent : ISendableEvent // TODO: think of this, probably inherit NamedEvent and only add Data
+    public class NamedEvent : IEvent
     {
         public string EventName { get; }
         public object Data { get; }
 
-        public CustomDataEvent(string eventName, object data)
+        public NamedEvent(string eventName, object data = null)
         {
             EventName = eventName;
             Data = data;
         }
 
-        public virtual bool Equals(IEvent other) => other is CustomDataEvent @event && @event.EventName == EventName;
-
-        public override bool Equals(object obj)
-        {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((CustomDataEvent)obj);
-        }
-
-        public override int GetHashCode() => EventName != null ? EventName.GetHashCode() : 0;
+        public bool Equals(IEvent other) => other is NamedEvent @event && @event.EventName == EventName;
     }
-    public class ServiceSuccessEvent : ISendableEvent {
-        public bool Equals(IEvent other) => throw new NotImplementedException();
-    }
-    public class ServiceErrorEvent : ISendableEvent
+    public class ImmediateEvent : IEvent
     {
-        public bool Equals(IEvent other) => throw new NotImplementedException();
+        public object Data => null;
+        public bool Equals(IEvent other) => other is ImmediateEvent;
     }
-    public class CompoundDoneEvent : IEvent {
-        public bool Equals(IEvent other) => throw new NotImplementedException();
+    public class DelayedEvent : IdEvent<DelayedEvent>
+    {
+        public DelayedEvent(StateNode stateNode, DelayedEventDefinition definition) :
+            base($"{stateNode.Key}:after:{definition.Delay.TotalMilliseconds}") { } // TODO: think of this key (lookup xstate)
     }
+    public class InitializeEvent : IEvent
+    {
+        public object Data => null;
+        public bool Equals(IEvent other) => other is InitializeEvent;
+    }
+    public class ServiceSuccessEvent : IdEvent<ServiceSuccessEvent>
+    {
+        public ServiceSuccessEvent(string serviceId) : base($"{serviceId}.success") { } // TODO: think of this key (lookup xstate)
+    }
+    public class ServiceErrorEvent : IdEvent<ServiceErrorEvent>
+    {
+        public ServiceErrorEvent(string serviceId) : base($"{serviceId}.error") { } // TODO: think of this key (lookup xstate)
+    }
+    public class DoneEvent : IdEvent<DoneEvent> {
+        public DoneEvent(Statenode statenode) : base($"{statenode}.done") { } // TODO: think of this key (lookup xstate)
+    }
+    public class ExecutionErrorEvent : IEvent
+    {
+        public object Data => null;
+        public ExecutionErrorEvent() { } // TODO: probably take Exception and provide as Data
+        public bool Equals(IEvent other) => other is ExecutionErrorEvent;
+    }
+    #endregion
 }

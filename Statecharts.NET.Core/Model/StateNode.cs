@@ -11,7 +11,7 @@ namespace Statecharts.NET.Model
         public abstract Option<IEnumerable<OneOf<Action, ContextActionDefinition>>> EntryActions { get; }
         public abstract Option<IEnumerable<OneOf<Action, ContextActionDefinition>>> ExitActions { get; }
 
-        public override string ToString() => $"{Name} ({GetType().Name.Replace("Definition.StateNode`1", string.Empty)})";
+        public override string ToString() => $"{Name} ({GetType().Name.Replace("StatenodeDefinition`1", string.Empty)})";
 
         #region Construction Helper Methods
         public static Option<IEnumerable<OneOf<Action, ContextActionDefinition>>> NoActions => Option.None<IEnumerable<OneOf<Action, ContextActionDefinition>>>();
@@ -35,12 +35,12 @@ namespace Statecharts.NET.Model
     {
         public abstract IEnumerable<StatenodeDefinition> States { get; }
         public abstract InitialCompoundTransitionDefinition InitialTransition { get; }
-        public abstract Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition, GuardedTransitionDefinition, GuardedContextTransitionDefinition>> DoneTransition { get; } // TODO: think about done data
+        public abstract Option<DoneTransitionDefinition> DoneTransition { get; } // TODO: think about done data
     }
     public abstract class OrthogonalStatenodeDefinition : NonFinalStatenodeDefinition
     {
         public abstract IEnumerable<StatenodeDefinition> States { get; }
-        public abstract Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition, GuardedTransitionDefinition, GuardedContextTransitionDefinition>> DoneTransition { get; } // TODO: think about done data
+        public abstract Option<DoneTransitionDefinition> DoneTransition { get; } // TODO: think about done data
     }
     #endregion
 }
