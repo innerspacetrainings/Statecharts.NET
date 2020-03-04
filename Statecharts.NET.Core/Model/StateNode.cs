@@ -15,6 +15,22 @@ namespace Statecharts.NET.Model
 
         public override string ToString() => $"{Name} ({GetType().Name.Replace("StatenodeDefinition`1", string.Empty)})";
 
+        internal TResult CataFold<TResult>(
+            Func<AtomicStatenodeDefinition, TResult> fAtomic,
+            Func<FinalStatenodeDefinition, TResult> fFinal,
+            Func<CompoundStatenodeDefinition, IEnumerable<TResult>, TResult> fCompound,
+            Func<OrthogonalStatenodeDefinition, IEnumerable<TResult>, TResult> fOrthogonal)
+        {
+            TResult Recurse(StatenodeDefinition recursedStateNode) =>
+                recursedStateNode.CataFold(fAtomic, fFinal, fCompound, fOrthogonal);
+
+            return Match(
+                fAtomic,
+                fFinal,
+                compound => fCompound(compound, compound.Statenodes.Select(Recurse)),
+                orthogonal => fOrthogonal(orthogonal, orthogonal.Statenodes.Select(Recurse)));
+        }
+
         #region Construction Helper Methods
         public static Option<IEnumerable<OneOf<Action, ContextActionDefinition>>> NoActions => Option.None<IEnumerable<OneOf<Action, ContextActionDefinition>>>();
         public static Option<IEnumerable<TransitionDefinition>> NoTransitions => Option.None<IEnumerable<TransitionDefinition>>();
@@ -35,18 +51,18 @@ namespace Statecharts.NET.Model
     }
     public abstract class CompoundStatenodeDefinition : NonFinalStatenodeDefinition
     {
-        public abstract IEnumerable<StatenodeDefinition> States { get; }
+        public abstract IEnumerable<StatenodeDefinition> Statenodes { get; }
         public abstract InitialCompoundTransitionDefinition InitialTransition { get; }
         public abstract Option<DoneTransitionDefinition> DoneTransition { get; } // TODO: think about done data
     }
     public abstract class OrthogonalStatenodeDefinition : NonFinalStatenodeDefinition
     {
-        public abstract IEnumerable<StatenodeDefinition> States { get; }
+        public abstract IEnumerable<StatenodeDefinition> Statenodes { get; }
         public abstract Option<DoneTransitionDefinition> DoneTransition { get; } // TODO: think about done data
     }
     #endregion
 
-    public class Statenode : OneOfBase<AtomicStatenode, FinalstateNode, CompoundStatenode, OrthogonalStatenode>
+    public class Statenode : OneOfBase<AtomicStatenode, FinalStatenode, CompoundStatenode, OrthogonalStatenode>
     {
         public Option<Statenode> Parent { get; }
         public string Name { get; }
@@ -54,14 +70,16 @@ namespace Statecharts.NET.Model
         internal int Depth { get; }
 
         public IEnumerable<Transition> Transitions { get; }
-
+        public Actionblock EntryActions { get; }
+        public Actionblock ExitActions { get; }
+        public IEnumerable<Service> Services { get; }
 
         public Statenode(
             Statenode parent,
             string name,
             IEnumerable<Transition> transitions,
-            IEnumerable<Action> entryActions,
-            IEnumerable<Action> exitActions,
+            Actionblock entryActions,
+            Actionblock exitActions,
             IEnumerable<Service> services)
         {
             Parent = parent.ToOption();
@@ -79,7 +97,6 @@ namespace Statecharts.NET.Model
                 () => 0);
         }
 
-
         internal TResult CataFold<TResult>(
             Func<AtomicStatenode, TResult> fAtomic,
             Func<FinalStatenode, TResult> fFinal,
@@ -89,15 +106,16 @@ namespace Statecharts.NET.Model
             TResult Recurse(Statenode recursedStateNode) =>
                 recursedStateNode.CataFold(fAtomic, fFinal, fCompound, fOrthogonal);
 
-            return this.Match(
+            return Match(
                 fAtomic,
                 fFinal,
-                compound => fCompound(compound, compound.StateNodes.Select(Recurse)),
-                orthogonal => fOrthogonal(orthogonal, orthogonal.StateNodes.Select(Recurse)));
+                compound => fCompound(compound, compound.Statenodes.Select(Recurse)),
+                orthogonal => fOrthogonal(orthogonal, orthogonal.Statenodes.Select(Recurse)));
         }
     }
 
-    public class AtomicStatenode : Statenode
-    {
-    }
+    public class AtomicStatenode : Statenode { }
+    public class FinalStatenode : Statenode { }
+    public class CompoundStatenode : Statenode { }
+    public class OrthogonalStatenode : Statenode { }
 }

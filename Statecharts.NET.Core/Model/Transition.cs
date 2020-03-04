@@ -103,6 +103,7 @@ namespace Statecharts.NET.Model
 
     public class Transition
     {
+        public IEvent Event { get; }
         public Statenode Source { get; }
         public IEnumerable<Statenode> Targets { get; }
 

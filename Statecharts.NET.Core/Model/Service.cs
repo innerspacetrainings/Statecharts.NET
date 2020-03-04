@@ -25,4 +25,7 @@ namespace Statecharts.NET.Model
         public abstract Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition, UnguardedContextDataTransitionDefinition>> OnSuccessDefinition { get; }
     }
     #endregion
+    #region Parsed
+    public class Service { }
+    #endregion
 }

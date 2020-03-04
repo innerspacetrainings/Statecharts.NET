@@ -7,6 +7,6 @@ namespace Statecharts.NET
 {
     public class Interpreter
     {
-        public _ Run(_)
+        public _ Run(_, options) // options e.g. Logger
     }
 }

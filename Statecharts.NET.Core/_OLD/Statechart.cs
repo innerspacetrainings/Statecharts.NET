@@ -10,7 +10,7 @@ using Statecharts.NET.Model;
 using Action = System.Action;
 using Task = System.Threading.Tasks.Task;
 
-namespace Statecharts.NET
+namespace OLD.Statecharts.NET.Parser
 {
     public static class StateChartExtensions
     {

@@ -8,7 +8,7 @@ using Statecharts.NET.Utilities;
 using Action = System.Action;
 using Task = System.Threading.Tasks.Task;
 
-namespace Statecharts.NET.Interpreter
+namespace OLD.Statecharts.NET.Interpreter
 {
     internal static class ReadabilityExtensions
     {

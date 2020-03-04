@@ -31,7 +31,7 @@ namespace Statecharts.NET.Model
         public NextStep(IEvent @event) => Event = @event;
     }
 
-    internal class EventQueue : IEnumerable<IEvent>
+    internal class EventQueue
     {
         private readonly PriorityQueue<OneOfUnion<IQueuedEvent, Stabilization, CurrentStep, NextStep>, int> _queue
             = new PriorityQueue<OneOfUnion<IQueuedEvent, Stabilization, CurrentStep, NextStep>, int>();
@@ -60,8 +60,7 @@ namespace Statecharts.NET.Model
             .Map(queuedEvent => queuedEvent.Match(stabilization => true, currentStep => true, nextStep => false))
             .ValueOr(true);
 
-        public IEnumerator<IEvent> GetEnumerator() => _queue.Select(queued => queued.AsBase().Event).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public EventList AsEventList() => ;
     }
     internal class EventList : IEnumerable<OneOf<CurrentStep, NextStep>>
     {

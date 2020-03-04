@@ -8,10 +8,10 @@ namespace Statecharts.NET.Model
     public class Macrostep<TContext> where TContext : IContext<TContext>
     {
         public State<TContext> State { get; }
-        public IEnumerable<IEvent> RemainingEvents { get; }
+        public  RemainingEvents { get; }
         public IList<Microstep> Microsteps { get; }
 
-        public Macrostep(State<TContext> state, IEnumerable<IEvent> remainingEvents, IList<Microstep> microsteps)
+        public Macrostep(State<TContext> state,  remainingEvents, IList<Microstep> microsteps)
         {
             State = state;
             RemainingEvents = remainingEvents;

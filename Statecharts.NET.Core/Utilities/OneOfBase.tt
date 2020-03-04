@@ -5,7 +5,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 <#
-var arities = new[] { 3, 4, 5, 7 };
+var arities = new[] { 2, 3, 4, 5, 7 };
 
 string GenerateForArity(int arity, string template, string separator) =>
     string.Join(separator, Enumerable.Range(0, arity).Select(position => string.Format(template, position)));
@@ -67,7 +67,7 @@ namespace Statecharts.NET.Utilities
         }
 
         public override bool Equals(object obj) =>
-            ReferenceEquals(this, obj) || (!(obj is null) && obj is OneOfBase<<#= Generics(arity) #>> other && Equals(other));
+            ReferenceEquals(this, obj) || !(obj is null) && obj is OneOfBase<<#= Generics(arity) #>> other && Equals(other);
 
         public override string ToString()
         {

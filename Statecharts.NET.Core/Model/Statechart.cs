@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Statecharts.NET.Interfaces;
 
 namespace Statecharts.NET.Model
@@ -44,16 +45,19 @@ namespace Statecharts.NET.Model
             throw new NotImplementedException();
     }
 
-    public class ExecutableStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
+    public class ExecutableStatechart<TContext> : ParsedStatechart<TContext> where TContext : IContext<TContext>
     {
-        public ExecutableStatechart() : base(null) =>
-            throw new NotImplementedException();
+        public IContext<object> InitialContext { get; }
+        public IDictionary<StatenodeId, Statenode> Statenodes { get; }
 
-
-        public IEnumerable<Statenode> GetActiveStatenodes(StateConfiguration stateConfiguration)
+        public ExecutableStatechart(Statenode rootnode, IContext<object> initialContext, IEnumerable<Statenode> statenodes) : base(rootnode)
         {
-            throw new NotImplementedException();
+            InitialContext = initialContext;
+            Statenodes = statenodes.ToDictionary(statenode => statenode.Id);
         }
+
+        public IEnumerable<Statenode> GetActiveStatenodes(StateConfiguration stateConfiguration) => 
+            stateConfiguration.Select(id => Statenodes[id]);
     }
     #endregion
 }

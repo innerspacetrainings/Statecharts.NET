@@ -57,7 +57,9 @@ namespace Statecharts.NET
             where TContext : IContext<TContext>
         {
             Option<Transition> FirstMatchingTransition(Statenode node) =>
-                node.Transitions.FirstOrDefault(transition => transition.IsEnabled(context, @event.Data)).ToOption();
+                node.Transitions
+                    .Where(transition => transition.IsEnabled(context, @event.Data))
+                    .FirstOrDefault(transition => @event.Equals(transition.Event)).ToOption();
 
             return statechart
                 .GetActiveStatenodes(stateConfiguration)
@@ -174,7 +176,7 @@ namespace Statecharts.NET
             }
             void UpdateStateConfiguration(IReadOnlyCollection<Microstep> microSteps) =>
                 stateConfiguration = stateConfiguration.Without(microSteps.GetEnteredStateNodes()).With(microSteps.GetExitedStateNodes());
-            void UpdateMacroStep(IEnumerable<Microstep> steps) => microsteps.AddRange(steps);
+            void AddMicrosteps(IEnumerable<Microstep> steps) => microsteps.AddRange(steps);
 
             while (events.NextIsInternal)
             {
@@ -183,7 +185,7 @@ namespace Statecharts.NET
                 StabilizeIfNecessary(microSteps);
                 EnqueueDoneEvents(microSteps);
                 UpdateStateConfiguration(microSteps);
-                UpdateMacroStep(microSteps);
+                AddMicrosteps(microSteps);
             }
 
             return new Macrostep<TContext>(new State<TContext>(stateConfiguration, context), events, microsteps);

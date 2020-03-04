@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Statecharts.NET.Interfaces;
 using Statecharts.NET.Model;
 
 namespace Statecharts.NET
 {
     public class Parser
     {
-        private static Statenode ParseStatenode(Statenode parent, StatenodeDefinition definition)
+        private static Statenode ParseStatenode(StatenodeDefinition definition, Statenode parent)
         {
             definition.Match(
                 atomic => new AtomicStatenode(),
@@ -17,6 +15,11 @@ namespace Statecharts.NET
             new CompoundStatenode(Transform(definition.InitialTransition))
         }
 
-        public _ Parse(_)
+        public ParsedStatechart<TContext> Parse<TContext>(StatechartDefinition<TContext> definition)
+            where TContext : IContext<TContext> =>
+            // TODO: return actual ParsedStatechart based on results from parsing
+            new Model.ExecutableStatechart<TContext>(
+                ParseStatenode(definition.RootStateNode, null),
+                definition.InitialContext.CopyDeep());
     }
 }
