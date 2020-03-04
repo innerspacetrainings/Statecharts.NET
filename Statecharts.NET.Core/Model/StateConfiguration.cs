@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Statecharts.NET.Interpreter;
+using System.Text;
 
-namespace Statecharts.NET
+namespace Statecharts.NET.Model
 {
+    // TODO
     public static class StateConfigurationFunctions
     {
         public static StateConfiguration Without(this StateConfiguration stateConfiguration, IEnumerable<StateNodeId> stateNodeIds)
@@ -14,21 +15,19 @@ namespace Statecharts.NET
         public static StateConfiguration With(this StateConfiguration stateConfiguration, IEnumerable<StateNodeId> stateNodeIds)
             => new StateConfiguration(stateConfiguration.StateNodeIds.Concat(stateNodeIds));
         public static StateConfiguration With(this StateConfiguration stateConfiguration, StateNodeId stateNodeId)
-            => stateConfiguration.With(new[] {stateNodeId});
+            => stateConfiguration.With(new[] { stateNodeId });
         public static bool Contains(this StateConfiguration stateConfiguration, StateNode stateNode)
             => stateConfiguration.StateNodeIds.Contains(stateNode.Id);
     }
 
     public class StateConfiguration
     {
-        public static StateConfiguration NotInitialized =>
-            new StateConfiguration(Enumerable.Empty<StateNodeId>());
+        public IEnumerable<StatenodeId> StateNodeIds { get; }
 
-        public StateConfiguration(IEnumerable<StateNodeId> stateIds) =>
-            StateNodeIds = stateIds ?? throw new ArgumentNullException(nameof(stateIds));
+        public StateConfiguration(IEnumerable<Statenode> statenodes) =>
+            StateNodeIds = statenodes?.Select(statenode => statenode.Id) ?? throw new ArgumentNullException(nameof(statenodes));
 
-        public IEnumerable<StateNodeId> StateNodeIds { get; }
-
-        public bool IsNotInitialized => !StateNodeIds.Any();
+        public bool Contains(Statenode statenode)
+            => StateNodeIds.Contains(statenode.Id);
     }
 }

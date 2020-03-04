@@ -95,8 +95,8 @@ namespace Statecharts.NET.Model
     }
     public class DelayedEvent : IdEvent<DelayedEvent>
     {
-        public DelayedEvent(StateNode stateNode, DelayedEventDefinition definition) :
-            base($"{stateNode.Key}:after:{definition.Delay.TotalMilliseconds}") { } // TODO: think of this key (lookup xstate)
+        public DelayedEvent(Statenode statenode, DelayedEventDefinition definition) :
+            base($"{statenode.Key}:after:{definition.Delay.TotalMilliseconds}") { } // TODO: think of this key (lookup xstate)
     }
     public class InitializeEvent : IEvent
     {
@@ -116,8 +116,9 @@ namespace Statecharts.NET.Model
     }
     public class ExecutionErrorEvent : IEvent
     {
+        public Exception Exception { get; }
         public object Data => null;
-        public ExecutionErrorEvent() { } // TODO: probably take Exception and provide as Data
+        public ExecutionErrorEvent(Exception exception) => Exception = exception;
         public bool Equals(IEvent other) => other is ExecutionErrorEvent;
     }
     #endregion

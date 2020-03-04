@@ -31,7 +31,7 @@ namespace Statecharts.NET.Model
         public NextStep(IEvent @event) => Event = @event;
     }
 
-    internal class EventQueue
+    internal class EventQueue : IEnumerable<IEvent>
     {
         private readonly PriorityQueue<OneOfUnion<IQueuedEvent, Stabilization, CurrentStep, NextStep>, int> _queue
             = new PriorityQueue<OneOfUnion<IQueuedEvent, Stabilization, CurrentStep, NextStep>, int>();
@@ -59,6 +59,9 @@ namespace Statecharts.NET.Model
             .ToOption()
             .Map(queuedEvent => queuedEvent.Match(stabilization => true, currentStep => true, nextStep => false))
             .ValueOr(true);
+
+        public IEnumerator<IEvent> GetEnumerator() => _queue.Select(queued => queued.AsBase().Event).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
     internal class EventList : IEnumerable<OneOf<CurrentStep, NextStep>>
     {
@@ -70,11 +73,13 @@ namespace Statecharts.NET.Model
         public static EventList Empty() => new EventList();
         public static EventList From(IEnumerable<OneOf<CurrentStep, NextStep>> events) => new EventList(events);
 
-        public void AddForCurrentStep(IEvent @event) => _events.Add(new CurrentStep(@event));
-        public void AddForNextStep(IEvent @event) => _events.Add(new NextStep(@event));
+        internal void Enqueue(OneOf<CurrentStep, NextStep> queuedEvent) => _events.Add(queuedEvent);
+        public void EnqueueOnCurrentStep(IEvent @event) => Enqueue(new CurrentStep(@event));
+        public void EnqueueOnNextStep(IEvent @event) => Enqueue(new NextStep(@event));
         public void AddRange(IEnumerable<OneOf<CurrentStep, NextStep>> events) => _events.AddRange(events);
 
         public IEnumerator<OneOf<CurrentStep, NextStep>> GetEnumerator() => _events.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
     }
 }

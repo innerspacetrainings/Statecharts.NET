@@ -24,11 +24,11 @@ namespace Statecharts.NET.Utilities
             this IEnumerable<T> source, params T[] tail)
             => source.Concat(tail);
 
-        public static IEnumerable<T> Append<T>(
+        public static IEnumerable<T> Append<T>( // TODO: concat
             this T source, params T[] tail)
             => new []{ source }.Concat(tail);
 
-        public static IEnumerable<T> Append<T>(
+        public static IEnumerable<T> Append<T>( // TODO: concat
             this T source, IEnumerable<T> tail)
             => new[] { source }.Concat(tail);
 

@@ -90,11 +90,11 @@ namespace Statecharts.NET
                         definition => new Interpreter.GuardedTransition(stateNode, definition.Event, definition.Guard, definition.Targets.Select(target => ResolveTarget(stateNode, target)), definition.Actions.ValueOr(Enumerable.Empty<OneOf<Definition.Action, ContextAction, ContextDataAction>>()))));
 
             InitialContext = initialContext;
-            RootNode.Transitions.Add(
+            Rootnode.Transitions.Add(
                 new Interpreter.UnguardedTransition(
-                    RootNode,
+                    Rootnode,
                     DoneEvent,
-                    RootNode.Yield(),
+                    Rootnode.Yield(),
                     (new Definition.SideEffectAction(() => _doneAction?.Invoke()) as Definition.Action).Yield()));
 
             var descendants = rootNode.GetDescendants().ToArray();
@@ -158,6 +158,23 @@ namespace Statecharts.NET
                 guarded => Matches(guarded.Event) && IsEnabled(guarded));
             Interpreter.StateNode TransitionSource(Interpreter.Transition transition) => transition.Source;
             Interpreter.Transition FirstMatching(IGrouping<Interpreter.StateNode, Interpreter.Transition> transitions) => transitions.FirstOrDefault(TransitionShouldBeTaken);
+
+            IEnumerable<StateNode> activeStatenodes = ;
+            Option<Transition> FirstMatchingTransition(StateNode node, IEvent @event) => ;
+
+            var result = activeStatenodes
+                .OrderBy(node => node.Depth)
+                .Aggregate(
+                    (excluded: Enumerable.Empty<StateNode>(), transitions: Enumerable.Empty<Transition>()),
+                    (tuple, current) =>
+                        tuple.excluded.Contains(current)
+                        ? tuple
+                        : FirstMatchingTransition(current, nextEvent).Match(
+                            transition => (
+                                excluded: tuple.excluded.Concat(current.GetParents()),
+                                transitions: transition.Append(transition)),
+                            () => tuple))
+                .transitions;
 
             return Transitions
                 .Where(SourceStateIsActive)

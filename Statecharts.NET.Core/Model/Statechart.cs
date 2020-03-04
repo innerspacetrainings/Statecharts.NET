@@ -24,12 +24,12 @@ namespace Statecharts.NET.Model
     public abstract class ParsedStatechart<TContext>
         where TContext : IEquatable<TContext>
     {
-        public Interpreter.StateNode RootNode { get; set; }
+        public Statenode Rootnode { get; }
 
-        public string Id => RootNode.Key.GetType().Name; // TODO: get real name here
+        public string Id => Rootnode.Name;
 
-        public ParsedStatechart(Interpreter.StateNode rootNode) =>
-            RootNode = rootNode ?? throw new ArgumentNullException(nameof(rootNode));
+        protected ParsedStatechart(Statenode rootnode) =>
+            Rootnode = rootnode ?? throw new ArgumentNullException(nameof(rootnode));
     }
 
     class InvalidStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
@@ -42,6 +42,18 @@ namespace Statecharts.NET.Model
     {
         public ValidStatechart() : base(null) =>
             throw new NotImplementedException();
+    }
+
+    public class ExecutableStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
+    {
+        public ExecutableStatechart() : base(null) =>
+            throw new NotImplementedException();
+
+
+        public IEnumerable<Statenode> GetActiveStatenodes(StateConfiguration stateConfiguration)
+        {
+            throw new NotImplementedException();
+        }
     }
     #endregion
 }

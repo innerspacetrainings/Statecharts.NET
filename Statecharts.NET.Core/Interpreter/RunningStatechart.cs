@@ -52,75 +52,17 @@ namespace Statecharts.NET.Interpreter
                 foreach (var action in actions)
                     // TODO: where to get EventData from
                     action.Switch(
-                        send => result.AddForNextStep(new NamedEvent(send.EventName)),
-                        raise => result.AddForCurrentStep(new NamedEvent(raise.EventName)),
+                        send => result.EnqueueOnNextStep(new NamedEvent(send.EventName)),
+                        raise => result.EnqueueOnCurrentStep(new NamedEvent(raise.EventName)),
                         log => _logger.Log(log.Message(_context, default)),
                         assign => assign.Mutation(_context, default),
                         sideEffect => sideEffect.Function(_context, default));
             }
             catch (Exception e)
             {
-                result.AddForCurrentStep(new ExecutionErrorEvent(e));
+                result.EnqueueOnCurrentStep(new ExecutionErrorEvent(e));
             }
             return result;
-        }
-        private EventList Apply(MicroStep microStep, Func<ActionBlock, EventList> fExecute)
-        {
-            var events = EventList.Empty();
-
-            EventList ExecuteMultiple(IEnumerable<ActionBlock> actionBlocks) =>
-                EventList.From(actionBlocks.SelectMany(fExecute).ToList());
-            void ExecuteExitActions() => events.AddRange(ExecuteMultiple(microStep.ExitedActionBlocks));
-            void ExecuteTransitionActions() => events.AddRange(fExecute(microStep.TransitionActionBlock));
-            void ExecuteEntryActions() => events.AddRange(ExecuteMultiple(microStep.EnteredActionBlocks));
-            
-            ExecuteExitActions();
-            StopServices(microStep.ExitedStateNodes);
-            ExecuteTransitionActions();
-            ExecuteEntryActions();
-
-            return events;
-        }
-
-        public void Send(ISendableEvent sentEvent)
-        {
-            var events = EventQueue.WithSentEvent(sentEvent);
-
-            IReadOnlyCollection<MicroStep> ResolveMicroSteps(IEvent @event) =>
-                _statechart.ResolveSingleEvent(CurrentState, @event).ToList().AsReadOnly();
-            void Execute(IEnumerable<MicroStep> microSteps)
-            {
-                foreach (var step in microSteps)
-                    foreach (var @event in Apply(step, ExecuteActionBlock))
-                        @event.Switch(events.Enqueue, events.Enqueue);
-            }
-            void StabilizeIfNecessary(IReadOnlyCollection<MicroStep> microSteps)
-            {
-                if(microSteps.GetEnteredStateNodes().Any()) events.EnqueueStabilizationEvent();
-            }
-            void EnqueueDoneEvents(IReadOnlyCollection<MicroStep> microSteps)
-            {
-                // TODO: check state finishing and enqueue
-            }
-            void UpdateStateConfiguration(IReadOnlyCollection<MicroStep> microSteps) =>
-                _stateConfiguration = _stateConfiguration.Without(microSteps.GetEnteredStateNodes().Ids()).With(microSteps.GetExitedStateNodes().Ids()); // TODO: Ids is ugly
-            void UpdateMacroStep(MacroStep macroStep, IEnumerable<MicroStep> microSteps) =>
-                macroStep.Add(microSteps);
-
-            while (events.IsNotEmpty)
-            {
-                var macroStep = new MacroStep();
-                while (events.NextIsInternal)
-                {
-                    var microSteps = ResolveMicroSteps(events.Dequeue());
-                    Execute(microSteps);
-                    StabilizeIfNecessary(microSteps);
-                    EnqueueDoneEvents(microSteps);
-                    UpdateStateConfiguration(microSteps);
-                    UpdateMacroStep(macroStep, microSteps);
-                }
-                StartServices(macroStep.GetEnteredStateNodes());
-            }
         }
 
         internal Task StartFrom(State<TContext> state) => Start(
@@ -128,7 +70,7 @@ namespace Statecharts.NET.Interpreter
             state.Context,
             () => StartServices()); // TODO: think about this
         internal Task StartFromRootState() => Start(
-            new StateConfiguration(_statechart.RootNode.Yield().Ids()),
+            new StateConfiguration(_statechart.Rootnode.Yield().Ids()),
             _statechart.InitialContext,
             () => Send(InitEvent)); // TODO: generate Init Event Transition when Parsing
 

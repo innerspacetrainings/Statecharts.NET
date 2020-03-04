@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
@@ -96,6 +97,16 @@ namespace Statecharts.NET.Model
         public abstract OneOf<InStateGuard, ConditionContextGuard, ConditionContextDataGuard> Guard { get; }
         public abstract IEnumerable<Target> Targets { get; }
         public abstract IEnumerable<OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> Actions { get; }
+    }
+    #endregion
+    #region Parsed
+
+    public class Transition
+    {
+        public Statenode Source { get; }
+        public IEnumerable<Statenode> Targets { get; }
+
+        public bool IsEnabled(object context, object eventData) => throw new NotImplementedException();
     }
     #endregion
 }
