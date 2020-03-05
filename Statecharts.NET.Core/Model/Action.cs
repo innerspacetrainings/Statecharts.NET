@@ -111,22 +111,25 @@ namespace Statecharts.NET.Model
 
     public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction>
     {
-        public static Action From(ActionDefinition action) =>
-            action.Match(
+        public static Action From(ActionDefinition actionDefinition) =>
+            actionDefinition.Match(
                 send => new SendAction(send.EventName) as Action,
                 raise => new RaiseAction(raise.EventName),
                 log => new LogAction((context, data) => log.Label),
                 assign => new AssignAction((context, data) => assign.Mutation()),
                 sideEffect => new SideEffectAction((context, data) => sideEffect.Function()));
-        public static Action From(ContextActionDefinition action) =>
-            action.Match(
+        public static Action From(ContextActionDefinition actionDefinition) =>
+            actionDefinition.Match(
                 log => new LogAction((context, data) => log.Message(context)) as Action, 
                 assign => new AssignAction((context, data) => assign.Mutation(context)), 
                 sideEffect => new SideEffectAction((context, data) => sideEffect.Function(context)));
-        public static Action From(ContextDataActionDefinition action) =>
-            action.Match(
+        public static Action From(ContextDataActionDefinition actionDefinition) =>
+            actionDefinition.Match(
                 log => new LogAction(log.Message) as Action,
                 assign => new AssignAction(assign.Mutation),
                 sideEffect => new SideEffectAction(sideEffect.Function));
+
+        public static Action From(OneOf<ActionDefinition, ContextActionDefinition> actionDefinition) =>
+            actionDefinition.Match(From, From);
     }
 }

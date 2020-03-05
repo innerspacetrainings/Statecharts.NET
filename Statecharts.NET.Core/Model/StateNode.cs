@@ -10,8 +10,8 @@ namespace Statecharts.NET.Model
         OneOfBase<AtomicStatenodeDefinition, FinalStatenodeDefinition, CompoundStatenodeDefinition, OrthogonalStatenodeDefinition>
     {
         public abstract string Name { get; }
-        public abstract Option<IEnumerable<OneOf<Action, ContextActionDefinition>>> EntryActions { get; }
-        public abstract Option<IEnumerable<OneOf<Action, ContextActionDefinition>>> ExitActions { get; }
+        public abstract IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; }
+        public abstract IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; }
 
         public override string ToString() => $"{Name} ({GetType().Name.Replace("StatenodeDefinition`1", string.Empty)})";
 
@@ -43,7 +43,7 @@ namespace Statecharts.NET.Model
     public abstract class FinalStatenodeDefinition : StatenodeDefinition { }
     public abstract class NonFinalStatenodeDefinition : StatenodeDefinition
     {
-        public abstract Option<IEnumerable<TransitionDefinition>> Transitions { get; }
+        public abstract IEnumerable<TransitionDefinition> Transitions { get; }
         public abstract Option<IEnumerable<ServiceDefinition>> Services { get; }
     }
     public abstract class AtomicStatenodeDefinition : NonFinalStatenodeDefinition
@@ -62,32 +62,30 @@ namespace Statecharts.NET.Model
     }
     #endregion
 
-    public class Statenode : OneOfBase<AtomicStatenode, FinalStatenode, CompoundStatenode, OrthogonalStatenode>
+    public abstract class Statenode : OneOfBase<AtomicStatenode, FinalStatenode, CompoundStatenode, OrthogonalStatenode>
     {
         public Option<Statenode> Parent { get; }
         public string Name { get; }
+        public int DocumentIndex { get; }
+        public Actionblock EntryActions { get; }
+        public Actionblock ExitActions { get; }
+
         public StatenodeId Id { get; }
         internal int Depth { get; }
 
-        public IEnumerable<Transition> Transitions { get; }
-        public Actionblock EntryActions { get; }
-        public Actionblock ExitActions { get; }
-        public IEnumerable<Service> Services { get; }
 
         public Statenode(
             Statenode parent,
             string name,
-            IEnumerable<Transition> transitions,
+            int documentIndex,
             Actionblock entryActions,
-            Actionblock exitActions,
-            IEnumerable<Service> services)
+            Actionblock exitActions)
         {
             Parent = parent.ToOption();
             Name = name;
-            Transitions = transitions;
+            DocumentIndex = documentIndex;
             EntryActions = entryActions;
             ExitActions = exitActions;
-            Services = services;
 
             Id = Parent.Match(
                 p => StatenodeId.DeriveFromParent(p, name),
@@ -114,8 +112,45 @@ namespace Statecharts.NET.Model
         }
     }
 
-    public class AtomicStatenode : Statenode { }
-    public class FinalStatenode : Statenode { }
-    public class CompoundStatenode : Statenode { }
-    public class OrthogonalStatenode : Statenode { }
+    public class FinalStatenode : Statenode
+    {
+        public FinalStatenode(Statenode parent, string name, int documentIndex, Actionblock entryActions, Actionblock exitActions) : base(parent, name, documentIndex, entryActions, exitActions)
+        {
+        }
+    }
+
+    public abstract class NonFinalStatenode : Statenode
+    {
+        public IEnumerable<Transition> Transitions { get; internal set; }
+
+        protected NonFinalStatenode(
+            Statenode parent,
+            string name,
+            int documentIndex,
+            Actionblock entryActions,
+            Actionblock exitActions) : base(parent, name, documentIndex, entryActions, exitActions) { }
+    }
+
+    public class AtomicStatenode : NonFinalStatenode
+    {
+        public AtomicStatenode(
+            Statenode parent,
+            string name,
+            int documentIndex,
+            Actionblock entryActions,
+            Actionblock exitActions) : base(parent, name, documentIndex, entryActions, exitActions) { }
+    }
+
+    public class CompoundStatenode : NonFinalStatenode
+    {
+        public IEnumerable<Statenode> Statenodes { get; internal set; }
+
+        public CompoundStatenode(Statenode parent, string name, int documentIndex, Actionblock entryActions, Actionblock exitActions) : base(parent, name, documentIndex, entryActions, exitActions) { }
+    }
+    public class OrthogonalStatenode : NonFinalStatenode
+    {
+        public IEnumerable<Statenode> Statenodes { get; internal set; }
+
+        public OrthogonalStatenode(Statenode parent, string name, int documentIndex, Actionblock entryActions, Actionblock exitActions) : base(parent, name, documentIndex, entryActions, exitActions) { }
+    }
 }

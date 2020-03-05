@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using Statecharts.NET.Definition;
+using Statecharts.NET.Interfaces;
 using Statecharts.NET.Language;
 using Statecharts.NET.Model;
 using Statecharts.NET.XState;
 using static Statecharts.NET.XState.JPropertyConstructorFunctions;
 using static Statecharts.NET.Language.Keywords;
-using Service = Statecharts.NET.Definition.Service;
 
 namespace Statecharts.NET.Demo
 {
-    internal class FetchContext : IEquatable<FetchContext>, IXStateSerializable
+    internal class FetchContext : IContext<FetchContext>, IXStateSerializable
     {
         public int Retries { get; set; }
 
@@ -20,13 +18,15 @@ namespace Statecharts.NET.Demo
         ObjectValue IXStateSerializable.AsJSObject()
             => ObjectValue(("retries", Retries));
 
+        public FetchContext CopyDeep() => new FetchContext {Retries = Retries};
+
         public override string ToString()
             => $"FetchContext: (Retries = {Retries})";
     }
 
     internal static class Program
     {
-        private static readonly Statechart<FetchContext> FetchDefinition = Statechart
+        private static readonly StatechartDefinition<FetchContext> FetchDefinition = Statechart
             .WithInitialContext(new FetchContext { Retries = 0 })
             .WithRootState(
                 "fetch"
@@ -74,24 +74,15 @@ namespace Statecharts.NET.Demo
             var definition = FetchDefinition;
             Console.WriteLine(definition.AsXStateVisualizerV4Definition());
 
-            var parsedStatechart = definition.Parse();
-            Console.WriteLine($"Parsing the definition of the Statechart resulted in {parsedStatechart.GetType().Name}");
-
-            switch (parsedStatechart)
+            var statechart = Parser.Parse(definition) as ExecutableStatechart<FetchContext>;
+            var service = Interpreter.Run(statechart);
+            var started = service.Start();
+            LogState(started.State);
+            while (true)
             {
-                case ExecutableStatechart<FetchContext> statechart:
-                    var service = statechart.Interpret();
-                    var started = service.Start();
-                    LogState(started.State);
-                    while (true)
-                    {
-                        var eventType = Console.ReadLine();
-                        var state = service.Send(new NamedEvent(eventType?.ToUpper()));
-                        LogState(state);
-                    }
-                default:
-                    Console.WriteLine("NOT EXECUTABLE");
-                    break;
+                var eventType = Console.ReadLine();
+                var state = service.Send(new NamedEvent(eventType?.ToUpper()));
+                LogState(state);
             }
 
         }

@@ -47,13 +47,13 @@ namespace Statecharts.NET.Model
 
     public class ExecutableStatechart<TContext> : ParsedStatechart<TContext> where TContext : IContext<TContext>
     {
-        public IContext<object> InitialContext { get; }
+        public IContext<TContext> InitialContext { get; }
         public IDictionary<StatenodeId, Statenode> Statenodes { get; }
 
-        public ExecutableStatechart(Statenode rootnode, IContext<object> initialContext, IEnumerable<Statenode> statenodes) : base(rootnode)
+        public ExecutableStatechart(Statenode rootnode, IContext<TContext> initialContext, IDictionary<StatenodeId, Statenode> statenodes) : base(rootnode)
         {
             InitialContext = initialContext;
-            Statenodes = statenodes.ToDictionary(statenode => statenode.Id);
+            Statenodes = statenodes;
         }
 
         public IEnumerable<Statenode> GetActiveStatenodes(StateConfiguration stateConfiguration) => 
