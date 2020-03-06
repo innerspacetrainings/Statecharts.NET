@@ -131,5 +131,7 @@ namespace Statecharts.NET.Model
 
         public static Action From(OneOf<ActionDefinition, ContextActionDefinition> actionDefinition) =>
             actionDefinition.Match(From, From);
+        public static Action From(OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition> actionDefinition) =>
+            actionDefinition.Match(From, From, From);
     }
 }

@@ -60,7 +60,10 @@ namespace Statecharts.NET.Model
             .Map(queuedEvent => queuedEvent.Match(stabilization => true, currentStep => true, nextStep => false))
             .ValueOr(true);
 
-        public EventList AsEventList() => ;
+        public IEnumerable<IEvent> NextStepEvents => // TODO: don't fully like that
+            _queue
+                .Select(queuedEvent => queuedEvent.Match(_ => null, _ => null, nextStep => nextStep.Event))
+                .WhereNotNull();
     }
     internal class EventList : IEnumerable<OneOf<CurrentStep, NextStep>>
     {

@@ -17,7 +17,6 @@ namespace Statecharts.NET.Model
     public interface ISendableDataEvent : IEvent
     {
         string Name { get; }
-        object Data { get; }
     }
 
 
@@ -95,8 +94,8 @@ namespace Statecharts.NET.Model
     }
     public class DelayedEvent : IdEvent<DelayedEvent>
     {
-        public DelayedEvent(Statenode statenode, DelayedEventDefinition definition) :
-            base($"{statenode.Key}:after:{definition.Delay.TotalMilliseconds}") { } // TODO: think of this key (lookup xstate)
+        public DelayedEvent(Statenode statenode, TimeSpan delay) :
+            base($"{statenode.Id}:after:{delay.TotalMilliseconds}") { } // TODO: think of this key (lookup xstate)
     }
     public class InitializeEvent : IEvent
     {

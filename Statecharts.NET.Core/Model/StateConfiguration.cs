@@ -3,35 +3,34 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
 {
-    // TODO
-    public static class StateConfigurationFunctions
-    {
-        public static StateConfiguration Without(this StateConfiguration stateConfiguration, IEnumerable<StateNodeId> stateNodeIds)
-            => new StateConfiguration(stateConfiguration.StateNodeIds.Except(stateNodeIds));
-        public static StateConfiguration Without(this StateConfiguration stateConfiguration, StateNodeId stateNodeId)
-            => stateConfiguration.Without(new[] { stateNodeId });
-        public static StateConfiguration With(this StateConfiguration stateConfiguration, IEnumerable<StateNodeId> stateNodeIds)
-            => new StateConfiguration(stateConfiguration.StateNodeIds.Concat(stateNodeIds));
-        public static StateConfiguration With(this StateConfiguration stateConfiguration, StateNodeId stateNodeId)
-            => stateConfiguration.With(new[] { stateNodeId });
-        public static bool Contains(this StateConfiguration stateConfiguration, StateNode stateNode)
-            => stateConfiguration.StateNodeIds.Contains(stateNode.Id);
-    }
-
     public class StateConfiguration : IEnumerable<StatenodeId>
     {
+        private static IEnumerable<StatenodeId> Ids(IEnumerable<Statenode> statenodes)
+            => statenodes?.Select(statenode => statenode.Id);
+
         public IEnumerable<StatenodeId> StateNodeIds { get; }
 
-        public StateConfiguration(IEnumerable<Statenode> statenodes) =>
-            StateNodeIds = statenodes?.Select(statenode => statenode.Id) ?? throw new ArgumentNullException(nameof(statenodes));
+        private StateConfiguration(IEnumerable<StatenodeId> statenodeIds) =>
+            StateNodeIds = statenodeIds ?? throw new ArgumentNullException(nameof(statenodeIds));
+        public StateConfiguration(IEnumerable<Statenode> statenodes) : this (Ids(statenodes)) { }
 
         public bool Contains(Statenode statenode)
             => StateNodeIds.Contains(statenode.Id);
 
         public IEnumerator<StatenodeId> GetEnumerator() => StateNodeIds.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public StateConfiguration Without(IEnumerable<Statenode> statenodes) =>
+            new StateConfiguration(StateNodeIds.Except(Ids(statenodes)));
+        public StateConfiguration Without(Statenode statenode) =>
+            Without(statenode.Yield());
+        public StateConfiguration With(IEnumerable<Statenode> statenodes) =>
+            new StateConfiguration(StateNodeIds.Concat(Ids(statenodes)));
+        public StateConfiguration With(Statenode statenode) =>
+            With(statenode.Yield());
     }
 }

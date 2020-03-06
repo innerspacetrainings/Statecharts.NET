@@ -44,7 +44,7 @@ namespace Statecharts.NET.Model
     public abstract class NonFinalStatenodeDefinition : StatenodeDefinition
     {
         public abstract IEnumerable<TransitionDefinition> Transitions { get; }
-        public abstract Option<IEnumerable<ServiceDefinition>> Services { get; }
+        public abstract IEnumerable<ServiceDefinition> Services { get; }
     }
     public abstract class AtomicStatenodeDefinition : NonFinalStatenodeDefinition
     {
@@ -94,6 +94,14 @@ namespace Statecharts.NET.Model
                 p => p.Depth + 1,
                 () => 0);
         }
+
+        internal TResult Match<TResult>(Func<FinalStatenode, TResult> fFinalStatenode,
+            Func<NonFinalStatenode, TResult> fNonFinalStatenode) =>
+            Match(fNonFinalStatenode, fFinalStatenode, fNonFinalStatenode, fNonFinalStatenode);
+
+        internal void Switch(Action<FinalStatenode> fFinalStatenode,
+            Action<NonFinalStatenode> fNonFinalStatenode) =>
+            Switch(fNonFinalStatenode, fFinalStatenode, fNonFinalStatenode, fNonFinalStatenode);
 
         internal TResult CataFold<TResult>(
             Func<AtomicStatenode, TResult> fAtomic,

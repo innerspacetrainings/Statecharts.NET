@@ -6,20 +6,20 @@ namespace Statecharts.NET.Model
 
     public class AbsoluteTarget : Target
     {
-        public StateNodeId Id { get; }
+        public StatenodeId Id { get; }
 
-        public AbsoluteTarget(StateNodeId id) => Id = id;
+        public AbsoluteTarget(StatenodeId id) => Id = id;
     }
     public abstract class RelativeTarget : Target
     {
-        public NamedStateNodeKey Key { get; }
+        public string StatenodeName { get; }
 
-        internal RelativeTarget(string stateNodeName) => Key = new NamedStateNodeKey(stateNodeName);
+        internal RelativeTarget(string statenodeName) => StatenodeName = statenodeName;
     }
     public class SiblingTarget : RelativeTarget {
-        public SiblingTarget(string stateNodeName) : base(stateNodeName) { }
+        public SiblingTarget(string statenodeName) : base(statenodeName) { }
     }
     public class ChildTarget : RelativeTarget {
-        public ChildTarget(string stateNodeName) : base(stateNodeName) { }
+        public ChildTarget(string statenodeName) : base(statenodeName) { }
     }
 }

@@ -37,6 +37,9 @@ namespace Statecharts.NET
         internal static IEnumerable<Statenode> AncestorsUntil(
             this Statenode stateNode, Statenode until)
             => stateNode.GetParents().TakeWhile(parentStateNode => !parentStateNode.Equals(until));
+
+        internal static IEnumerable<Transition> GetTransitions(this Statenode statenode)
+            => statenode.Match(final => Enumerable.Empty<Transition>(), nonFinal => nonFinal.Transitions);
     }
 
     internal static class MicrostepExtensions
@@ -57,7 +60,7 @@ namespace Statecharts.NET
             where TContext : IContext<TContext>
         {
             Option<Transition> FirstMatchingTransition(Statenode node) =>
-                node.Transitions
+                node.GetTransitions()
                     .Where(transition => transition.IsEnabled(context, @event.Data))
                     .FirstOrDefault(transition => @event.Equals(transition.Event)).ToOption();
 
@@ -188,7 +191,7 @@ namespace Statecharts.NET
                 AddMicrosteps(microSteps);
             }
 
-            return new Macrostep<TContext>(new State<TContext>(stateConfiguration, context), events, microsteps);
+            return new Macrostep<TContext>(new State<TContext>(stateConfiguration, context), events.NextStepEvents, microsteps);
         }
 
 

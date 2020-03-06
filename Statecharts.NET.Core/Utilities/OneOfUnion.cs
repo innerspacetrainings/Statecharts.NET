@@ -2,7 +2,7 @@
 
 namespace Statecharts.NET.Utilities
 {
-    public struct OneOfUnion<TBase, T0, T1>
+    public struct OneOfUnion<TBase, T0, T1> : IOneOfUnion<TBase>
         where T0 : TBase
         where T1 : TBase
     {
@@ -88,8 +88,13 @@ namespace Statecharts.NET.Utilities
             }
         }
     }
-    
-    public struct OneOfUnion<TBase, T0, T1, T2>
+
+    public interface IOneOfUnion<out TBase>
+    {
+        TBase AsBase();
+    }
+
+    public struct OneOfUnion<TBase, T0, T1, T2> : IOneOfUnion<TBase>
         where T0 : TBase
         where T1 : TBase
         where T2 : TBase
