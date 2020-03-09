@@ -1,32 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Statecharts.NET.Definition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
-using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET.Language.Builders.Transition
 {
     public class WithEvent
     {
-        public Model.Event Event { get; }
+        public IEventDefinition Event { get; }
 
-        private WithEvent(Model.Event @event) => Event = @event;
+        private WithEvent(IEventDefinition @event) => Event = @event;
 
         internal static WithEvent OfEventType(string eventType) =>
-            new WithEvent(new NamedEvent(eventType));
+            new WithEvent(new NamedEventDefinition(eventType));
         internal static WithEvent Immediately() =>
-            new WithEvent(new ImmediateEvent());
+            new WithEvent(new ImmediateEventDefinition());
         internal static WithEvent Delayed(TimeSpan delay) =>
-            new WithEvent(new DelayedEvent(delay));
-        internal static WithEvent OnCompoundDone() =>
-            new WithEvent(new NamedEvent("#compound.done")); // TODO: CompoundDoneEvent()
+            new WithEvent(new DelayedEventDefinition(delay));
+        internal static WithEvent OnDone() =>
+            new WithEvent(new DoneEventDefinition());
         internal static WithEvent OnServiceSuccess() =>
-            new WithEvent(new NamedEvent("#compound.done")); // TODO: ServiceSuccessEvent()
+            new WithEvent(new ServiceSuccessEventDefinition());
         internal static WithEvent OnServiceError() =>
-            new WithEvent(new NamedEvent("#service.error")); // TODO: ServiceErrorEvent()
-
+            new WithEvent(new ServiceErrorEventDefinition());
         public WithDataEvent<TEventData> WithData<TEventData>() =>
             new WithDataEvent<TEventData>(Event);
 
@@ -42,9 +39,9 @@ namespace Statecharts.NET.Language.Builders.Transition
     }
     public class WithDataEvent<TEventData>
     {
-        public Model.Event Event { get; }
+        public IEventDefinition Event { get; }
 
-        internal WithDataEvent(Model.Event @event) => Event = @event;
+        internal WithDataEvent(IEventDefinition @event) => Event = @event;
 
         public UnguardedTransitionTo TransitionTo =>
             throw new NotImplementedException();
@@ -61,8 +58,8 @@ namespace Statecharts.NET.Language.Builders.Transition
 
     public class UnguardedTransitionTo
     {
-        public Model.Event Event { get; }
-        public UnguardedTransitionTo(Model.Event @event) => Event = @event;
+        public IEventDefinition Event { get; }
+        public UnguardedTransitionTo(IEventDefinition @event) => Event = @event;
 
         public WithTarget Child(string stateName) =>
             new WithTarget(Event, Keywords.Child(stateName));
@@ -76,10 +73,10 @@ namespace Statecharts.NET.Language.Builders.Transition
 
     public class Guarded
     {
-        public Model.Event Event { get; }
+        public IEventDefinition Event { get; }
         public InStateGuard Guard { get; }
 
-        public Guarded(Model.Event @event, InStateGuard guard)
+        public Guarded(IEventDefinition @event, InStateGuard guard)
         {
             Event = @event;
             Guard = guard;
@@ -91,10 +88,10 @@ namespace Statecharts.NET.Language.Builders.Transition
     public class Guarded<TContext>
         where TContext : IEquatable<TContext>
     {
-        public Model.Event Event { get; }
+        public IEventDefinition Event { get; }
         public ConditionContextGuard Guard { get; }
 
-        public Guarded(Model.Event @event, ConditionContextGuard guard)
+        public Guarded(IEventDefinition @event, ConditionContextGuard guard)
         {
             Event = @event;
             Guard = guard;
@@ -106,10 +103,10 @@ namespace Statecharts.NET.Language.Builders.Transition
 
     public class GuardedTransitionTo
     {
-        public Model.Event Event { get; }
+        public IEventDefinition Event { get; }
         public InStateGuard Guard { get; }
 
-        public GuardedTransitionTo(Model.Event @event, InStateGuard guard)
+        public GuardedTransitionTo(IEventDefinition @event, InStateGuard guard)
         {
             Event = @event;
             Guard = guard;
@@ -127,10 +124,10 @@ namespace Statecharts.NET.Language.Builders.Transition
     public class GuardedTransitionTo<TContext>
         where TContext : IEquatable<TContext>
     {
-        public Model.Event Event { get; }
+        public IEventDefinition Event { get; }
         public ConditionContextGuard Guard { get; }
 
-        public GuardedTransitionTo(Model.Event @event, ConditionContextGuard guard)
+        public GuardedTransitionTo(IEventDefinition @event, ConditionContextGuard guard)
         {
             Event = @event;
             Guard = guard;
@@ -146,20 +143,20 @@ namespace Statecharts.NET.Language.Builders.Transition
             new GuardedWithTarget<TContext>(Event, Guard, target, targets);
     }
 
-    public class WithTarget : Definition.UnguardedTransition
+    public class WithTarget : UnguardedTransitionDefinition
     {
-        internal WithTarget(Model.Event @event, IEnumerable<Target> targets)
+        internal WithTarget(IEventDefinition @event, IEnumerable<Target> targets)
         {
             Event = @event;
             Targets = targets;
         }
-        internal WithTarget(Model.Event @event, Target target, params Target[] targets) : this(@event,
+        internal WithTarget(IEventDefinition @event, Target target, params Target[] targets) : this(@event,
             target.Append(targets))
         { }
 
-        public override Model.Event Event { get; }
+        public override IEventDefinition Event { get; }
         public override IEnumerable<Target> Targets { get; }
-        public override Option<IEnumerable<Definition.Action>> Actions => Option.None<IEnumerable<Definition.Action>>();
+        public override IEnumerable<ActionDefinition> Actions => Enumerable.Empty<ActionDefinition>();
 
         public WithActions WithActions(Language.Action action, params Language.Action[] actions) =>
             new WithActions(this, action, actions);
@@ -169,22 +166,22 @@ namespace Statecharts.NET.Language.Builders.Transition
             where TContext : IEquatable<TContext> =>
             new WithActions<TContext>(this, action, actions);
     }
-    public class GuardedWithTarget : Definition.GuardedTransition
+    public class GuardedWithTarget : GuardedTransitionDefinition
     {
-        internal GuardedWithTarget(Model.Event @event, InStateGuard guard, IEnumerable<Target> targets)
+        internal GuardedWithTarget(IEventDefinition @event, InStateGuard guard, IEnumerable<Target> targets)
         {
             Event = @event;
             Guard = guard;
             Targets = targets;
         }
-        internal GuardedWithTarget(Model.Event @event, InStateGuard guard, Target target, params Target[] targets) : this(@event, guard,
+        internal GuardedWithTarget(IEventDefinition @event, InStateGuard guard, Target target, params Target[] targets) : this(@event, guard,
             target.Append(targets))
         { }
 
-        public override Model.Event Event { get; }
+        public override IEventDefinition Event { get; }
         public override InStateGuard Guard { get; }
         public override IEnumerable<Target> Targets { get; }
-        public override Option<IEnumerable<Definition.Action>> Actions => Option.None<IEnumerable<Definition.Action>>();
+        public override IEnumerable<ActionDefinition> Actions => Enumerable.Empty<ActionDefinition>();
 
         public GuardedWithActions WithActions(Language.Action action, params Language.Action[] actions) =>
             new GuardedWithActions(this, action, actions);
@@ -193,23 +190,23 @@ namespace Statecharts.NET.Language.Builders.Transition
             params OneOf<Language.Action, Language.Action<TContext>>[] actions) where TContext : IEquatable<TContext> =>
             new GuardedWithActions<TContext>(this, action, actions);
     }
-    public class GuardedWithTarget<TContext> : Definition.GuardedContextTransition
+    public class GuardedWithTarget<TContext> : GuardedContextTransitionDefinition
         where TContext : IEquatable<TContext>
     {
-        internal GuardedWithTarget(Model.Event @event, OneOf<InStateGuard, ConditionContextGuard> guard, IEnumerable<Target> targets)
+        internal GuardedWithTarget(IEventDefinition @event, OneOfUnion<Guard, InStateGuard, ConditionContextGuard> guard, IEnumerable<Target> targets)
         {
             Event = @event;
             Guard = guard;
             Targets = targets;
         }
-        internal GuardedWithTarget(Model.Event @event, OneOf<InStateGuard, ConditionContextGuard> guard, Target target, params Target[] targets) : this(@event, guard,
+        internal GuardedWithTarget(IEventDefinition @event, OneOfUnion<Guard, InStateGuard, ConditionContextGuard> guard, Target target, params Target[] targets) : this(@event, guard,
             target.Append(targets))
         { }
 
-        public override Model.Event Event { get; }
-        public override OneOf<InStateGuard, ConditionContextGuard> Guard { get; }
+        public override IEventDefinition Event { get; }
+        public override OneOfUnion<Guard, InStateGuard, ConditionContextGuard> Guard { get; }
         public override IEnumerable<Target> Targets { get; }
-        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> Actions => Option.None<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>>();
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> Actions => Enumerable.Empty<OneOf<ActionDefinition, ContextActionDefinition>>();
 
         public GuardedWithActions<TContext> WithActions(
             OneOf<Language.Action, Language.Action<TContext>> action,
@@ -220,61 +217,61 @@ namespace Statecharts.NET.Language.Builders.Transition
     public class WithActions : WithTarget
     {
         internal WithActions(
-            Definition.UnguardedTransition transition,
+            UnguardedTransitionDefinition transition,
             Language.Action action,
             params Language.Action[] actions) : base(transition.Event, transition.Targets) =>
-            Actions = action.Append(actions).Select(a => a.ToDefinitionAction()).ToOption();
+            Actions = action.Append(actions).Select(a => a.ToDefinitionAction());
 
-        public override Option<IEnumerable<Definition.Action>> Actions { get; }
+        public override IEnumerable<ActionDefinition> Actions { get; }
     }
-    public class WithActions<TContext> : UnguardedContextTransition
+    public class WithActions<TContext> : UnguardedContextTransitionDefinition
         where TContext : IEquatable<TContext>
     {
-        private Definition.UnguardedTransition Transition { get; }
+        private UnguardedTransitionDefinition Transition { get; }
 
         internal WithActions(
-            Definition.UnguardedTransition transition,
+            UnguardedTransitionDefinition transition,
             OneOf<Language.Action, Language.Action<TContext>> action,
             params OneOf<Language.Action, Language.Action<TContext>>[] actions)
         {
             Transition = transition;
-            Actions = action.Append(actions).Select(a => a.Match<OneOf<Definition.Action, Definition.ContextAction>>(
+            Actions = action.Append(actions).Select(a => a.Match<OneOf<ActionDefinition, ContextActionDefinition>>(
                 contextlessAction => contextlessAction.ToDefinitionAction(),
-                contextAction => contextAction.ToDefinitionAction())).ToOption();
+                contextAction => contextAction.ToDefinitionAction()));
         }
 
-        public override Model.Event Event => Transition.Event;
+        public override IEventDefinition Event => Transition.Event;
         public override IEnumerable<Target> Targets => Transition.Targets;
-        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> Actions { get; }
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> Actions { get; }
     }
     public class GuardedWithActions : GuardedWithTarget
     {
         internal GuardedWithActions(
-            Definition.GuardedTransition transition,
+            GuardedTransitionDefinition transition,
             Language.Action action,
             params Language.Action[] actions) : base(transition.Event, transition.Guard, transition.Targets) =>
-            Actions = action.Append(actions).Select(a => a.ToDefinitionAction()).ToOption();
+            Actions = action.Append(actions).Select(a => a.ToDefinitionAction());
 
-        public override Option<IEnumerable<Definition.Action>> Actions { get; }
+        public override IEnumerable<ActionDefinition> Actions { get; }
     }
     public class GuardedWithActions<TContext> : GuardedWithTarget<TContext>
         where TContext : IEquatable<TContext>
     {
         internal GuardedWithActions(
-            Definition.GuardedTransition transition,
+            GuardedTransitionDefinition transition,
             OneOf<Language.Action, Language.Action<TContext>> action,
             params OneOf<Language.Action, Language.Action<TContext>>[] actions) : base(transition.Event, transition.Guard, transition.Targets) =>
-            Actions = action.Append(actions).Select(a => a.Match<OneOf<Definition.Action, Definition.ContextAction>>(
+            Actions = action.Append(actions).Select(a => a.Match<OneOf<ActionDefinition, ContextActionDefinition>>(
                 contextlessAction => contextlessAction.ToDefinitionAction(),
-                contextAction => contextAction.ToDefinitionAction())).ToOption();
+                contextAction => contextAction.ToDefinitionAction()));
         internal GuardedWithActions(
-            Definition.GuardedContextTransition transition,
+            GuardedContextTransitionDefinition transition,
             OneOf<Language.Action, Language.Action<TContext>> action,
             params OneOf<Language.Action, Language.Action<TContext>>[] actions) : base(transition.Event, transition.Guard, transition.Targets) =>
-            Actions = action.Append(actions).Select(a => a.Match<OneOf<Definition.Action, Definition.ContextAction>>(
+            Actions = action.Append(actions).Select(a => a.Match<OneOf<ActionDefinition, ContextActionDefinition>>(
                 contextlessAction => contextlessAction.ToDefinitionAction(),
-                contextAction => contextAction.ToDefinitionAction())).ToOption(); // TODO: refactor this code to a utility function
+                contextAction => contextAction.ToDefinitionAction())); // TODO: refactor this code to a utility function
 
-        public override Option<IEnumerable<OneOf<Definition.Action, Definition.ContextAction>>> Actions { get; }
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> Actions { get; }
     }
 }

@@ -17,10 +17,14 @@ namespace Statecharts.NET
                 .ValueOr(Enumerable.Empty<Statenode>());
         internal static Option<Statenode> LeastCommonAncestor(
             this (Statenode first, Statenode second) pair)
-            => Enumerable.Intersect(
-                pair.first.GetParents(),
-                pair.second.GetParents()).FirstOrDefault()
-                .ToOption();
+        {
+            var par1 = pair.first.GetParents();
+            var par2 = pair.second.GetParents();
+
+            var intersection = Enumerable.Intersect(par1, par2).FirstOrDefault();
+            return intersection.ToOption();
+        }
+
         internal static Statenode OneBeneath(
             this Statenode statenode, Statenode beneath)
             => statenode.Append(statenode.GetParents())
@@ -64,18 +68,18 @@ namespace Statecharts.NET
                     .Where(transition => transition.IsEnabled(context, @event.Data))
                     .FirstOrDefault(transition => @event.Equals(transition.Event)).ToOption();
 
-            return statechart
+             return statechart
                 .GetActiveStatenodes(stateConfiguration)
                 .Aggregate(
-                    (excluded: Enumerable.Empty<Statenode>(), transitions: Enumerable.Empty<Transition>()),
-                    (tuple, current) =>
-                        tuple.excluded.Contains(current)
-                        ? tuple
-                        : FirstMatchingTransition(current).Match(
-                            transition => (
-                                excluded: tuple.excluded.Concat(current.GetParents()),
-                                transitions: transition.Append(transition)),
-                            () => tuple))
+                     (excluded: Enumerable.Empty<Statenode>(), transitions: Enumerable.Empty<Transition>()),
+                     (tuple, current) =>
+                         tuple.excluded.Contains(current)
+                             ? tuple
+                             : FirstMatchingTransition(current).Match(
+                                 transition => (
+                                     excluded: tuple.excluded.Concat(current.GetParents()),
+                                     transitions: tuple.transitions.Append(transition)),
+                                 () => tuple))
                 .transitions;
         }
 
@@ -84,18 +88,24 @@ namespace Statecharts.NET
             object context,
             StateConfiguration stateConfiguration,
             IEvent @event)
-            => transitions
-                .Where(transition => transition.IsEnabled(context, @event.Data))
-                .SelectMany(transition =>
+        {
+            var enabled = transitions.Where(transition => transition.IsEnabled(context, @event.Data));
+            var initialized = enabled.Where(transition => !(@event is InitializeEvent && transition.Targets.All(stateConfiguration.Contains)));
+            var result = initialized.SelectMany(transition =>
                 transition.Targets.Select(target =>
                 {
-                    var lca = (transition.Source, target).LeastCommonAncestor().Value; // TODO: this might fuck up
+                    var test = (transition.Source, target).LeastCommonAncestor();
+                    var lca = test.Value; // TODO: this might fuck up
                     var lastBeforeLeastCommonAncestor = transition.Source.OneBeneath(lca);
-                    var exited = lastBeforeLeastCommonAncestor.Append(lastBeforeLeastCommonAncestor.GetDescendants()).Where(stateConfiguration.Contains);
+                    var exited = lastBeforeLeastCommonAncestor
+                        .Append(lastBeforeLeastCommonAncestor.GetDescendants()).Where(stateConfiguration.Contains);
                     var entered = target.Append(target.AncestorsUntil(lca).Reverse());
 
                     return new Microstep(@event, transition, entered, exited);
                 }));
+
+            return result.ToList();
+        }
 
         [Pure]
         private static IEnumerable<Microstep> ResolveSingleEvent<TContext>(
@@ -148,16 +158,28 @@ namespace Statecharts.NET
 
             return events;
         }
+        
+        private static Option<OneOf<CurrentStep, NextStep>> SideffectFreeExecuteAction(Model.Action action, object context, object eventData) =>
+            action.Match(
+                send => ((OneOf<CurrentStep, NextStep>)new NextStep(new NamedEvent(send.EventName))).ToOption(),
+                raise => ((OneOf<CurrentStep, NextStep>)new CurrentStep(new NamedEvent(raise.EventName))).ToOption(),
+                log => Option.None<OneOf<CurrentStep, NextStep>>(),
+                assign =>
+                {
+                    assign.Mutation(context, eventData);
+                    return Option.None<OneOf<CurrentStep, NextStep>>();
+                },
+                sideEffect => Option.None<OneOf<CurrentStep, NextStep>>());
 
-        private static Macrostep<TContext> ResolveMacrostep<TContext>(
-            Model.ExecutableStatechart<TContext> statechart,
+        internal static Macrostep<TContext> ResolveMacrostep<TContext>(
+            ExecutableStatechart<TContext> statechart,
             State<TContext> sourceState,
-            ISendableEvent macrostepEvent,
+            IEvent macrostepEvent,
             (Func<Model.Action, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopServices) functions)
             where TContext : IContext<TContext>
         {
             var microsteps = new List<Microstep>();
-            var events = EventQueue.WithSentEvent(macrostepEvent);
+            var events = EventQueue.WithEvent(macrostepEvent);
             var stateConfiguration = sourceState.StateConfiguration;
             var context = sourceState.Context.CopyDeep();
 
@@ -178,17 +200,17 @@ namespace Statecharts.NET
                 // TODO: check state finishing and enqueue
             }
             void UpdateStateConfiguration(IReadOnlyCollection<Microstep> microSteps) =>
-                stateConfiguration = stateConfiguration.Without(microSteps.GetEnteredStateNodes()).With(microSteps.GetExitedStateNodes());
+                stateConfiguration = stateConfiguration.Without(microSteps.GetExitedStateNodes()).With(microSteps.GetEnteredStateNodes());
             void AddMicrosteps(IEnumerable<Microstep> steps) => microsteps.AddRange(steps);
 
-            while (events.NextIsInternal)
+            while (events.IsNotEmpty && events.NextIsInternal)
             {
-                var microSteps = ResolveMicroSteps(events.Dequeue());
-                Execute(microSteps);
-                StabilizeIfNecessary(microSteps);
-                EnqueueDoneEvents(microSteps);
-                UpdateStateConfiguration(microSteps);
-                AddMicrosteps(microSteps);
+                var steps = ResolveMicroSteps(events.Dequeue());
+                Execute(steps);
+                StabilizeIfNecessary(steps);
+                EnqueueDoneEvents(steps);
+                UpdateStateConfiguration(steps);
+                AddMicrosteps(steps);
             }
 
             return new Macrostep<TContext>(new State<TContext>(stateConfiguration, context), events.NextStepEvents, microsteps);
@@ -199,20 +221,15 @@ namespace Statecharts.NET
             Model.ExecutableStatechart<TContext> statechart,
             State<TContext> state,
             ISendableEvent @event)
-            where TContext : IContext<TContext>
-        {
-            Option<OneOf<CurrentStep, NextStep>> ExecuteAction(Model.Action action, object context, object eventData) =>
-                action.Match(
-                    send => ((OneOf<CurrentStep, NextStep>) new NextStep(new NamedEvent(send.EventName))).ToOption(),
-                    raise => ((OneOf<CurrentStep, NextStep>) new CurrentStep(new NamedEvent(raise.EventName))).ToOption(),
-                    log => Option.None<OneOf<CurrentStep, NextStep>>(),
-                    assign =>
-                    {
-                        assign.Mutation(context, eventData);
-                        return Option.None<OneOf<CurrentStep, NextStep>>();
-                    },
-                    sideEffect => Option.None<OneOf<CurrentStep, NextStep>>());
-            return ResolveMacrostep(statechart, state, @event, (ExecuteAction, Functions.NoOp)).State;
-        }
+            where TContext : IContext<TContext> =>
+            ResolveMacrostep(statechart, state, @event, (SideffectFreeExecuteAction, Functions.NoOp)).State;
+
+        public static State<TContext> ResolveInitialState<TContext>(
+            ExecutableStatechart<TContext> statechart) where TContext : IContext<TContext> =>
+            ResolveMacrostep(
+                statechart,
+                new State<TContext>(new StateConfiguration(statechart.Rootnode.Yield()), statechart.InitialContext.CopyDeep()),
+                new InitializeEvent(),
+                (SideffectFreeExecuteAction, Functions.NoOp)).State;
     }
 }

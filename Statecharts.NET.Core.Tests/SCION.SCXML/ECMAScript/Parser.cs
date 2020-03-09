@@ -1,7 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
+using Statecharts.NET.Model;
 using Statecharts.NET.Tests.SCION.SCXML.Definition;
 using Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions;
+using AssignAction = Statecharts.NET.Tests.SCION.SCXML.Definition.AssignAction;
+using LogAction = Statecharts.NET.Tests.SCION.SCXML.Definition.LogAction;
+using Transition = Statecharts.NET.Tests.SCION.SCXML.Definition.Transition;
 
 namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
 {
@@ -43,8 +47,8 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
             new Dictionary<(System.Type, System.Type), System.Action<object, object>>
             {
                 { (typeof(Statechart), typeof(ECMAScriptContext)), EraseTypes<Statechart, ECMAScriptContext>(Element.SetStatechartInitialContext) },
-                { (typeof(Statechart), typeof(PartialStateNode)), EraseTypes<Statechart, StateNode>(Element.StatechartAddStateNode) },
-                { (typeof(Statechart), typeof(FinalStateNode)), EraseTypes<Statechart, StateNode>(Element.StatechartAddStateNode) },
+                { (typeof(Statechart), typeof(PartialStateNode)), EraseTypes<Statechart, IStatenodeDefinition>(Element.StatechartAddStateNode) },
+                { (typeof(Statechart), typeof(FinalStateNode)), EraseTypes<Statechart, IStatenodeDefinition>(Element.StatechartAddStateNode) },
                 { (typeof(PartialStateNode), typeof(Transition)), EraseTypes<PartialStateNode, Transition>(Element.StateNodeAddTransition) },
                 { (typeof(PartialStateNode), typeof(EntryActions)), EraseTypes<PartialStateNode, EntryActions>(Element.StateNodeSetEntryActions) },
                 { (typeof(PartialStateNode), typeof(PartialStateNode)), EraseTypes<PartialStateNode, PartialStateNode>(Element.StateNodeAddChildren) },
@@ -56,7 +60,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
                 { (typeof(EntryActions), typeof(AssignAction)), EraseTypes<EntryActions, AssignAction>(Element.EntryActionsAddAssignAction) }
         };
 
-        internal static Statecharts.NET.Definition.Statechart<ECMAScriptContext> ParseStatechart(string scxmlDefinition)
+        internal static StatechartDefinition<ECMAScriptContext> ParseStatechart(string scxmlDefinition)
         {
             static object RecurseElement(object parent, XElement xElement)
             {

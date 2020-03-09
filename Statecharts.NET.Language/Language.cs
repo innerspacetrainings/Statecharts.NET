@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Statecharts.NET.Interfaces;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
@@ -8,7 +9,7 @@ namespace Statecharts.NET.Language
     public static class Statechart
     {
         public static Builders.Statechart<TContext> WithInitialContext<TContext>(TContext initialContext)
-            where TContext : IEquatable<TContext>
+            where TContext : IContext<TContext>
             => new Builders.Statechart<TContext>(initialContext);
     }
     public static class Service
@@ -33,16 +34,16 @@ namespace Statecharts.NET.Language
     {
         public static NamedEvent Define(string eventName) =>
             new NamedEvent(eventName);
-        public static CustomDataEvent WithData<TEventData>(this NamedEvent @event) => // TODO: Event.Define("...")[.WithData<TEventData>()];
-            new CustomDataEvent(@event.EventName, default);
+        public static NamedEvent WithData<TEventData>(this NamedEvent @event) => // TODO: Event.Define("...")[.WithData<TEventData>()];
+            new NamedEvent(@event.EventName, default);
     }
 
     public static class Keywords
     {
         public static TaskService Chain(
-            OneOf<Model.Task, Definition.TaskService> first,
-            OneOf<Model.Task, Definition.TaskService> second,
-            params OneOf<Model.Task, Definition.TaskService>[] remaining)
+            OneOf<Model.Task, TaskServiceDefinition> first,
+            OneOf<Model.Task, TaskServiceDefinition> second,
+            params OneOf<Model.Task, TaskServiceDefinition>[] remaining)
             => Service.DefineTask(async token =>
             {
                 foreach (var wrappedTask in first.Append(second).Append(remaining))
@@ -53,8 +54,8 @@ namespace Statecharts.NET.Language
                 }
             });
 
-        public static Definition.ForbiddenTransition Ignore(string eventName) =>
-            new Definition.ForbiddenTransition(eventName);
+        public static ForbiddenTransitionDefinition Ignore(string eventName) =>
+            new ForbiddenTransitionDefinition(eventName);
         
         public static Builders.Transition.WithEvent On(string eventType)
             => Builders.Transition.WithEvent.OfEventType(eventType);
@@ -68,11 +69,7 @@ namespace Statecharts.NET.Language
         public static SiblingTarget Sibling(string stateNodeName)
             => new SiblingTarget(stateNodeName);
         public static AbsoluteTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new AbsoluteTarget(
-                new StateNodeId((
-                    new RootStateNodeKey(stateChartName) as StateNodeKey)
-                    .Append(new NamedStateNodeKey(stateNodeName))
-                    .Concat(stateNodeNames.Select(name => new NamedStateNodeKey(name)))));
+            throw new NotImplementedException();
 
         public static SendAction Send(string eventName)
             => new SendAction(eventName);
@@ -121,13 +118,13 @@ namespace Statecharts.NET.Language
             => new Builders.StateNode.WithName(name).WithExitActions(action, exitActions);
         public static Builders.StateNode.WithTransitions WithTransitions(
             this string name,
-            Definition.Transition transition,
-            params Definition.Transition[] transitions)
+            TransitionDefinition transition,
+            params TransitionDefinition[] transitions)
             => new Builders.StateNode.WithName(name).WithTransitions(transition, transitions);
         public static Builders.StateNode.WithInvocations WithInvocations(
             this string name,
-            Definition.Service service,
-            params Definition.Service[] services)
+            ServiceDefinition service,
+            params ServiceDefinition[] services)
             => new Builders.StateNode.WithName(name).WithInvocations(service, services);
         public static Builders.StateNode.Final AsFinal(this string name)
             => new Builders.StateNode.WithName(name).AsFinal();

@@ -55,10 +55,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Interpreter\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="_OLD\RunningStatechart.cs" />
     <None Include="_OLD\Service.cs" />
     <None Include="_OLD\Statechart.cs" />

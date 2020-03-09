@@ -8,7 +8,7 @@ namespace Statecharts.NET.Model
     }
     public interface ISendableEvent : IEvent
     {
-        string Name { get; }
+        //TODO: string Name { get; }
     }
     public interface ISendableDataEventDefinition<TData> : IDataEventDefinition
     {
@@ -48,15 +48,15 @@ namespace Statecharts.NET.Model
         public DelayedEventDefinition(TimeSpan delay) => Delay = delay;
         public override string ToString() => $"After: {Delay.TotalSeconds} seconds";
     }
-    public class ServiceSuccessEventDefinition
+    public class ServiceSuccessEventDefinition : IEventDefinition
     {
         public override string ToString() => "Service.Success";
     }
-    public class ServiceErrorEventDefinition
+    public class ServiceErrorEventDefinition : IEventDefinition
     {
         public override string ToString() => "Service.Error";
     }
-    public class DoneEventDefinition
+    public class DoneEventDefinition : IEventDefinition
     {
         public override string ToString() => "Done";
     }
@@ -74,7 +74,7 @@ namespace Statecharts.NET.Model
         protected IdEvent(string id) => _id = id;
         public bool Equals(IEvent other) => other is TActualEvent @event && @event._id == _id;
     }
-    public class NamedEvent : IEvent
+    public class NamedEvent : ISendableEvent
     {
         public string EventName { get; }
         public object Data { get; }

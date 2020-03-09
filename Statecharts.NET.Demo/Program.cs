@@ -76,14 +76,17 @@ namespace Statecharts.NET.Demo
 
             var statechart = Parser.Parse(definition) as ExecutableStatechart<FetchContext>;
             var service = Interpreter.Run(statechart);
-            var started = service.Start();
-            LogState(started.State);
-            while (true)
-            {
-                var eventType = Console.ReadLine();
-                var state = service.Send(new NamedEvent(eventType?.ToUpper()));
-                LogState(state);
-            }
+
+            throw new NotImplementedException();
+
+            ////var started = service.Start();
+            ////LogState(started.State);
+            ////while (true)
+            ////{
+            ////    var eventType = Console.ReadLine();
+            ////    var state = service.Send(new NamedEvent(eventType?.ToUpper()));
+            ////    LogState(state);
+            ////}
 
         }
 

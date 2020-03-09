@@ -15,7 +15,7 @@ namespace Statecharts.NET.Model
 
         public override string ToString() => $"{Name} ({GetType().Name.Replace("StatenodeDefinition`1", string.Empty)})";
 
-        internal TResult CataFold<TResult>(
+        public TResult CataFold<TResult>(
             Func<AtomicStatenodeDefinition, TResult> fAtomic,
             Func<FinalStatenodeDefinition, TResult> fFinal,
             Func<CompoundStatenodeDefinition, IEnumerable<TResult>, TResult> fCompound,
@@ -73,7 +73,6 @@ namespace Statecharts.NET.Model
         public StatenodeId Id { get; }
         internal int Depth { get; }
 
-
         public Statenode(
             Statenode parent,
             string name,
@@ -94,6 +93,9 @@ namespace Statecharts.NET.Model
                 p => p.Depth + 1,
                 () => 0);
         }
+
+        public override bool Equals(object other) => other is Statenode statenode && statenode.Id.Equals(Id);
+        public override int GetHashCode() => Id.GetHashCode() ^ 217;
 
         internal TResult Match<TResult>(Func<FinalStatenode, TResult> fFinalStatenode,
             Func<NonFinalStatenode, TResult> fNonFinalStatenode) =>

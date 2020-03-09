@@ -1,25 +1,26 @@
 ﻿using System;
+using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Language
 {
     public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction>
     {
-        internal Definition.Action ToDefinitionAction() =>
+        internal ActionDefinition ToDefinitionAction() =>
             Match(
-                send => new Definition.SendAction(send.EventName) as Definition.Action, 
-                raise => new Definition.RaiseAction(raise.EventName),
-                log => new Definition.LogAction(log.Label),
-                assign => new Definition.AssignAction(assign.Mutation),
-                sideEffect => new Definition.SideEffectAction(sideEffect.Function));
+                send => new SendActionDefinition(send.EventName) as ActionDefinition, 
+                raise => new RaiseActionDefinition(raise.EventName),
+                log => new LogActionDefinition(log.Label),
+                assign => new AssignActionDefinition(assign.Mutation),
+                sideEffect => new SideEffectActionDefinition(sideEffect.Function));
     }
     public abstract class Action<TContext> : OneOfBase<LogAction<TContext>, AssignAction<TContext>, SideEffectAction<TContext>>
     {
-        internal Definition.ContextAction ToDefinitionAction() =>
+        internal ContextActionDefinition ToDefinitionAction() =>
             this.Match(
-                log => new Definition.LogContextAction(context => log.Message((TContext)context)) as Definition.ContextAction,
-                assign => new Definition.AssignContextAction(context => assign.Mutation((TContext) context)), 
-                sideEffect => new Definition.SideEffectContextAction(context => sideEffect.Function((TContext) context)));
+                log => new LogContextActionDefinition(context => log.Message((TContext)context)) as ContextActionDefinition,
+                assign => new AssignContextActionDefinition(context => assign.Mutation((TContext) context)), 
+                sideEffect => new SideEffectContextActionDefinition(context => sideEffect.Function((TContext) context)));
     }
     public abstract class Action<TContext, TData> : OneOfBase<LogAction<TContext, TData>, AssignAction<TContext, TData>, SideEffectAction<TContext, TData>> { }
 

@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using Jint;
-using Statecharts.NET.Definition;
+using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Tests.SCION.SCXML.Definition
 {
     internal abstract class ActionsArray
     {
-        internal IList<OneOf<Action, ContextAction>> Actions { get; } = new List<OneOf<Action, ContextAction>>();
+        internal IList<OneOf<ActionDefinition, ContextActionDefinition>> Actions { get; } = new List<OneOf<ActionDefinition, ContextActionDefinition>>();
 
         internal void AddAction(LogAction logAction) =>
             Actions.Add(logAction.AsContextAction());
@@ -22,7 +22,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         internal string Expression { get; set; }
         internal string Label { get; set; }
 
-        public LogContextAction AsContextAction() => new LogContextAction(
+        public LogContextActionDefinition AsContextAction() => new LogContextActionDefinition(
             context => $"{Label}: {((ECMAScriptContext) context).Engine.Execute(Expression).GetCompletionValue().AsString()}");
     }
     internal class AssignAction
@@ -30,7 +30,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         internal string Property { get; set; }
         internal string Expression { get; set; }
 
-        public AssignContextAction AsContextAction() => new AssignContextAction(
+        public AssignContextActionDefinition AsContextAction() => new AssignContextActionDefinition(
             context => ((ECMAScriptContext)context).Engine.SetValue(
                 Property,
                 $"({((ECMAScriptContext)context).Engine.Execute(Expression).GetCompletionValue()})"));

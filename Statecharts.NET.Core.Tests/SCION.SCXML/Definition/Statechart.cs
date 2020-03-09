@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Jint;
-using Statecharts.NET.Definition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Tests.Shared.Definition;
 using Statecharts.NET.Utilities;
@@ -15,27 +12,22 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         internal Option<string> Name { get; set; }
         internal Option<string> InitialStateNodeName { get; set; }
         internal Option<ECMAScriptContext> InitialContext { get; set; }
-        internal IList<Statecharts.NET.Definition.StateNode> StateNodes { get; } = new List<Statecharts.NET.Definition.StateNode>();
+        internal IList<StatenodeDefinition> Statenodes { get; } = new List<StatenodeDefinition>();
 
-        internal Statechart<ECMAScriptContext> AsStatechartDefinition()
+        internal StatechartDefinition<ECMAScriptContext> AsStatechartDefinition()
         {
             var initialContext = InitialContext.ValueOr(new ECMAScriptContext(new Engine()));
-            var rootStateNode = new CompoundStateNodeDefinition(
+            var rootStateNode = new TestCompoundStatenodeDefinition(
                 Name.ValueOr("root"),
                 null,
                 null,
                 null,
                 null,
-                StateNodes,
-                new InitialTransition(new ChildTarget(InitialStateNodeName.ValueOr(StateNodes.First().Name))),
-                Option.None<OneOfUnion<
-                        Statecharts.NET.Definition.Transition,
-                        Statecharts.NET.Definition.UnguardedTransition,
-                        Statecharts.NET.Definition.UnguardedContextTransition,
-                        Statecharts.NET.Definition.GuardedTransition,
-                        Statecharts.NET.Definition.GuardedContextTransition>>());
+                Statenodes,
+                new InitialCompoundTransitionDefinition(new ChildTarget(InitialStateNodeName.ValueOr(Statenodes.First().Name))),
+                Option.None<DoneTransitionDefinition>());
 
-            return new Statechart<ECMAScriptContext>(initialContext, rootStateNode);
+            return new StatechartDefinition<ECMAScriptContext>(initialContext, rootStateNode);
         }
     }
 }

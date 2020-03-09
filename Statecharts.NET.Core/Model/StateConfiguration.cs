@@ -14,6 +14,12 @@ namespace Statecharts.NET.Model
 
         public IEnumerable<StatenodeId> StateNodeIds { get; }
 
+        public IEnumerable<string> NonRootIds =>
+            StateNodeIds
+                .Select(id => id.Values.Skip(1))
+                .Where(values => values.Any())
+                .Select(values => string.Join(".", values));
+
         private StateConfiguration(IEnumerable<StatenodeId> statenodeIds) =>
             StateNodeIds = statenodeIds ?? throw new ArgumentNullException(nameof(statenodeIds));
         public StateConfiguration(IEnumerable<Statenode> statenodes) : this (Ids(statenodes)) { }

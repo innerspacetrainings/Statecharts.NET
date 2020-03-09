@@ -15,8 +15,7 @@ namespace Statecharts.NET.Model
         internal static StatenodeId DeriveFromParent(Statenode parent, string name) =>
             new NamedStatenodeId(parent, name);
 
-        public virtual bool Equals(StatenodeId other) =>
-            Match(root => root.Equals(other), named => named.Equals(other));
+        public bool Equals(StatenodeId other) => other != null && other.String.Equals(String);
         public override bool Equals(object obj) =>
             ReferenceEquals(this, obj) || !(obj is null) && obj is StatenodeId other && Equals(other);
 

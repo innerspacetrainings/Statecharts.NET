@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Statecharts.NET.Definition;
+using Statecharts.NET.Interfaces;
+using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 using static Statecharts.NET.XState.JPropertyConstructorFunctions;
 
@@ -10,71 +11,81 @@ namespace Statecharts.NET.XState
     public static class XStateExtensions
     {
         public static string AsXStateVisualizerV4Definition<TContext>(
-            this Definition.Statechart<TContext> statechartDefinition)
-            where TContext : IEquatable<TContext>, IXStateSerializable
+            this StatechartDefinition<TContext> statechartDefinition)
+            where TContext : IContext<TContext>, IXStateSerializable
             => $"const machine = Machine({statechartDefinition.AsXStateV4Definition()});";
         public static string AsXStateVisualizerV5Definition<TContext>(
-            this Definition.Statechart<TContext> statechartDefinition)
-            where TContext : IEquatable<TContext>, IXStateSerializable
+            this StatechartDefinition<TContext> statechartDefinition)
+            where TContext : IContext<TContext>, IXStateSerializable
             => throw new NotImplementedException();
 
         private static string AsXStateV4Definition<TContext>(
-            this Definition.Statechart<TContext> statechartDefinition)
-            where TContext : IEquatable<TContext>, IXStateSerializable
+            this StatechartDefinition<TContext> statechartDefinition)
+            where TContext : IContext<TContext>, IXStateSerializable
             => ObjectValue(
                     ("id", statechartDefinition.Id),
                     ("context", statechartDefinition.InitialContext.AsJSObject())
                 ).With(statechartDefinition.RootStateNode.AsJSProperty(statechartDefinition).Value as ObjectValue).AsString(); // this cast is necessary because of the way xstate merges the top-level state node with the machine definition
 
         private static JSProperty AsJSProperty<TContext>(
-            this Definition.StateNode stateNodeDefinition,
-            Definition.Statechart<TContext> statechartDefinition)
-            where TContext : IEquatable<TContext>
+            this StatenodeDefinition stateNodeDefinition,
+            StatechartDefinition<TContext> statechartDefinition)
+            where TContext : IContext<TContext>
             => stateNodeDefinition.CataFold<JSProperty>( // TODO: add actions, transitions
                 atomic => (atomic.Name, atomic.Properties(statechartDefinition)),
                 final => (final.Name, final.Properties(statechartDefinition).With(("type", "final"))),
                 (compound, subDefinitions) => (compound.Name, compound.Properties(statechartDefinition).With(
-                    ("initial", compound.InitialTransition.Target.Key.StateName),
+                    ("initial", compound.InitialTransition.Target.StatenodeName),
                     ("states", subDefinitions))),
                 (orthogonal, subDefinitions) => (orthogonal.Name, orthogonal.Properties(statechartDefinition).With(
                     ("type", "parallel"),
                     ("states", subDefinitions))));
 
         private static ObjectValue Properties<TContext>(
-            this Definition.StateNode definition,
-            Definition.Statechart<TContext> statechartDefinition)
-            where TContext : IEquatable<TContext>
+            this StatenodeDefinition definition,
+            StatechartDefinition<TContext> statechartDefinition)
+            where TContext : IContext<TContext>
         {
             var properties = new List<JSProperty>();
 
             ArrayValue Targets(IEnumerable<Model.Target> targets)
                 => ArrayValue(targets.Select(target => target.Serialize(statechartDefinition)));
-            string Event(Model.Event @event) =>
-                @event.Match(custom => custom.EventName, immediate => "\"\"", delayed => "after");
-            JSProperty Unguarded(OneOf<string, Model.Event> @event, IEnumerable<Model.Target> targets)
-                => (@event.Match(e => e, Event), ObjectValue(("target", Targets(targets))));
-            JSProperty Guarded(OneOf<string, Model.Event> @event, IEnumerable<Model.Target> targets)
-                => (@event.Match(e => e, Event), ObjectValue(("target", Targets(targets)), ("cond", SimpleValue("() => false", true))));
+            string Event(IEventDefinition @event)
+            {
+                switch (@event)
+                {
+                    case NamedEventDefinition named: return named.Name;
+                    case ImmediateEventDefinition _: return "\"\"";
+                    case DelayedEventDefinition _: return "after";
+                    default: throw new Exception("oh shit");
+                }
+            }
+            JSProperty Unguarded(string @event, IEnumerable<Model.Target> targets)
+                => (@event, ObjectValue(("target", Targets(targets))));
+            JSProperty Guarded(string @event, IEnumerable<Model.Target> targets)
+                => (@event, ObjectValue(("target", Targets(targets)), ("cond", SimpleValue("() => false", true))));
 
             // transitions
-            var transitions = definition.GetTransitions().Select(
+            var transitions = definition.Match(
+                atomic => atomic.Transitions,
+                final => Enumerable.Empty<TransitionDefinition>(),
+                compound => compound.Transitions,
+                orthogonal => orthogonal.Transitions).Select(
                 transition => transition
                     .Match(
-                        forbidden => (forbidden.Event.EventName, SimpleValue("undefined", true)),
-                        unguarded => Unguarded(unguarded.Event, unguarded.Targets),
-                        unguarded => Unguarded(unguarded.Event, unguarded.Targets),
-                        unguarded => Unguarded(new Model.NamedEvent("[THINK]"), unguarded.Targets),
-                        guarded => Guarded(guarded.Event, guarded.Targets),
-                        guarded => Guarded(guarded.Event, guarded.Targets),
-                        guarded => Guarded(new Model.NamedEvent("[THINK]"), guarded.Targets))).ToList();
+                        forbidden => (forbidden.Event.Name, SimpleValue("undefined", true)),
+                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets),
+                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets),
+                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets),
+                        guarded => Guarded(Event(guarded.Event), guarded.Targets),
+                        guarded => Guarded(Event(guarded.Event), guarded.Targets),
+                        guarded => Guarded(Event(guarded.Event), guarded.Targets))).ToList();
             if(transitions.Any()) properties.Add(("on", ObjectValue(transitions)));
 
-            JSProperty MapDoneTransition(OneOfUnion<Definition.Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition> transition) =>
-                transition.Match(
-                    unguarded => Unguarded("onDone", unguarded.Targets),
-                    unguarded => Unguarded("onDone", unguarded.Targets),
-                    guarded => Guarded("onDone", guarded.Targets),
-                    guarded => Guarded("onDone", guarded.Targets));
+            JSProperty MapDoneTransition(DoneTransitionDefinition transition) =>
+                transition.Guard.Match(
+                    guarded => Guarded("onDone", transition.Targets),
+                    () => Unguarded("onDone", transition.Targets));
 
             // DoneTransition
             var onDoneTransition = definition.Match(
@@ -85,13 +96,13 @@ namespace Statecharts.NET.XState
             onDoneTransition.SwitchSome(properties.Add);
 
             // actions
-            var entryCount = definition.EntryActions.Map(actions => actions.Count()).ValueOr(0);
-            var exitCount = definition.ExitActions.Map(actions => actions.Count()).ValueOr(0);
+            var entryCount = definition.EntryActions.Count();
+            var exitCount = definition.ExitActions.Count();
             if(entryCount > 0) properties.Add(("entry", entryCount == 1 ? "1 Action" : $"{entryCount} Actions"));
             if(exitCount > 0) properties.Add(("exit", exitCount == 1 ? "1 Action" : $"{exitCount} Actions"));
 
-            Option<IEnumerable<ObjectValue>> MapServices(NonFinalStateNode stateNode) =>
-                stateNode.Services.Map(s => s.Select(service =>
+            IEnumerable<ObjectValue> MapServices(NonFinalStatenodeDefinition stateNode) =>
+                stateNode.Services.Select(service =>
                 {
                     var idProperty = service.Id.Map<JSProperty>(id => ("id", id));
                     var onErrorProperty = service.OnErrorTransition.Map(transition => transition.Match(
@@ -111,11 +122,11 @@ namespace Statecharts.NET.XState
                         .Where(property => property.HasValue).Select(property => property.ValueOr(default(JSProperty)));
 
                     return ObjectValue(serviceProperties);
-                }));
+                });
 
             // services
-            var services = definition.Match(_ => Option.None<IEnumerable<ObjectValue>>(), MapServices).ValueOr(Enumerable.Empty<ObjectValue>()).ToList(); // TODO: probably rethink this Optional unfolding
-            if (services.Any()) properties.Add(("invoke", ArrayValue(services)));
+            var services = definition.Match(MapServices, _ => Enumerable.Empty<ObjectValue>(), MapServices, MapServices).ToList(); // TODO: probably build Match for NonFinalStatenode
+            if (services.Any()) properties.Add(("invoke", services));
 
             return properties;
         }
@@ -125,11 +136,11 @@ namespace Statecharts.NET.XState
     {
         internal static SimpleValue Serialize<TContext>(
             this Model.Target target,
-            Definition.Statechart<TContext> statechartDefinition)
-            where TContext : IEquatable<TContext>
+            StatechartDefinition<TContext> statechartDefinition)
+            where TContext : IContext<TContext>
             => SimpleValue(target.Match(
-                absolute => $"#{statechartDefinition.Id}.{string.Join(".", absolute.Id.Path.Select(key => key.Map(_ => null, named => named.StateName)) .Where(text => text != null))}",
-                sibling => $"{sibling.Key.StateName}",
-                child => $".{child.Key.StateName}"));
+                absolute => throw new NotImplementedException(),
+                sibling => $"{sibling.StatenodeName}",
+                child => $".{child.StatenodeName}"));
     }
 }

@@ -38,7 +38,7 @@ namespace Statecharts.NET.Model
 
         private EventQueue() { }
 
-        public static EventQueue WithSentEvent(ISendableEvent initialEvent)
+        public static EventQueue WithEvent(IEvent initialEvent)
         {
             var eventQueue = new EventQueue();
             eventQueue.Enqueue(new NextStep(initialEvent));
@@ -58,7 +58,7 @@ namespace Statecharts.NET.Model
             .FirstOrDefault()
             .ToOption()
             .Map(queuedEvent => queuedEvent.Match(stabilization => true, currentStep => true, nextStep => false))
-            .ValueOr(true);
+            .ValueOr(false);
 
         public IEnumerable<IEvent> NextStepEvents => // TODO: don't fully like that
             _queue

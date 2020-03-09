@@ -1,83 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Statecharts.NET.Definition;
+using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
-using Action = Statecharts.NET.Definition.Action;
 
 namespace Statecharts.NET.Tests.Shared.Definition
 {
-    internal class AtomicStateNodeDefinition : Statecharts.NET.Definition.AtomicStateNode
+    internal class TestAtomicStatenodeDefinition : AtomicStatenodeDefinition
     {
-        public AtomicStateNodeDefinition(
+        public TestAtomicStatenodeDefinition(
             string name,
-            IEnumerable<OneOf<Action, ContextAction>> entryActions,
-            IEnumerable<OneOf<Action, ContextAction>> exitActions,
-            IEnumerable<Transition> transitions,
-            IEnumerable<Service> services)
+            IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> entryActions,
+            IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> exitActions,
+            IEnumerable<TransitionDefinition> transitions,
+            IEnumerable<ServiceDefinition> services)
         {
             Name = name;
-            EntryActions = entryActions.ToOption();
-            ExitActions = exitActions.ToOption();
-            Transitions = transitions.ToOption();
-            Services = services.ToOption();
+            EntryActions = entryActions;
+            ExitActions = exitActions;
+            Transitions = transitions;
+            Services = services;
         }
 
         public override string Name { get; }
-        public override Option<IEnumerable<OneOf<Action, ContextAction>>> EntryActions { get; }
-        public override Option<IEnumerable<OneOf<Action, ContextAction>>> ExitActions { get; }
-        public override Option<IEnumerable<Transition>> Transitions { get; }
-        public override Option<IEnumerable<Service>> Services { get; }
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; }
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; }
+        public override IEnumerable<TransitionDefinition> Transitions { get; }
+        public override IEnumerable<ServiceDefinition> Services { get; }
     }
 
-    internal class CompoundStateNodeDefinition : Statecharts.NET.Definition.CompoundStateNode
+    internal class TestCompoundStatenodeDefinition : CompoundStatenodeDefinition
     {
-        public CompoundStateNodeDefinition(
+        public TestCompoundStatenodeDefinition(
             string name,
-            IEnumerable<OneOf<Action, ContextAction>> entryActions,
-            IEnumerable<OneOf<Action, ContextAction>> exitActions,
-            IEnumerable<Transition> transitions,
-            IEnumerable<Service> services,
-            IEnumerable<StateNode> states,
-            InitialTransition initialTransition,
-            Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> doneTransition)
+            IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> entryActions,
+            IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> exitActions,
+            IEnumerable<TransitionDefinition> transitions,
+            IEnumerable<ServiceDefinition> services,
+            IEnumerable<StatenodeDefinition> statenodes,
+            InitialCompoundTransitionDefinition initialTransition,
+            Option<DoneTransitionDefinition> doneTransition)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            EntryActions = entryActions.ToOption();
-            ExitActions = exitActions.ToOption();
-            Transitions = transitions.ToOption();
-            Services = services.ToOption();
-            States = states;
+            EntryActions = entryActions;
+            ExitActions = exitActions;
+            Transitions = transitions;
+            Services = services;
+            Statenodes = statenodes;
             InitialTransition = initialTransition ?? throw new ArgumentNullException(nameof(initialTransition));
             DoneTransition = doneTransition;
         }
 
         public override string Name { get; }
 
-        public override Option<IEnumerable<OneOf<Action, ContextAction>>> EntryActions { get; }
-        public override Option<IEnumerable<OneOf<Action, ContextAction>>> ExitActions { get; }
-        public override Option<IEnumerable<Transition>> Transitions { get; }
-        public override Option<IEnumerable<Service>> Services { get; }
-        public override IEnumerable<StateNode> States { get; }
-        public override InitialTransition InitialTransition { get; }
-        public override Option<OneOfUnion<Transition, UnguardedTransition, UnguardedContextTransition, GuardedTransition, GuardedContextTransition>> DoneTransition { get; }
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; }
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; }
+        public override IEnumerable<TransitionDefinition> Transitions { get; }
+        public override IEnumerable<ServiceDefinition> Services { get; }
+        public override IEnumerable<StatenodeDefinition> Statenodes { get; }
+        public override InitialCompoundTransitionDefinition InitialTransition { get; }
+        public override Option<DoneTransitionDefinition> DoneTransition { get; }
     }
 
-    internal class FinalStateNodeDefinition : Statecharts.NET.Definition.FinalStateNode
+    internal class TestFinalStatenodeDefinition : FinalStatenodeDefinition
     {
-        public FinalStateNodeDefinition(
+        public TestFinalStatenodeDefinition(
             string name,
-            IEnumerable<OneOf<Action, ContextAction>> entryActions,
-            IEnumerable<OneOf<Action, ContextAction>> exitActions)
+            IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> entryActions,
+            IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> exitActions)
         {
             Name = name;
-            EntryActions = entryActions.ToOption();
-            ExitActions = exitActions.ToOption();
+            EntryActions = entryActions;
+            ExitActions = exitActions;
         }
 
         public override string Name { get; }
-        public override Option<IEnumerable<OneOf<Action, ContextAction>>> EntryActions { get; }
-        public override Option<IEnumerable<OneOf<Action, ContextAction>>> ExitActions { get; }
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; }
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; }
     }
 }

@@ -16,11 +16,11 @@ namespace Statecharts.NET
                 : Actionblock.Empty();
 
         internal static Actionblock Convert(this IEnumerable<ActionDefinition> actions) =>
-            NullsafeConvert(actions.Select(Action.From));
+            NullsafeConvert(actions?.Select(Action.From));
         internal static Actionblock Convert(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> actions) =>
-            NullsafeConvert(actions.Select(Action.From));
+            NullsafeConvert(actions?.Select(Action.From));
         internal static Actionblock Convert(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> actions) =>
-            NullsafeConvert(actions.Select(Action.From));
+            NullsafeConvert(actions?.Select(Action.From));
     }
 
     internal static class TargetExtensions
@@ -70,7 +70,7 @@ namespace Statecharts.NET
         private static IEnumerable<Transition> GetNonFinalStatenodeTransitions(this NonFinalStatenodeDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode)
         {
             IEnumerable<TransitionDefinition> GetServiceTransitionDefinitions(IEnumerable<ServiceDefinition> serviceDefinitions) =>
-                serviceDefinitions.SelectMany(serviceDefinition =>
+                serviceDefinitions?.SelectMany(serviceDefinition =>
                     serviceDefinition.Match(
                         activity => activity.OnErrorTransition.Map(transitionDefinition => transitionDefinition.AsBase())
                             .Yield().WhereSome(),
@@ -80,9 +80,10 @@ namespace Statecharts.NET
                         {
                             dataTask.OnSuccessDefinition.Map(_ => _.AsBase()),
                             dataTask.OnErrorTransition.Map(_ => _.AsBase())
-                        }.WhereSome()));
+                        }.WhereSome()))
+                ?? Enumerable.Empty<TransitionDefinition>();
 
-            return definition.Transitions.Concat(GetServiceTransitionDefinitions(definition.Services))
+            return GetServiceTransitionDefinitions(definition.Services)
                 .Select(transitionDefinition => transitionDefinition.Convert(source, getStatenode));
         }
 
