@@ -45,9 +45,9 @@ namespace Statecharts.NET.Model
             return eventQueue;
         }
         public IEvent Dequeue() => _queue.Dequeue().AsBase().Event;
-        public void EnqueueStabilizationEvent()
+        public void EnqueueStabilizationEvent(StatenodeId statenodeId)
         {
-            var @event = new Stabilization(new InitializeEvent());
+            var @event = new Stabilization(new InitializeEvent(statenodeId));
             _queue.Enqueue(@event, @event.Priority);
         }
         public void Enqueue(CurrentStep @event) => _queue.Enqueue(@event, @event.Priority);

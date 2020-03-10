@@ -63,7 +63,7 @@ namespace Statecharts.NET
                 guarded => new Transition(guarded.Event.Convert(source), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption()),
                 guarded => new Transition(guarded.Event.Convert(source), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption()));
         private static Transition Convert(this InitialCompoundTransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode) =>
-            new Transition(new InitializeEvent(), source, definition.Target.GetTargetStatenode(source.Id, getStatenode).Yield(), definition.Actions.Convert(), Option.None<Guard>());
+            new Transition(new InitializeEvent(source.Id), source, definition.Target.GetTargetStatenode(source.Id, getStatenode).Yield(), definition.Actions.Convert(), Option.None<Guard>());
         private static Transition Convert(this DoneTransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode) =>
             new Transition(new DoneEvent(source), source, definition.Targets.GetTargetStatenodes(source.Id, getStatenode), definition.Actions.Convert(), definition.Guard.Map(guard => guard.AsBase()));
 

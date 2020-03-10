@@ -99,8 +99,11 @@ namespace Statecharts.NET.Model
     }
     public class InitializeEvent : IEvent
     {
+        public StatenodeId StatenodeId { get; }
         public object Data => null;
-        public bool Equals(IEvent other) => other is InitializeEvent;
+        public InitializeEvent(StatenodeId id) => StatenodeId = id; // TODO: probably limit this to Compund & Orthogonal
+        public bool Equals(IEvent other) =>
+            other is InitializeEvent initializeEvent && initializeEvent.StatenodeId.Equals(StatenodeId);
     }
     public class ServiceSuccessEvent : IdEvent<ServiceSuccessEvent>
     {

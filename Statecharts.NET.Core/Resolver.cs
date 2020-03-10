@@ -16,14 +16,8 @@ namespace Statecharts.NET
                 .Map(parent => parent.Append(parent.GetParents()))
                 .ValueOr(Enumerable.Empty<Statenode>());
         internal static Option<Statenode> LeastCommonAncestor(
-            this (Statenode first, Statenode second) pair)
-        {
-            var par1 = pair.first.GetParents();
-            var par2 = pair.second.GetParents();
-
-            var intersection = Enumerable.Intersect(par1, par2).FirstOrDefault();
-            return intersection.ToOption();
-        }
+            this (Statenode first, Statenode second) pair) =>
+            Enumerable.Intersect(pair.first.GetParents(), pair.second.GetParents()).FirstOrDefault().ToOption();
 
         internal static Statenode OneBeneath(
             this Statenode statenode, Statenode beneath)
@@ -90,12 +84,13 @@ namespace Statecharts.NET
             IEvent @event)
         {
             var enabled = transitions.Where(transition => transition.IsEnabled(context, @event.Data));
-            var initialized = enabled.Where(transition => !(@event is InitializeEvent && transition.Targets.All(stateConfiguration.Contains)));
-            var result = initialized.SelectMany(transition =>
+            var result = enabled.SelectMany(transition =>
                 transition.Targets.Select(target =>
                 {
                     var test = (transition.Source, target).LeastCommonAncestor();
-                    var lca = test.Value; // TODO: this might fuck up
+                    var lca = test.Value;
+                    // TODO: this fucks up
+                    throw new NotImplementedException();
                     var lastBeforeLeastCommonAncestor = transition.Source.OneBeneath(lca);
                     var exited = lastBeforeLeastCommonAncestor
                         .Append(lastBeforeLeastCommonAncestor.GetDescendants()).Where(stateConfiguration.Contains);
@@ -193,7 +188,12 @@ namespace Statecharts.NET
             }
             void StabilizeIfNecessary(IReadOnlyCollection<Microstep> microSteps)
             {
-                if (microSteps.GetEnteredStateNodes().Any()) events.EnqueueStabilizationEvent();
+                foreach (var enteredStateNode in microSteps.GetEnteredStateNodes())
+                    enteredStateNode.Switch(
+                        Functions.NoOp,
+                        Functions.NoOp,
+                        compound => events.EnqueueStabilizationEvent(compound.Id),
+                        orthogonal => events.EnqueueStabilizationEvent(orthogonal.Id));
             }
             void EnqueueDoneEvents(IReadOnlyCollection<Microstep> microSteps)
             {
@@ -229,7 +229,7 @@ namespace Statecharts.NET
             ResolveMacrostep(
                 statechart,
                 new State<TContext>(new StateConfiguration(statechart.Rootnode.Yield()), statechart.InitialContext.CopyDeep()),
-                new InitializeEvent(),
+                new InitializeEvent(statechart.Rootnode.Id),
                 (SideffectFreeExecuteAction, Functions.NoOp)).State;
     }
 }
