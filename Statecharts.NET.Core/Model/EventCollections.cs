@@ -64,6 +64,12 @@ namespace Statecharts.NET.Model
             _queue
                 .Select(queuedEvent => queuedEvent.Match(_ => null, _ => null, nextStep => nextStep.Event))
                 .WhereNotNull();
+
+        public override string ToString() => string.Join(", ",
+            _queue.Select(e => e.Match(
+                stabilization => $"stabilization: {stabilization.Event}",
+                current => $"current: {current.Event}",
+                next => $"next: {next.Event}")));
     }
     internal class EventList : IEnumerable<OneOf<CurrentStep, NextStep>>
     {

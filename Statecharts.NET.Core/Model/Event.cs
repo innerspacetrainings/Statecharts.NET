@@ -86,16 +86,20 @@ namespace Statecharts.NET.Model
         }
 
         public bool Equals(IEvent other) => other is NamedEvent @event && @event.EventName == EventName;
+
+        public override string ToString() => $"@{EventName}";
     }
     public class ImmediateEvent : IEvent
     {
         public object Data => null;
         public bool Equals(IEvent other) => other is ImmediateEvent;
+        public override string ToString() => "Immediate";
     }
     public class DelayedEvent : IdEvent<DelayedEvent>
     {
         public DelayedEvent(Statenode statenode, TimeSpan delay) :
             base($"{statenode.Id}:after:{delay.TotalMilliseconds}") { } // TODO: think of this key (lookup xstate)
+        public override string ToString() => "Delayed";
     }
     public class InitializeEvent : IEvent
     {
@@ -104,6 +108,7 @@ namespace Statecharts.NET.Model
         public InitializeEvent(StatenodeId id) => StatenodeId = id; // TODO: probably limit this to Compund & Orthogonal
         public bool Equals(IEvent other) =>
             other is InitializeEvent initializeEvent && initializeEvent.StatenodeId.Equals(StatenodeId);
+        public override string ToString() => $"Initialize({StatenodeId})";
     }
     public class ServiceSuccessEvent : IdEvent<ServiceSuccessEvent>
     {

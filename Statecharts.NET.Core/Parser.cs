@@ -83,8 +83,12 @@ namespace Statecharts.NET
                         }.WhereSome()))
                 ?? Enumerable.Empty<TransitionDefinition>();
 
-            return GetServiceTransitionDefinitions(definition.Services)
+            var serviceTransitions = GetServiceTransitionDefinitions(definition.Services)
                 .Select(transitionDefinition => transitionDefinition.Convert(source, getStatenode));
+            var regularTransitions = (definition.Transitions ?? Enumerable.Empty<TransitionDefinition>()).Select(transitionDefinition =>
+                transitionDefinition.Convert(source, getStatenode));
+
+            return regularTransitions.Concat(serviceTransitions);
         }
 
         internal static IEnumerable<Transition> ConvertTransitions(this AtomicStatenodeDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode) =>

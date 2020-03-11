@@ -88,13 +88,15 @@ namespace Statecharts.NET
                 transition.Targets.Select(target =>
                 {
                     var test = (transition.Source, target).LeastCommonAncestor();
-                    var lca = test.Value;
-                    // TODO: this fucks up
-                    throw new NotImplementedException();
-                    var lastBeforeLeastCommonAncestor = transition.Source.OneBeneath(lca);
-                    var exited = lastBeforeLeastCommonAncestor
-                        .Append(lastBeforeLeastCommonAncestor.GetDescendants()).Where(stateConfiguration.Contains);
-                    var entered = target.Append(target.AncestorsUntil(lca).Reverse());
+                    var lcca = test.Value;
+                    var lastBeforeLeastCompoundCommonAncestor = transition.Source.OneBeneath(lcca);
+                    var isChildTransition = target.GetParents().Contains(transition.Source);
+                    var exited = isChildTransition
+                        ? Enumerable.Empty<Statenode>()
+                        : lastBeforeLeastCompoundCommonAncestor.Append(lastBeforeLeastCompoundCommonAncestor.GetDescendants()).Where(stateConfiguration.Contains);
+                    var entered = isChildTransition
+                        ? target.Append(target.AncestorsUntil(lastBeforeLeastCompoundCommonAncestor).Reverse())
+                        : target.Append(target.AncestorsUntil(lcca).Reverse());
 
                     return new Microstep(@event, transition, entered, exited);
                 }));
@@ -205,6 +207,7 @@ namespace Statecharts.NET
 
             while (events.IsNotEmpty && events.NextIsInternal)
             {
+                Console.WriteLine($"events: {events}");
                 var steps = ResolveMicroSteps(events.Dequeue());
                 Execute(steps);
                 StabilizeIfNecessary(steps);
