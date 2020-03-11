@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Statecharts.NET.Interfaces;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
@@ -8,7 +9,7 @@ using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET
 {
-    internal static class ConversionExtensions
+    internal static class ActionDefinitionExtensions
     {
         private static Actionblock NullsafeConvert(IEnumerable<Action> actions) =>
             actions != null
@@ -33,9 +34,9 @@ namespace Statecharts.NET
             getStatenode(StatenodeIdFor(sourceId, target));
     }
 
-    internal static class EventExtensions
+    internal static class EventDefinitionExtensions
     {
-        internal static IEvent Convert(this IEventDefinition eventDefinition, Statenode source)
+        internal static IEvent Convert(this IEventDefinition eventDefinition, Statenode source, ServiceDefinition serviceDefinition, int serviceIndex)
         {
             switch (eventDefinition)
             {
@@ -43,8 +44,8 @@ namespace Statecharts.NET
                 case NamedEventDefinition definition: return new NamedEvent(definition.Name);
                 case ImmediateEventDefinition _: return new ImmediateEvent();
                 case DelayedEventDefinition definition: return new DelayedEvent(source, definition.Delay);
-                case ServiceSuccessEventDefinition _: return new ServiceSuccessEvent("", null); // TODO: implement this
-                case ServiceErrorEventDefinition _: return new ServiceErrorEvent("", null); // TODO: check this
+                case ServiceSuccessEventDefinition _: return new ServiceSuccessEvent(serviceDefinition.GetId(source.Id, serviceIndex), null);
+                case ServiceErrorEventDefinition _: return new ServiceErrorEvent(serviceDefinition.GetId(source.Id, serviceIndex), null);
                 case DoneEventDefinition _: return new DoneEvent(source);
                 default: throw new Exception("it would be easier to interpret a Statechart if a proper event mapping is defined ;)");
             }
@@ -53,15 +54,15 @@ namespace Statecharts.NET
 
     internal static class TransitionDefinitionExtensions
     {
-        private static Transition Convert(this TransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode) =>
+        private static Transition Convert(this TransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode, ServiceDefinition serviceDefinition, int serviceIndex) =>
             definition.Match(
-                forbidden => new Transition(forbidden.Event.Convert(source), source, Enumerable.Empty<Statenode>(), Actionblock.Empty(), (new ConditionContextGuard(_ => false) as Guard).ToOption()),
-                unguarded => new Transition(unguarded.Event.Convert(source), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>()),
-                unguarded => new Transition(unguarded.Event.Convert(source), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>()),
-                unguarded => new Transition(unguarded.Event.Convert(source), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>()),
-                guarded => new Transition(guarded.Event.Convert(source), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), (guarded.Guard as Guard).ToOption()),
-                guarded => new Transition(guarded.Event.Convert(source), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption()),
-                guarded => new Transition(guarded.Event.Convert(source), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption()));
+                forbidden => new Transition(forbidden.Event.Convert(source, serviceDefinition, serviceIndex), source, Enumerable.Empty<Statenode>(), Actionblock.Empty(), (new ConditionContextGuard(_ => false) as Guard).ToOption()),
+                unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>()),
+                unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>()),
+                unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>()),
+                guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), (guarded.Guard as Guard).ToOption()),
+                guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption()),
+                guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption()));
         private static Transition Convert(this InitialCompoundTransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode) =>
             new Transition(new InitializeEvent(source.Id), source, definition.Target.GetTargetStatenode(source.Id, getStatenode).Yield(), definition.Actions.Convert(), Option.None<Guard>());
         private static Transition Convert(this DoneTransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode) =>
@@ -69,24 +70,24 @@ namespace Statecharts.NET
 
         private static IEnumerable<Transition> GetNonFinalStatenodeTransitions(this NonFinalStatenodeDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode)
         {
-            IEnumerable<TransitionDefinition> GetServiceTransitionDefinitions(IEnumerable<ServiceDefinition> serviceDefinitions) =>
-                serviceDefinitions?.SelectMany(serviceDefinition =>
-                    serviceDefinition.Match(
+            IEnumerable<(ServiceDefinition serviceDefinition, TransitionDefinition transitionDefinition, int serviceIndex)> GetServiceTransitionDefinitions(IEnumerable<ServiceDefinition> serviceDefinitions) =>
+                serviceDefinitions?.SelectMany((serviceDefinition, index) =>
+                    serviceDefinition.Match<IEnumerable<(ServiceDefinition, TransitionDefinition, int)>>(
                         activity => activity.OnErrorTransition.Map(transitionDefinition => transitionDefinition.AsBase())
-                            .Yield().WhereSome(),
+                            .Yield().WhereSome().Select(transitionDefinition => (serviceDefinition, transitionDefinition, index)),
                         task => new[] { task.OnSuccessDefinition, task.OnErrorTransition }.WhereSome()
-                            .Select(transitionDefinition => transitionDefinition.AsBase()),
+                            .Select(transitionDefinition => (serviceDefinition, transitionDefinition.AsBase(), index)),
                         dataTask => new[]
                         {
                             dataTask.OnSuccessDefinition.Map(_ => _.AsBase()),
                             dataTask.OnErrorTransition.Map(_ => _.AsBase())
-                        }.WhereSome()))
-                ?? Enumerable.Empty<TransitionDefinition>();
+                        }.WhereSome().Select(transitionDefinition => (serviceDefinition, transitionDefinition, index))))
+                ?? Enumerable.Empty<(ServiceDefinition, TransitionDefinition, int)>();
 
             var serviceTransitions = GetServiceTransitionDefinitions(definition.Services)
-                .Select(transitionDefinition => transitionDefinition.Convert(source, getStatenode));
+                .Select(mapped => mapped.transitionDefinition.Convert(source, getStatenode, mapped.serviceDefinition, mapped.serviceIndex));
             var regularTransitions = (definition.Transitions ?? Enumerable.Empty<TransitionDefinition>()).Select(transitionDefinition =>
-                transitionDefinition.Convert(source, getStatenode));
+                transitionDefinition.Convert(source, getStatenode, null, 0)); // TODO, hate this `null`
 
             return regularTransitions.Concat(serviceTransitions);
         }
@@ -112,6 +113,31 @@ namespace Statecharts.NET
             new Transition(new InitializeEvent(statenode.Id), statenode, statenode.Statenodes, Actionblock.Empty(), Option.None<Guard>());
     }
 
+    internal static class ServiceDefinitionExtensions
+    {
+        internal static string GetId(this ServiceDefinition serviceDefinition, StatenodeId statenodeId, int serviceIndex)
+            => serviceDefinition.Id.ValueOr($"service:{statenodeId.String}#{serviceIndex}");
+        internal static IEnumerable<Service> Convert(this IEnumerable<ServiceDefinition> serviceDefinitions, NonFinalStatenode statenode)
+        {
+            Service CreateServiceFromActivity(ActivityServiceDefinition service, string id) =>
+                new Service(id, token =>
+                {
+                    token.Register(service.Activity.Stop);
+                    service.Activity.Start(); // TODO: handle failure
+                    return new TaskCompletionSource<object>().Task; // TODO: check if token and TaskCompletionSource have to be linked
+                });
+
+            return serviceDefinitions.Select((serviceDefinition, index) => serviceDefinition.Match(
+                activity => CreateServiceFromActivity(activity, serviceDefinition.GetId(statenode.Id, index)),
+                task => new Service(serviceDefinition.GetId(statenode.Id, index), async cancellationToken =>
+                {
+                    await task.Task(cancellationToken);
+                    return default;
+                }),
+                dataTask => new Service(serviceDefinition.GetId(statenode.Id, index), dataTask.Task)));
+        }
+    }
+
     public static class Parser
     {
         private static (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) ParseStatenode(
@@ -133,6 +159,7 @@ namespace Statecharts.NET
             (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateAtomicStatenode(AtomicStatenodeDefinition atomicDefinition)
             {
                 var statenode = new AtomicStatenode(parent, name, documentIndex, entryActions, exitActions);
+                statenode.Services = atomicDefinition.Services.Convert(statenode);
                 definitions.Add(statenode.Id, atomicDefinition);
                 return (statenode, definitions);
             }
@@ -149,6 +176,7 @@ namespace Statecharts.NET
                 var statenodes = children.Select(child => child.statenode);
 
                 statenode.Statenodes = statenodes;
+                statenode.Services = compoundDefinition.Services.Convert(statenode);
                 definitions.Add(statenode.Id, compoundDefinition);
 
                 return (statenode, definitions);
@@ -160,6 +188,7 @@ namespace Statecharts.NET
                 var statenodes = children.Select(child => child.statenode);
 
                 statenode.Statenodes = statenodes;
+                statenode.Services = orthogonalDefinition.Services.Convert(statenode);
                 definitions.Add(statenode.Id, orthogonalDefinition);
 
                 return (statenode, definitions);
