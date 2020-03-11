@@ -127,14 +127,15 @@ namespace Statecharts.NET
                     return new TaskCompletionSource<object>().Task; // TODO: check if token and TaskCompletionSource have to be linked
                 });
 
-            return serviceDefinitions.Select((serviceDefinition, index) => serviceDefinition.Match(
+            return serviceDefinitions?.Select((serviceDefinition, index) => serviceDefinition.Match(
                 activity => CreateServiceFromActivity(activity, serviceDefinition.GetId(statenode.Id, index)),
                 task => new Service(serviceDefinition.GetId(statenode.Id, index), async cancellationToken =>
                 {
                     await task.Task(cancellationToken);
                     return default;
                 }),
-                dataTask => new Service(serviceDefinition.GetId(statenode.Id, index), dataTask.Task)));
+                dataTask => new Service(serviceDefinition.GetId(statenode.Id, index), dataTask.Task)))
+                ?? Enumerable.Empty<Service>();
         }
     }
 
