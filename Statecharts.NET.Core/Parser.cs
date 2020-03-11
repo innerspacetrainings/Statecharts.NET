@@ -43,8 +43,8 @@ namespace Statecharts.NET
                 case NamedEventDefinition definition: return new NamedEvent(definition.Name);
                 case ImmediateEventDefinition _: return new ImmediateEvent();
                 case DelayedEventDefinition definition: return new DelayedEvent(source, definition.Delay);
-                case ServiceSuccessEventDefinition _: throw new NotImplementedException();
-                case ServiceErrorEventDefinition _: throw new NotImplementedException();
+                case ServiceSuccessEventDefinition _: return new ServiceSuccessEvent("", null); // TODO: implement this
+                case ServiceErrorEventDefinition _: return new ServiceErrorEvent("", null); // TODO: check this
                 case DoneEventDefinition _: return new DoneEvent(source);
                 default: throw new Exception("it would be easier to interpret a Statechart if a proper event mapping is defined ;)");
             }
@@ -108,6 +108,8 @@ namespace Statecharts.NET
 
             return done.Concat(transitions);
         }
+        internal static Transition GetInitialTransition(this OrthogonalStatenode statenode) =>
+            new Transition(new InitializeEvent(statenode.Id), statenode, statenode.Statenodes, Actionblock.Empty(), Option.None<Guard>());
     }
 
     public static class Parser
@@ -115,13 +117,14 @@ namespace Statecharts.NET
         private static (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) ParseStatenode(
             StatenodeDefinition definition,
             Statenode parent,
+            IDictionary<StatenodeId, StatenodeDefinition> definitions,
             int documentIndex)
         {
             IEnumerable<(Statenode statenode, StatenodeDefinition definition)> ParseChildren(
                 IEnumerable<StatenodeDefinition> substateNodeDefinitions,
                 Statenode recursedParent) =>
                 substateNodeDefinitions.Select((substateDefinition, index) =>
-                    (ParseStatenode(substateDefinition, recursedParent, documentIndex + index).root, substateDefinition));
+                    (ParseStatenode(substateDefinition, recursedParent, definitions, documentIndex + index).root, substateDefinition));
 
             var name = definition.Name;
             var entryActions = definition.EntryActions.Convert();
@@ -130,34 +133,36 @@ namespace Statecharts.NET
             (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateAtomicStatenode(AtomicStatenodeDefinition atomicDefinition)
             {
                 var statenode = new AtomicStatenode(parent, name, documentIndex, entryActions, exitActions);
-                return (statenode, new Dictionary<StatenodeId, StatenodeDefinition> {{statenode.Id, atomicDefinition}});
+                definitions.Add(statenode.Id, atomicDefinition);
+                return (statenode, definitions);
             }
             (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateFinalStatenode(FinalStatenodeDefinition finalDefinition)
             {
                 var statenode = new FinalStatenode(parent, name, documentIndex, entryActions, exitActions);
-                return (statenode, new Dictionary<StatenodeId, StatenodeDefinition> { { statenode.Id, finalDefinition } });
+                definitions.Add(statenode.Id, finalDefinition);
+                return (statenode, definitions);
             }
             (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateCompoundStatenode(CompoundStatenodeDefinition compoundDefinition)
             {
                 var statenode = new CompoundStatenode(parent, name, documentIndex, entryActions, exitActions);
                 var children = ParseChildren(compoundDefinition.Statenodes, statenode).ToList();
                 var statenodes = children.Select(child => child.statenode);
-                var definitions = children.Select(child => (child.statenode.Id, child.definition));
 
                 statenode.Statenodes = statenodes;
+                definitions.Add(statenode.Id, compoundDefinition);
 
-                return (statenode, (statenode.Id, compoundDefinition as StatenodeDefinition).Append(definitions).ToDictionary(kvp => kvp.Id, kvp => kvp.Item2));
+                return (statenode, definitions);
             }
             (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateOrthogonalStatenode(OrthogonalStatenodeDefinition orthogonalDefinition)
             {
                 var statenode = new OrthogonalStatenode(parent, name, documentIndex, entryActions, exitActions);
                 var children = ParseChildren(orthogonalDefinition.Statenodes, statenode).ToList();
                 var statenodes = children.Select(child => child.statenode);
-                var definitions = children.Select(child => (child.statenode.Id, child.definition));
 
                 statenode.Statenodes = statenodes;
+                definitions.Add(statenode.Id, orthogonalDefinition);
 
-                return (statenode, (statenode.Id, orthogonalDefinition as StatenodeDefinition).Append(definitions).ToDictionary(kvp => kvp.Id, kvp => kvp.Item2));
+                return (statenode, definitions);
             }
 
             return definition.Match(
@@ -189,7 +194,7 @@ namespace Statecharts.NET
                     atomic => atomic.Transitions = (definition as AtomicStatenodeDefinition).ConvertTransitions(statenode, GetStatenode),
                     Functions.NoOp,
                     compound => compound.Transitions = (definition as CompoundStatenodeDefinition).ConvertTransitions(statenode, GetStatenode),
-                    orthogonal => orthogonal.Transitions = (definition as OrthogonalStatenodeDefinition).ConvertTransitions(statenode, GetStatenode));
+                    orthogonal => orthogonal.Transitions = (definition as OrthogonalStatenodeDefinition).ConvertTransitions(statenode, GetStatenode).Append(orthogonal.GetInitialTransition()));
             }
         }
 
@@ -197,7 +202,7 @@ namespace Statecharts.NET
         public static ParsedStatechart<TContext> Parse<TContext>(StatechartDefinition<TContext> definition)
             where TContext : IContext<TContext>
         {
-            var (rootnode, definitions) = ParseStatenode(definition.RootStateNode, null, 0);
+            var (rootnode, definitions) = ParseStatenode(definition.RootStateNode, null, new Dictionary<StatenodeId, StatenodeDefinition>(),  0);
             var lookup = CreateLookup(rootnode, definitions);
             var statenodes = lookup.Values
                 .Select(value => value.statenode)

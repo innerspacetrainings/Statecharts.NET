@@ -5,10 +5,8 @@ namespace Statecharts.NET
 {
     public class Interpreter
     {
-        public static object Run<TContext>(ExecutableStatechart<TContext> statechart) // options e.g. Logger
-            where TContext : IContext<TContext>
-        {
-            return null;
-        }
+        public static RunningStatechart<TContext> Interpret<TContext>(ExecutableStatechart<TContext> statechart) // options e.g. Logger
+            where TContext : IContext<TContext> =>
+            new RunningStatechart<TContext>(statechart);
     }
 }

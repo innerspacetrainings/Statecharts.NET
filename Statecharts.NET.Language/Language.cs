@@ -69,7 +69,7 @@ namespace Statecharts.NET.Language
         public static SiblingTarget Sibling(string stateNodeName)
             => new SiblingTarget(stateNodeName);
         public static AbsoluteTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            throw new NotImplementedException();
+            new AbsoluteTarget(StatenodeId.Absolute(stateNodeName.Append(stateNodeNames))); // TODO: fix this
 
         public static SendAction Send(string eventName)
             => new SendAction(eventName);

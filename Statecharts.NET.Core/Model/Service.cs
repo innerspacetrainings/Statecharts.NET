@@ -1,4 +1,5 @@
-﻿using Statecharts.NET.Utilities;
+﻿using System.Threading;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
 {
@@ -26,6 +27,18 @@ namespace Statecharts.NET.Model
     }
     #endregion
     #region Parsed
-    public class Service { }
+    public class Service
+    {
+        public string Id { get; }
+        private readonly Task<object> _task;
+
+        internal Service(string id, Task<object> task)
+        {
+            Id = id;
+            _task = task;
+        }
+
+        public System.Threading.Tasks.Task<object> Invoke(CancellationToken cancellationToken) => _task(cancellationToken);
+    }
     #endregion
 }

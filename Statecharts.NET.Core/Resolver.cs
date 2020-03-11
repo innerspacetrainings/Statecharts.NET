@@ -197,6 +197,10 @@ namespace Statecharts.NET
                         compound => events.EnqueueStabilizationEvent(compound.Id),
                         orthogonal => events.EnqueueStabilizationEvent(orthogonal.Id));
             }
+            void EnqueueImmediateEvent(IReadOnlyCollection<Microstep> steps)
+            {
+                if(steps.Any()) events.EnqueueImmediateEvent();
+            }
             void EnqueueDoneEvents(IReadOnlyCollection<Microstep> microSteps)
             {
                 // TODO: check state finishing and enqueue
@@ -205,12 +209,16 @@ namespace Statecharts.NET
                 stateConfiguration = stateConfiguration.Without(microSteps.GetExitedStateNodes()).With(microSteps.GetEnteredStateNodes());
             void AddMicrosteps(IEnumerable<Microstep> steps) => microsteps.AddRange(steps);
 
+            events.Test();
+
             while (events.IsNotEmpty && events.NextIsInternal)
             {
                 Console.WriteLine($"events: {events}");
-                var steps = ResolveMicroSteps(events.Dequeue());
+                var @event = events.Dequeue();
+                var steps = ResolveMicroSteps(@event);
                 Execute(steps);
                 StabilizeIfNecessary(steps);
+                EnqueueImmediateEvent(steps); // TODO: check order
                 EnqueueDoneEvents(steps);
                 UpdateStateConfiguration(steps);
                 AddMicrosteps(steps);

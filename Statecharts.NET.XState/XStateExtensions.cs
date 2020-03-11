@@ -139,7 +139,7 @@ namespace Statecharts.NET.XState
             StatechartDefinition<TContext> statechartDefinition)
             where TContext : IContext<TContext>
             => SimpleValue(target.Match(
-                absolute => throw new NotImplementedException(),
+                absolute => $"#{statechartDefinition.Id}." + string.Join(".", absolute.Id.Values),
                 sibling => $"{sibling.StatenodeName}",
                 child => $".{child.StatenodeName}"));
     }

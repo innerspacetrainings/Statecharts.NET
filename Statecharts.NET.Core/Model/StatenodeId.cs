@@ -7,7 +7,7 @@ namespace Statecharts.NET.Model
 {
     public abstract class StatenodeId : OneOfBase<RootStatenodeId, NamedStatenodeId>, IEquatable<StatenodeId>
     {
-        internal abstract IEnumerable<string> Values { get; }
+        public abstract IEnumerable<string> Values { get; }
         internal string String => string.Join(".", Values);
 
         internal static StatenodeId Root(string name) =>
@@ -21,20 +21,24 @@ namespace Statecharts.NET.Model
 
         public override int GetHashCode() => String.GetHashCode();
 
+        public override string ToString() => String;
+
         public StatenodeId Sibling(string siblingStatenodeName) // TODO: think of rootState
             => new NamedStatenodeId(Values.Take(Values.Count() - 1).Append(siblingStatenodeName));
         public StatenodeId Child(string childStatenodeName) // TODO: think of rootState
             => new NamedStatenodeId(Values.Append(childStatenodeName));
+        public static StatenodeId Absolute(IEnumerable<string> statenodeids)
+            => new NamedStatenodeId(statenodeids); // TODO: check this
     }
 
     public class RootStatenodeId : StatenodeId {
         public string StatenodeName { get; }
-        internal override IEnumerable<string> Values => new[] {StatenodeName};
+        public override IEnumerable<string> Values => new[] {StatenodeName};
         public RootStatenodeId(string statenodeName) => StatenodeName = statenodeName;
     }
     public class NamedStatenodeId : StatenodeId
     {
-        internal override IEnumerable<string> Values { get; }
+        public override IEnumerable<string> Values { get; }
         public NamedStatenodeId(Statenode parent, string name) =>
             Values = parent.Id.Values.Append(name);
         internal NamedStatenodeId(IEnumerable<string> values) =>

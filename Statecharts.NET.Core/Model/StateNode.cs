@@ -132,6 +132,7 @@ namespace Statecharts.NET.Model
     public abstract class NonFinalStatenode : Statenode
     {
         public IEnumerable<Transition> Transitions { get; internal set; }
+        public IEnumerable<Service> Services { get; internal set; }
 
         protected NonFinalStatenode(
             Statenode parent,

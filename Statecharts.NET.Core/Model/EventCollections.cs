@@ -41,7 +41,7 @@ namespace Statecharts.NET.Model
         public static EventQueue WithEvent(IEvent initialEvent)
         {
             var eventQueue = new EventQueue();
-            eventQueue.Enqueue(new NextStep(initialEvent));
+            eventQueue.Enqueue(new CurrentStep(initialEvent));
             return eventQueue;
         }
         public IEvent Dequeue() => _queue.Dequeue().AsBase().Event;
@@ -50,15 +50,27 @@ namespace Statecharts.NET.Model
             var @event = new Stabilization(new InitializeEvent(statenodeId));
             _queue.Enqueue(@event, @event.Priority);
         }
+        public void EnqueueImmediateEvent()
+        {
+            var @event = new Stabilization(new ImmediateEvent());
+            _queue.Enqueue(@event, @event.Priority);
+        }
         public void Enqueue(CurrentStep @event) => _queue.Enqueue(@event, @event.Priority);
         public void Enqueue(NextStep @event) => _queue.Enqueue(@event, @event.Priority);
         public bool IsNotEmpty => _queue.Any();
-        public bool NextIsInternal => _queue
-            .Skip(1)
-            .FirstOrDefault()
-            .ToOption()
-            .Map(queuedEvent => queuedEvent.Match(stabilization => true, currentStep => true, nextStep => false))
-            .ValueOr(false);
+
+        internal void Test()
+        {
+            var test = _queue.Skip(1);
+            var test2 = test.FirstOrDefault();
+            var test3 = test2.ToOption();
+            var test4 = test3.Map(queuedEvent =>
+                queuedEvent.Match(stabilization => true, currentStep => true, nextStep => false));
+            var test5 = test4.ValueOr(false);
+        }
+
+        public bool NextIsInternal =>
+            _queue.Any() && _queue.First().Match(stabilization => true, currentStep => true, nextStep => false);
 
         public IEnumerable<IEvent> NextStepEvents => // TODO: don't fully like that
             _queue

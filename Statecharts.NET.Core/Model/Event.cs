@@ -112,11 +112,16 @@ namespace Statecharts.NET.Model
     }
     public class ServiceSuccessEvent : IdEvent<ServiceSuccessEvent>
     {
-        public ServiceSuccessEvent(string serviceId) : base($"{serviceId}.success") { } // TODO: think of this key (lookup xstate)
+        public override object Data { get; }
+        public ServiceSuccessEvent(string serviceId, object result) :
+            base($"{serviceId}.success") // TODO: think of this key (lookup xstate)
+            => Data = result;
     }
     public class ServiceErrorEvent : IdEvent<ServiceErrorEvent>
     {
-        public ServiceErrorEvent(string serviceId) : base($"{serviceId}.error") { } // TODO: think of this key (lookup xstate)
+        public override object Data { get; }
+        public ServiceErrorEvent(string serviceId, Exception exception) : base($"{serviceId}.error") // TODO: think of this key (lookup xstate)
+            => Data = exception;
     }
     public class DoneEvent : IdEvent<DoneEvent> {
         public DoneEvent(Statenode statenode) : base($"{statenode}.done") { } // TODO: think of this key (lookup xstate)

@@ -75,19 +75,15 @@ namespace Statecharts.NET.Demo
             Console.WriteLine(definition.AsXStateVisualizerV4Definition());
 
             var statechart = Parser.Parse(definition) as ExecutableStatechart<FetchContext>;
-            var service = Interpreter.Run(statechart);
+            var running = Interpreter.Interpret(statechart);
 
-            throw new NotImplementedException();
+            running.Start().ContinueWith(_ => Environment.Exit(0));
 
-            ////var started = service.Start();
-            ////LogState(started.State);
-            ////while (true)
-            ////{
-            ////    var eventType = Console.ReadLine();
-            ////    var state = service.Send(new NamedEvent(eventType?.ToUpper()));
-            ////    LogState(state);
-            ////}
-
+            while (true)
+            {
+                var eventType = Console.ReadLine();
+                running.Send(new NamedEvent(eventType?.ToUpper()));
+            }
         }
 
         private static void LogState(State<FetchContext> state)
