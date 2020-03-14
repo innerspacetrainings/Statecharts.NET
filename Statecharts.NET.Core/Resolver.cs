@@ -201,9 +201,25 @@ namespace Statecharts.NET
             {
                 if(steps.Any()) events.EnqueueImmediateEvent();
             }
-            void EnqueueDoneEvents(IReadOnlyCollection<Microstep> microSteps)
+            void EnqueueDoneEvents()
             {
-                // TODO: check state finishing and enqueue
+                var doneStatenodes = statechart
+                    .GetActiveStatenodes(stateConfiguration)
+                    .OrderByDescending(statenode => statenode.Depth)
+                    .ThenBy(statenode => statenode.DocumentIndex)
+                    .Aggregate(Enumerable.Empty<Statenode>(),
+                    (done, statenode) => statenode.Match(
+                        atomic => done, 
+                        done.Append,
+                        compound => done.Intersect(compound.Statenodes).Any() ? done.Append(compound) : done,
+                        orthogonal => orthogonal.Statenodes.All(done.Contains) ? done.Append(orthogonal) : done));
+
+                foreach (var doneStatenode in doneStatenodes)
+                    doneStatenode.Switch(
+                        Functions.NoOp,
+                        Functions.NoOp,
+                        compound => events.Enqueue(new CurrentStep(new DoneEvent(compound))),
+                        orthogonal => events.Enqueue(new CurrentStep(new DoneEvent(orthogonal))));
             }
             void UpdateStateConfiguration(IReadOnlyCollection<Microstep> microSteps) =>
                 stateConfiguration = stateConfiguration.Without(microSteps.GetExitedStateNodes()).With(microSteps.GetEnteredStateNodes());
@@ -218,9 +234,9 @@ namespace Statecharts.NET
                 var steps = ResolveMicroSteps(@event);
                 Execute(steps);
                 StabilizeIfNecessary(steps);
-                EnqueueImmediateEvent(steps); // TODO: check order
-                EnqueueDoneEvents(steps);
+                EnqueueImmediateEvent(steps);
                 UpdateStateConfiguration(steps);
+                EnqueueDoneEvents(); // TODO: sometimes enqueuing happens multiple times
                 AddMicrosteps(steps);
             }
 

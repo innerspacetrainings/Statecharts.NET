@@ -30,11 +30,15 @@ namespace Statecharts.NET
         // TODO: config object
         private readonly ILogger _logger;
 
-        internal RunningStatechart(ExecutableStatechart<TContext> statechart)
+        internal RunningStatechart(ExecutableStatechart<TContext> statechart, CancellationToken cancellationToken)
         {
             _statechart = statechart;
             _taskSource = new TaskCompletionSource<object>();
             _serviceCancellationTokens = new Dictionary<Statenode, CancellationTokenSource>();
+
+            _statechart.Done = (context, eventData) => CompleteSuccessfully(); // TODO: parameters
+            cancellationToken.Register(CompleteCancelled);
+            // TODO: register failed ActionBlock that was not handled as cancelled
         }
 
         public Task Start() => Start(
@@ -114,5 +118,13 @@ namespace Statecharts.NET
                     }, _serviceCancellationTokens[stateNode].Token);
             }
         }
+
+        private void Complete(System.Action finalAction)
+        {
+            _serviceCancellationTokens.CancelAll();
+            finalAction();
+        }
+        private void CompleteSuccessfully() => Complete(() => _taskSource.TrySetResult(null));
+        private void CompleteCancelled() => Complete(() => _taskSource.TrySetCanceled());
     }
 }

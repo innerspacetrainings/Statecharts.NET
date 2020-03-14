@@ -228,6 +228,19 @@ namespace Statecharts.NET
             }
         }
 
+        private static void SetRootDoneTransition<TContext>(ExecutableStatechart<TContext> statechart) where TContext : IContext<TContext>
+        {
+            statechart.Rootnode.Switch(
+                Functions.NoOp,
+                root =>
+                    root.Transitions =
+                        new Transition(new DoneEvent(root),
+                            root,
+                            root.Yield(),
+                            Actionblock.From(new SideEffectAction((context, eventData) => statechart.Done?.Invoke((TContext)context, eventData)).Yield()),
+                            Option.None<Guard>()).Yield().Concat(root.Transitions));
+        }
+
         // TODO: return actual ParsedStatechart based on results from parsing
         public static ParsedStatechart<TContext> Parse<TContext>(StatechartDefinition<TContext> definition)
             where TContext : IContext<TContext>
@@ -242,10 +255,14 @@ namespace Statecharts.NET
 
             ParseAndSetTransitions(lookup);
 
-            return new ExecutableStatechart<TContext>(
+            var statechart = new ExecutableStatechart<TContext>(
                 rootnode,
                 definition.InitialContext.CopyDeep(),
                 statenodes);
+
+            SetRootDoneTransition(statechart);
+
+            return statechart;
         }
     }
 }

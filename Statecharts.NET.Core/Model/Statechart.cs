@@ -47,6 +47,7 @@ namespace Statecharts.NET.Model
 
     public class ExecutableStatechart<TContext> : ParsedStatechart<TContext> where TContext : IContext<TContext>
     {
+        internal Action<TContext, object> Done { get; set; }
         public TContext InitialContext { get; }
         public IDictionary<StatenodeId, Statenode> Statenodes { get; }
 
