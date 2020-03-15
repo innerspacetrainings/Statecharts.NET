@@ -41,6 +41,12 @@ namespace Statecharts.NET
             // TODO: register failed ActionBlock that was not handled as cancelled
         }
 
+        public IEnumerable<string> NextEvents => _statechart
+            .GetActiveStatenodes(_currentState.StateConfiguration)
+            .SelectMany(statenode => statenode.GetTransitions())
+            .Select(transition => transition.Event is NamedEvent named ? named.EventName : null)
+            .WhereNotNull();
+
         public Task Start() => Start(
             new StateConfiguration(_statechart.Rootnode.Yield()),
             _statechart.InitialContext,

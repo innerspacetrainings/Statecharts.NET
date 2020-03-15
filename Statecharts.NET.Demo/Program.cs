@@ -81,6 +81,7 @@ namespace Statecharts.NET.Demo
 
             while (true)
             {
+                Console.WriteLine("Next possible events: " + string.Join(", ", running.NextEvents));
                 var eventType = Console.ReadLine();
                 running.Send(new NamedEvent(eventType?.ToUpper()));
             }
