@@ -31,14 +31,14 @@ namespace Statecharts.NET.Tests.SCION.SCXML
             Assert.IsType<ExecutableStatechart<ECMAScriptContext>>(parsed);
 
             var statechart = parsed as ExecutableStatechart<ECMAScriptContext>;
-            var initialState = Resolver.ResolveInitialState(statechart);
+            var initialState = Resolver.ResolveInitialState(statechart).Match(s => s, exception => null); // TODO: quick fix
 
             Assert.Equal(test.Script.InitialConfiguration, initialState.Ids());
 
             var state = initialState;
             foreach (var step in test.Script.Steps)
             {
-                state = Resolver.ResolveNextState(statechart, state, new NamedEvent(step.Event.Name));
+                state = Resolver.ResolveNextState(statechart, state, new NamedEvent(step.Event.Name)).Match(s => s, exception => null); // TODO: quick fix
                 Assert.Equal(step.NextConfiguration, state.Ids());
             }
         }

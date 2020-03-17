@@ -156,6 +156,7 @@ namespace Statecharts.NET
             return events;
         }
         
+        // TODO: return FailableOption
         private static Option<OneOf<CurrentStep, NextStep>> SideffectFreeExecuteAction(Model.Action action, object context, object eventData) =>
             action.Match(
                 send => ((OneOf<CurrentStep, NextStep>)new NextStep(new NamedEvent(send.EventName))).ToOption(),
@@ -168,7 +169,7 @@ namespace Statecharts.NET
                 },
                 sideEffect => Option.None<OneOf<CurrentStep, NextStep>>());
 
-        internal static Macrostep<TContext> ResolveMacrostep<TContext>(
+        internal static OneOf<Macrostep<TContext>, Exception> ResolveMacrostep<TContext>(
             ExecutableStatechart<TContext> statechart,
             State<TContext> sourceState,
             IEvent macrostepEvent,
@@ -225,13 +226,26 @@ namespace Statecharts.NET
                 stateConfiguration = stateConfiguration.Without(microSteps.GetExitedStateNodes()).With(microSteps.GetEnteredStateNodes());
             void AddMicrosteps(IEnumerable<Microstep> steps) => microsteps.AddRange(steps);
 
-            events.Test();
+            // TODO: execute EntryActions for Start Statenodes & start services (but somewhere else)
+            //var entryActions = statechart.GetActiveStatenodes(stateConfiguration)
+            //    .SelectMany(statenode => statenode.EntryActions);
+            //var services = statechart.GetActiveStatenodes(stateConfiguration)
+            //    .SelectMany(statenode =>
+            //        statenode.Match(final => Enumerable.Empty<Service>(), nonfinal => nonfinal.Services));
 
             while (events.IsNotEmpty && events.NextIsInternal)
             {
                 Console.WriteLine($"events: {events}");
                 var @event = events.Dequeue();
                 var steps = ResolveMicroSteps(@event);
+                switch (@event) // TODO, improve this
+                {
+                    case ExecutionErrorEvent executionErrorEvent when !steps.Any():
+                        return executionErrorEvent.Exception;
+                    case ServiceErrorEvent serviceErrorEvent when !steps.Any():
+                        return serviceErrorEvent.Exception;
+                }
+
                 Execute(steps);
                 StabilizeIfNecessary(steps);
                 EnqueueImmediateEvent(steps);
@@ -244,19 +258,21 @@ namespace Statecharts.NET
         }
 
 
-        public static State<TContext> ResolveNextState<TContext>(
+        public static OneOf<State<TContext>, Exception> ResolveNextState<TContext>(
             Model.ExecutableStatechart<TContext> statechart,
             State<TContext> state,
             ISendableEvent @event)
             where TContext : IContext<TContext> =>
-            ResolveMacrostep(statechart, state, @event, (SideffectFreeExecuteAction, Functions.NoOp)).State;
+            ResolveMacrostep(statechart, state, @event, (SideffectFreeExecuteAction, Functions.NoOp))
+                .Match<OneOf<State<TContext>, Exception>>(macrostep => macrostep.State, exception => exception);
 
-        public static State<TContext> ResolveInitialState<TContext>(
+        public static OneOf<State<TContext>, Exception> ResolveInitialState<TContext>(
             ExecutableStatechart<TContext> statechart) where TContext : IContext<TContext> =>
             ResolveMacrostep(
                 statechart,
                 new State<TContext>(new StateConfiguration(statechart.Rootnode.Yield()), statechart.InitialContext.CopyDeep()),
                 new InitializeEvent(statechart.Rootnode.Id),
-                (SideffectFreeExecuteAction, Functions.NoOp)).State;
+                (SideffectFreeExecuteAction, Functions.NoOp))
+                .Match<OneOf<State<TContext>, Exception>>(macrostep => macrostep.State, exception => exception);
     }
 }

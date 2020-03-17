@@ -56,6 +56,7 @@ namespace Statecharts.NET.Demo
                                 On("REJECT").TransitionTo.Sibling("failure")),
                         "success".AsFinal(),
                         "sheeeesh".AsFinal(),
+                        "test".AsCompound().WithInitialState("1").WithStates("1").OnDone.TransitionTo.Sibling("success"),
                         "failure".WithTransitions(
                                 On("RETRY").TransitionTo.Sibling("loading")
                                     .WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++)))
@@ -69,9 +70,24 @@ namespace Statecharts.NET.Demo
                                     () => Console.WriteLine("started"),
                                     () => Console.WriteLine("stopped")))));
 
+        private static readonly StatechartDefinition<FetchContext> DemoDefinition = Statechart
+            .WithInitialContext(new FetchContext { Retries = 0 })
+            .WithRootState(
+                "demo"
+                    .AsCompound()
+                    .WithInitialState("1")
+                    .WithStates(
+                        "1".WithTransitions( On("START").TransitionTo.Sibling("mc")),
+                        "mc".AsCompound().WithInitialState("selecting").WithStates(
+                            "selecting".WithTransitions(
+                                On("CORRECT").TransitionTo.Sibling("solved").WithActions(Run(() => Console.WriteLine("solved")))),
+                            "solved".AsFinal())
+                            .OnDone.TransitionTo.Sibling("final"),
+                        "final".AsFinal()));
+
         private static void Main()
         {
-            var definition = FetchDefinition;
+            var definition = DemoDefinition;
             Console.WriteLine(definition.AsXStateVisualizerV4Definition());
 
             var statechart = Parser.Parse(definition) as ExecutableStatechart<FetchContext>;

@@ -132,7 +132,7 @@ namespace Statecharts.NET
                 task => new Service(serviceDefinition.GetId(statenode.Id, index), async cancellationToken =>
                 {
                     await task.Task(cancellationToken);
-                    return default;
+                    return default; // TODO: document why this is used this way
                 }),
                 dataTask => new Service(serviceDefinition.GetId(statenode.Id, index), dataTask.Task)))
                 ?? Enumerable.Empty<Service>();

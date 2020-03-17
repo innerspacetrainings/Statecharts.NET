@@ -30,6 +30,8 @@ namespace Statecharts.NET
         // TODO: config object
         private readonly ILogger _logger;
 
+        private readonly SynchronizationContext synchronizationContext;
+
         internal RunningStatechart(ExecutableStatechart<TContext> statechart, CancellationToken cancellationToken)
         {
             _statechart = statechart;
@@ -39,6 +41,9 @@ namespace Statecharts.NET
             _statechart.Done = (context, eventData) => CompleteSuccessfully(); // TODO: parameters
             cancellationToken.Register(CompleteCancelled);
             // TODO: register failed ActionBlock that was not handled as cancelled
+
+            synchronizationContext = SynchronizationContext.Current;
+            Console.WriteLine($"SC.NET syncContext #1: {SynchronizationContext.Current}");
         }
 
         public IEnumerable<string> NextEvents => _statechart
@@ -68,12 +73,17 @@ namespace Statecharts.NET
 
             while (events.IsNotEmpty)
             {
-                var macrostep = Resolver.ResolveMacrostep(_statechart, _currentState, events.Dequeue(), (ExecuteAction, StopServices));
-                _currentState = macrostep.State;
-                foreach (var queuedEvent in macrostep.QueuedEvents) events.Enqueue(new NextStep(queuedEvent));
-                Console.WriteLine("  State Config: " + string.Join(", ", _currentState.StateConfiguration.StateNodeIds));
-                Console.WriteLine("  Context: " + _currentState.Context);
-                StartServices(macrostep.GetEnteredStateNodes());
+                var result = Resolver.ResolveMacrostep(_statechart, _currentState, events.Dequeue(), (ExecuteAction, StopServices));
+                result.Switch(macrostep =>
+                {
+                    _currentState = macrostep.State;
+                    foreach (var queuedEvent in macrostep.QueuedEvents) events.Enqueue(new NextStep(queuedEvent));
+                    Console.WriteLine("  State Config: " +
+                                      string.Join(", ", _currentState.StateConfiguration.StateNodeIds));
+                    Console.WriteLine("  Context: " + _currentState.Context);
+                    StartServices(macrostep.GetEnteredStateNodes());
+
+                }, CompleteErrored);
             }
 
             Console.WriteLine();
@@ -100,7 +110,7 @@ namespace Statecharts.NET
                 sideEffect => sideEffect.Function(context, eventData));
             return result;
         }
-        private void StartServices(IEnumerable<Statenode> statenodes)
+        private async void StartServices(IEnumerable<Statenode> statenodes)
         {
             var entered = statenodes
                 .Select(statenode => (statenode, services: statenode.Match(final => Enumerable.Empty<Service>(), nonFinal => nonFinal.Services)))
@@ -109,19 +119,24 @@ namespace Statecharts.NET
             foreach (var (stateNode, services) in entered)
             {
                 _serviceCancellationTokens.Add(stateNode, new CancellationTokenSource());
-                foreach (var service in services)
-                    service.Invoke(_serviceCancellationTokens[stateNode].Token).ContinueWith(task =>
+
+                SynchronizationContext.SetSynchronizationContext(synchronizationContext);
+                Console.WriteLine($"SC.NET syncContext #2: {SynchronizationContext.Current}");
+
+                var tasks = services.Select(async service =>
+                {
+                    try
                     {
-                        switch (task.Status)
-                        {
-                            case TaskStatus.RanToCompletion:
-                                HandleEvent(new ServiceSuccessEvent(service.Id, task.Result));
-                                break;
-                            case TaskStatus.Faulted:
-                                HandleEvent(new ServiceErrorEvent(service.Id, task.Exception));
-                                break;
-                        }
-                    }, _serviceCancellationTokens[stateNode].Token);
+                        var result = await service.Invoke(_serviceCancellationTokens[stateNode].Token);
+                        HandleEvent(new ServiceSuccessEvent(service.Id, result));
+                    }
+                    catch (Exception e)
+                    {
+                        HandleEvent(new ServiceErrorEvent(service.Id, e));
+                    }
+                });
+
+                await Task.WhenAll(tasks.ToArray());
             }
         }
 
@@ -132,5 +147,6 @@ namespace Statecharts.NET
         }
         private void CompleteSuccessfully() => Complete(() => _taskSource.TrySetResult(null));
         private void CompleteCancelled() => Complete(() => _taskSource.TrySetCanceled());
+        private void CompleteErrored(Exception exception) => Complete(() => _taskSource.TrySetException(exception));
     }
 }

@@ -246,7 +246,7 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
         public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
         public override InitialCompoundTransitionDefinition InitialTransition => DefinitionData.InitialTransition;
-        public override Option<DoneTransitionDefinition> DoneTransition =>  throw new NotImplementedException(); // DoneTransitionBuilder.ToOption();
+        public override Option<DoneTransitionDefinition> DoneTransition => new DoneTransitionDefinition(DoneTransitionBuilder.Targets).ToOption(); // TODO: improve this
     }
     public class CompoundWithDoneTransitionWithActions : CompoundStatenodeDefinition
     {
@@ -265,7 +265,7 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
         public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
         public override InitialCompoundTransitionDefinition InitialTransition => DefinitionData.InitialTransition;
-        public override Option<DoneTransitionDefinition> DoneTransition => throw new NotImplementedException(); // DoneTransitionBuilder.ToOption();
+        public override Option<DoneTransitionDefinition> DoneTransition => new DoneTransitionDefinition(DoneTransitionBuilder.Targets).ToOption(); // TODO: improve this
     }
 
     public class Orthogonal

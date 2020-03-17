@@ -119,9 +119,12 @@ namespace Statecharts.NET.Model
     }
     public class ServiceErrorEvent : IdEvent<ServiceErrorEvent>
     {
-        public override object Data { get; }
+        internal Exception Exception { get; }
+        public override object Data => Exception;
         public ServiceErrorEvent(string serviceId, Exception exception) : base($"{serviceId}.error") // TODO: think of this key (lookup xstate)
-            => Data = exception;
+            => Exception = exception;
+
+        public override string ToString() => $"ServiceErrorEvent({Data})";
     }
     public class DoneEvent : IdEvent<DoneEvent> {
         public DoneEvent(Statenode statenode) : base($"{statenode}.done") { } // TODO: think of this key (lookup xstate)
@@ -129,7 +132,7 @@ namespace Statecharts.NET.Model
     public class ExecutionErrorEvent : IEvent
     {
         public Exception Exception { get; }
-        public object Data => null;
+        public object Data => Exception;
         public ExecutionErrorEvent(Exception exception) => Exception = exception;
         public bool Equals(IEvent other) => other is ExecutionErrorEvent;
     }

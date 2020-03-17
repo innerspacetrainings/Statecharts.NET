@@ -59,16 +59,6 @@ namespace Statecharts.NET.Model
         public void Enqueue(NextStep @event) => _queue.Enqueue(@event, @event.Priority);
         public bool IsNotEmpty => _queue.Any();
 
-        internal void Test()
-        {
-            var test = _queue.Skip(1);
-            var test2 = test.FirstOrDefault();
-            var test3 = test2.ToOption();
-            var test4 = test3.Map(queuedEvent =>
-                queuedEvent.Match(stabilization => true, currentStep => true, nextStep => false));
-            var test5 = test4.ValueOr(false);
-        }
-
         public bool NextIsInternal =>
             _queue.Any() && _queue.First().Match(stabilization => true, currentStep => true, nextStep => false);
 
