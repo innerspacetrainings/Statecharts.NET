@@ -212,15 +212,15 @@ namespace Statecharts.NET
                     (done, statenode) => statenode.Match(
                         atomic => done, 
                         done.Append,
-                        compound => done.Intersect(compound.Statenodes).Any() ? done.Append(compound) : done,
+                        compound => compound.Statenodes.Intersect(done.Where(node => node.Match(final => true, nonFinal => false))).Any() ? done.Append(compound) : done,
                         orthogonal => orthogonal.Statenodes.All(done.Contains) ? done.Append(orthogonal) : done));
 
                 foreach (var doneStatenode in doneStatenodes)
                     doneStatenode.Switch(
                         Functions.NoOp,
                         Functions.NoOp,
-                        compound => events.Enqueue(new CurrentStep(new DoneEvent(compound))),
-                        orthogonal => events.Enqueue(new CurrentStep(new DoneEvent(orthogonal))));
+                        compound => events.EnqueueDoneEvent(compound.Id),
+                        orthogonal => events.EnqueueDoneEvent(orthogonal.Id));
             }
             void UpdateStateConfiguration(IReadOnlyCollection<Microstep> microSteps) =>
                 stateConfiguration = stateConfiguration.Without(microSteps.GetExitedStateNodes()).With(microSteps.GetEnteredStateNodes());
@@ -238,7 +238,8 @@ namespace Statecharts.NET
                 Console.WriteLine($"events: {events}");
                 var @event = events.Dequeue();
                 var steps = ResolveMicroSteps(@event);
-                switch (@event) // TODO, improve this
+                var isRootDoneEvent = @event.Equals(new DoneEvent(statechart.Rootnode.Id));
+                    switch (@event) // TODO, improve this
                 {
                     case ExecutionErrorEvent executionErrorEvent when !steps.Any():
                         return executionErrorEvent.Exception;
@@ -247,8 +248,11 @@ namespace Statecharts.NET
                 }
 
                 Execute(steps);
-                StabilizeIfNecessary(steps);
-                EnqueueImmediateEvent(steps);
+                if (!isRootDoneEvent)
+                {
+                    StabilizeIfNecessary(steps);
+                    EnqueueImmediateEvent(steps);
+                }
                 UpdateStateConfiguration(steps);
                 EnqueueDoneEvents(); // TODO: sometimes enqueuing happens multiple times
                 AddMicrosteps(steps);

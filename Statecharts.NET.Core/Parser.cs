@@ -46,7 +46,7 @@ namespace Statecharts.NET
                 case DelayedEventDefinition definition: return new DelayedEvent(source, definition.Delay);
                 case ServiceSuccessEventDefinition _: return new ServiceSuccessEvent(serviceDefinition.GetId(source.Id, serviceIndex), null);
                 case ServiceErrorEventDefinition _: return new ServiceErrorEvent(serviceDefinition.GetId(source.Id, serviceIndex), null);
-                case DoneEventDefinition _: return new DoneEvent(source);
+                case DoneEventDefinition _: return new DoneEvent(source.Id);
                 default: throw new Exception("it would be easier to interpret a Statechart if a proper event mapping is defined ;)");
             }
         }
@@ -66,7 +66,7 @@ namespace Statecharts.NET
         private static Transition Convert(this InitialCompoundTransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode) =>
             new Transition(new InitializeEvent(source.Id), source, definition.Target.GetTargetStatenode(source.Id, getStatenode).Yield(), definition.Actions.Convert(), Option.None<Guard>());
         private static Transition Convert(this DoneTransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode) =>
-            new Transition(new DoneEvent(source), source, definition.Targets.GetTargetStatenodes(source.Id, getStatenode), definition.Actions.Convert(), definition.Guard.Map(guard => guard.AsBase()));
+            new Transition(new DoneEvent(source.Id), source, definition.Targets.GetTargetStatenodes(source.Id, getStatenode), definition.Actions.Convert(), definition.Guard.Map(guard => guard.AsBase()));
 
         private static IEnumerable<Transition> GetNonFinalStatenodeTransitions(this NonFinalStatenodeDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode)
         {
@@ -234,7 +234,7 @@ namespace Statecharts.NET
                 Functions.NoOp,
                 root =>
                     root.Transitions =
-                        new Transition(new DoneEvent(root),
+                        new Transition(new DoneEvent(root.Id),
                             root,
                             root.Yield(),
                             Actionblock.From(new SideEffectAction((context, eventData) => statechart.Done?.Invoke((TContext)context, eventData)).Yield()),

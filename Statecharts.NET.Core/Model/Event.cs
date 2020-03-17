@@ -73,6 +73,7 @@ namespace Statecharts.NET.Model
         public virtual object Data => null;
         protected IdEvent(string id) => _id = id;
         public bool Equals(IEvent other) => other is TActualEvent @event && @event._id == _id;
+        public override string ToString() => $"{GetType().Name}({_id})";
     }
     public class NamedEvent : ISendableEvent
     {
@@ -127,7 +128,7 @@ namespace Statecharts.NET.Model
         public override string ToString() => $"ServiceErrorEvent({Data})";
     }
     public class DoneEvent : IdEvent<DoneEvent> {
-        public DoneEvent(Statenode statenode) : base($"{statenode}.done") { } // TODO: think of this key (lookup xstate)
+        public DoneEvent(StatenodeId statenodeId) : base($"{statenodeId}.done") { } // TODO: think of this key (lookup xstate)
     }
     public class ExecutionErrorEvent : IEvent
     {

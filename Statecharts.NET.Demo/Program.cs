@@ -93,6 +93,8 @@ namespace Statecharts.NET.Demo
             var statechart = Parser.Parse(definition) as ExecutableStatechart<FetchContext>;
             var running = Interpreter.Interpret(statechart);
 
+            running.OnMacroStep += macrostep => Console.WriteLine("StateNodes: " + string.Join(", ", macrostep.State.StateConfiguration.StateNodeIds));
+
             running.Start().ContinueWith(_ => Environment.Exit(0));
 
             while (true)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Statecharts.NET.Interfaces;
@@ -26,11 +25,12 @@ namespace Statecharts.NET
         private State<TContext> _currentState;
         private readonly TaskCompletionSource<object> _taskSource;
         private readonly Dictionary<Statenode, CancellationTokenSource> _serviceCancellationTokens;
+        private bool _isFinished;
 
         // TODO: config object
         private readonly ILogger _logger;
 
-        private readonly SynchronizationContext synchronizationContext;
+        public event Action<Macrostep<TContext>> OnMacroStep;
 
         internal RunningStatechart(ExecutableStatechart<TContext> statechart, CancellationToken cancellationToken)
         {
@@ -38,12 +38,11 @@ namespace Statecharts.NET
             _taskSource = new TaskCompletionSource<object>();
             _serviceCancellationTokens = new Dictionary<Statenode, CancellationTokenSource>();
 
-            _statechart.Done = (context, eventData) => CompleteSuccessfully(); // TODO: parameters
+            _statechart.Done = (context, eventData) => _isFinished = true;
             cancellationToken.Register(CompleteCancelled);
             // TODO: register failed ActionBlock that was not handled as cancelled
 
-            synchronizationContext = SynchronizationContext.Current;
-            Console.WriteLine($"SC.NET syncContext #1: {SynchronizationContext.Current}");
+            _isFinished = false;
         }
 
         public IEnumerable<string> NextEvents => _statechart
@@ -71,23 +70,23 @@ namespace Statecharts.NET
         {
             var events = EventQueue.WithEvent(@event);
 
-            while (events.IsNotEmpty)
+            while (events.IsNotEmpty && !_isFinished)
             {
                 var result = Resolver.ResolveMacrostep(_statechart, _currentState, events.Dequeue(), (ExecuteAction, StopServices));
                 result.Switch(macrostep =>
                 {
                     _currentState = macrostep.State;
                     foreach (var queuedEvent in macrostep.QueuedEvents) events.Enqueue(new NextStep(queuedEvent));
-                    Console.WriteLine("  State Config: " +
-                                      string.Join(", ", _currentState.StateConfiguration.StateNodeIds));
-                    Console.WriteLine("  Context: " + _currentState.Context);
+                    OnMacroStep?.Invoke(macrostep);
                     StartServices(macrostep.GetEnteredStateNodes());
-
                 }, CompleteErrored);
             }
 
+            if(_isFinished) CompleteSuccessfully();
+
             Console.WriteLine();
         }
+
         public void Send(ISendableEvent sentEvent) => HandleEvent(sentEvent);
         private void StopServices(IEnumerable<Statenode> statenodes)
         {
@@ -119,9 +118,6 @@ namespace Statecharts.NET
             foreach (var (stateNode, services) in entered)
             {
                 _serviceCancellationTokens.Add(stateNode, new CancellationTokenSource());
-
-                SynchronizationContext.SetSynchronizationContext(synchronizationContext);
-                Console.WriteLine($"SC.NET syncContext #2: {SynchronizationContext.Current}");
 
                 var tasks = services.Select(async service =>
                 {

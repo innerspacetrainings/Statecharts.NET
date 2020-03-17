@@ -53,10 +53,17 @@ namespace Statecharts.NET.Model
         public void EnqueueImmediateEvent()
         {
             var @event = new Stabilization(new ImmediateEvent());
-            _queue.Enqueue(@event, @event.Priority);
+            if(!_queue.Any(queuedEvent => queuedEvent.AsBase().Event is ImmediateEvent)) _queue.Enqueue(@event, @event.Priority);
         }
         public void Enqueue(CurrentStep @event) => _queue.Enqueue(@event, @event.Priority);
         public void Enqueue(NextStep @event) => _queue.Enqueue(@event, @event.Priority);
+        public void EnqueueDoneEvent(StatenodeId statenodeId)
+        {
+            var @event = new DoneEvent(statenodeId);
+            if(!_queue.Any(queuedEvent => queuedEvent.Match(_ => false, current => current.Event.Equals(@event), _ => false)))
+                Enqueue(new CurrentStep(@event));
+        }
+
         public bool IsNotEmpty => _queue.Any();
 
         public bool NextIsInternal =>
