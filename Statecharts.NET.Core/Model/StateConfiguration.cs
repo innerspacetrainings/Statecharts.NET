@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
@@ -12,7 +11,7 @@ namespace Statecharts.NET.Model
         private static IEnumerable<StatenodeId> Ids(IEnumerable<Statenode> statenodes)
             => statenodes?.Select(statenode => statenode.Id);
 
-        public IEnumerable<StatenodeId> StateNodeIds { get; }
+        public IList<StatenodeId> StateNodeIds { get; }
 
         public IEnumerable<string> NonRootIds =>
             StateNodeIds
@@ -21,7 +20,7 @@ namespace Statecharts.NET.Model
                 .Select(values => string.Join(".", values));
 
         private StateConfiguration(IEnumerable<StatenodeId> statenodeIds) =>
-            StateNodeIds = statenodeIds ?? throw new ArgumentNullException(nameof(statenodeIds));
+            StateNodeIds = statenodeIds?.ToList() ?? throw new ArgumentNullException(nameof(statenodeIds));
         public StateConfiguration(IEnumerable<Statenode> statenodes) : this (Ids(statenodes)) { }
 
         public bool Contains(Statenode statenode)
