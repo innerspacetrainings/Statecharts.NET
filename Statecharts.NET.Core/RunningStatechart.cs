@@ -83,8 +83,6 @@ namespace Statecharts.NET
             }
 
             if(_isFinished) CompleteSuccessfully();
-
-            Console.WriteLine();
         }
 
         public void Send(ISendableEvent sentEvent) => HandleEvent(sentEvent);

@@ -235,7 +235,6 @@ namespace Statecharts.NET
 
             while (events.IsNotEmpty && events.NextIsInternal)
             {
-                Console.WriteLine($"events: {events}");
                 var @event = events.Dequeue();
                 var steps = ResolveMicroSteps(@event);
                 var isRootDoneEvent = @event.Equals(new DoneEvent(statechart.Rootnode.Id));
