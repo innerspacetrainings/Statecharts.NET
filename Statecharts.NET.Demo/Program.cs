@@ -78,9 +78,12 @@ namespace Statecharts.NET.Demo
                     .WithInitialState("1")
                     .WithStates(
                         "1".WithTransitions( On("START").TransitionTo.Sibling("mc")),
-                        "mc".AsCompound().WithInitialState("selecting").WithStates(
+                        "mc".WithTransitions(On("RETRY").TransitionTo.Child("initial"))
+                            .AsCompound().WithInitialState("initial").WithStates(
+                            "initial".WithTransitions(
+                                On("START").TransitionTo.Sibling("selecting")),
                             "selecting".WithTransitions(
-                                On("CORRECT").TransitionTo.Sibling("solved").WithActions(Run(() => Console.WriteLine("solved")))),
+                                On("CORRECT").TransitionTo.Sibling("solved")),
                             "solved".AsFinal())
                             .OnDone.TransitionTo.Sibling("final"),
                         "final".AsFinal()));

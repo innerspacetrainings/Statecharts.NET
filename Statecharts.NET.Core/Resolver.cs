@@ -92,7 +92,7 @@ namespace Statecharts.NET
                     var lastBeforeLeastCompoundCommonAncestor = transition.Source.OneBeneath(lcca);
                     var isChildTransition = target.GetParents().Contains(transition.Source);
                     var exited = isChildTransition
-                        ? Enumerable.Empty<Statenode>()
+                        ? transition.Source.GetDescendants().Where(stateConfiguration.Contains)
                         : lastBeforeLeastCompoundCommonAncestor.Append(lastBeforeLeastCompoundCommonAncestor.GetDescendants()).Where(stateConfiguration.Contains);
                     var entered = isChildTransition
                         ? target.Append(target.AncestorsUntil(lastBeforeLeastCompoundCommonAncestor).Reverse())
@@ -235,6 +235,7 @@ namespace Statecharts.NET
 
             while (events.IsNotEmpty && events.NextIsInternal)
             {
+                Console.WriteLine($"events: {events}");
                 var @event = events.Dequeue();
                 var steps = ResolveMicroSteps(@event);
                 var isRootDoneEvent = @event.Equals(new DoneEvent(statechart.Rootnode.Id));
