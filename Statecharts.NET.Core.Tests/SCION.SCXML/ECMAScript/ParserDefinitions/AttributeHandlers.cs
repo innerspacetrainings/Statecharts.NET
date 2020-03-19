@@ -12,7 +12,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions
         internal static void SetStateNodeName(FinalStateNode stateNode, string name) =>
             stateNode.Name = name;
         public static void SetTransitionEvent(Transition transition, string @event) =>
-            transition._event = @event;
+            transition._eventName = @event;
         public static void SetTransitionTarget(Transition transition, string target) =>
             transition._target = target;
         public static void SetContextDataEntryId(ContextDataEntry entry, string id) =>

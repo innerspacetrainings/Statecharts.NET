@@ -57,8 +57,8 @@ namespace Statecharts.NET.Model
 
     public sealed class ForbiddenTransitionDefinition : TransitionDefinition
     {
-        public NamedEventDefinition Event { get; }
-        public ForbiddenTransitionDefinition(string eventName) => Event = new NamedEventDefinition(eventName);
+        public NamedEvent Event { get; }
+        public ForbiddenTransitionDefinition(string eventName) => Event = new NamedEvent(eventName);
     }
     public abstract class UnguardedTransitionDefinition : TransitionDefinition
     {

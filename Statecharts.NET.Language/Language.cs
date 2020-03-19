@@ -30,12 +30,13 @@ namespace Statecharts.NET.Language
         public static SideEffectAction<TContext, TData> Define<TContext, TData>(System.Action<TContext, TData> effect) =>
             new SideEffectAction<TContext, TData>(effect);
     }
+    public delegate NamedDataEvent<TEventData> NamedDataEventFactory<TEventData>(TEventData data);
     public static class Event
     {
         public static NamedEvent Define(string eventName) =>
             new NamedEvent(eventName);
-        public static NamedEvent WithData<TEventData>(this NamedEvent @event) => // TODO: Event.Define("...")[.WithData<TEventData>()];
-            new NamedEvent(@event.EventName, default);
+        public static NamedDataEventFactory<TEventData> WithData<TEventData>(this NamedEvent @event) => // TODO: Event.Define("...")[.WithData<TEventData>()];
+            data => new NamedDataEvent<TEventData>(@event.Name, data);
     }
 
     public static class Keywords
@@ -57,8 +58,12 @@ namespace Statecharts.NET.Language
         public static ForbiddenTransitionDefinition Ignore(string eventName) =>
             new ForbiddenTransitionDefinition(eventName);
         
-        public static Builders.Transition.WithEvent On(string eventType)
-            => Builders.Transition.WithEvent.OfEventType(eventType);
+        public static Builders.Transition.WithEvent On(string eventName)
+            => Builders.Transition.WithEvent.OfNamedEvent(new NamedEvent(eventName));
+        public static Builders.Transition.WithEvent On(NamedEvent @event)
+            => Builders.Transition.WithEvent.OfNamedEvent(@event);
+        public static Builders.Transition.WithDataEvent<TEventData> On<TEventData>(NamedDataEventFactory<TEventData> factory)
+            => Builders.Transition.WithEvent.OfNamedDataEvent(factory(default));
         public static Builders.Transition.WithEvent Immediately
             => Builders.Transition.WithEvent.Immediately();
         public static Builders.Transition.WithEvent After(TimeSpan delay)

@@ -54,7 +54,7 @@ namespace Statecharts.NET.XState
             {
                 switch (@event)
                 {
-                    case NamedEventDefinition named: return named.Name;
+                    case ISendableEvent named: return named.Name;
                     case ImmediateEventDefinition _: return "\"\"";
                     case DelayedEventDefinition _: return "after";
                     default: throw new Exception("oh shit");

@@ -12,8 +12,10 @@ namespace Statecharts.NET.Language.Builders.Transition
 
         private WithEvent(IEventDefinition @event) => Event = @event;
 
-        internal static WithEvent OfEventType(string eventType) =>
-            new WithEvent(new NamedEventDefinition(eventType));
+        internal static WithEvent OfNamedEvent(NamedEvent namedEvent) =>
+            new WithEvent(namedEvent);
+        internal static WithDataEvent<TEventData> OfNamedDataEvent<TEventData>(NamedDataEvent<TEventData> namedDataEvent) =>
+            new WithDataEvent<TEventData>(namedDataEvent);
         internal static WithEvent Immediately() =>
             new WithEvent(new ImmediateEventDefinition());
         internal static WithEvent Delayed(TimeSpan delay) =>

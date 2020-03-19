@@ -48,7 +48,7 @@ namespace Statecharts.NET
         public IEnumerable<string> NextEvents => _statechart
             .GetActiveStatenodes(_currentState.StateConfiguration)
             .SelectMany(statenode => statenode.GetTransitions())
-            .Select(transition => transition.Event is NamedEvent named ? named.EventName : null)
+            .Select(transition => transition.Event is NamedEvent named ? named.Name : null)
             .WhereNotNull();
 
         public Task Start() => Start(
@@ -85,7 +85,7 @@ namespace Statecharts.NET
             if(_isFinished) CompleteSuccessfully();
         }
 
-        public void Send(ISendableEvent sentEvent) => HandleEvent(sentEvent);
+        public void Send(ISendableEvent @event) => HandleEvent(@event);
         private void StopServices(IEnumerable<Statenode> statenodes)
         {
             foreach (var (stateNode, token) in statenodes

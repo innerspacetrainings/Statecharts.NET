@@ -40,8 +40,8 @@ namespace Statecharts.NET
         {
             switch (eventDefinition)
             {
-                case NamedDataEventDefinition definition: return new NamedEvent(definition.Name, definition.Data); // TODO: check this
-                case NamedEventDefinition definition: return new NamedEvent(definition.Name);
+                case INamedDataEvent definition: return new NamedDataEvent<object>(definition.Name, definition.Data); // TODO: check this
+                case INamedEvent definition: return new NamedEvent(definition.Name);
                 case ImmediateEventDefinition _: return new ImmediateEvent();
                 case DelayedEventDefinition definition: return new DelayedEvent(source, definition.Delay);
                 case ServiceSuccessEventDefinition _: return new ServiceSuccessEvent(serviceDefinition.GetId(source.Id, serviceIndex), null);

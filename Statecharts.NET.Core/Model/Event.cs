@@ -2,41 +2,11 @@
 
 namespace Statecharts.NET.Model
 {
-    public interface ISendableEventDefinition : IEventDefinition
-    {
-        string Name { get; }
-    }
-    public interface ISendableEvent : IEvent
-    {
-        //TODO: string Name { get; }
-    }
-    public interface ISendableDataEventDefinition<TData> : IDataEventDefinition
-    {
-        string Name { get; }
-    }
-    public interface ISendableDataEvent : IEvent
-    {
-        string Name { get; }
-    }
-
-
     #region Definition
     public interface IEventDefinition { }
     public interface IDataEventDefinition : IEventDefinition
     {
         object Data { get; }
-    }
-    public class NamedEventDefinition : IEventDefinition // TODO: ISendableEventDefinition
-    {
-        public string Name { get; }
-        public NamedEventDefinition(string eventName) => Name = eventName;
-        public override string ToString() => $"@\"{Name}\"";
-    }
-    public class NamedDataEventDefinition : NamedEventDefinition, IDataEventDefinition
-    {
-        public object Data { get; }
-        public NamedDataEventDefinition(string eventName, object data) : base(eventName) => Data = data;
-        public override string ToString() => $"@\"{Name}\" (Data={Data})";
     }
     public class ImmediateEventDefinition : IEventDefinition
     {
@@ -74,21 +44,6 @@ namespace Statecharts.NET.Model
         protected IdEvent(string id) => _id = id;
         public bool Equals(IEvent other) => other is TActualEvent @event && @event._id == _id;
         public override string ToString() => $"{GetType().Name}({_id})";
-    }
-    public class NamedEvent : ISendableEvent
-    {
-        public string EventName { get; }
-        public object Data { get; }
-
-        public NamedEvent(string eventName, object data = null)
-        {
-            EventName = eventName;
-            Data = data;
-        }
-
-        public bool Equals(IEvent other) => other is NamedEvent @event && @event.EventName == EventName;
-
-        public override string ToString() => $"@{EventName}";
     }
     public class ImmediateEvent : IEvent
     {
@@ -136,6 +91,36 @@ namespace Statecharts.NET.Model
         public object Data => Exception;
         public ExecutionErrorEvent(Exception exception) => Exception = exception;
         public bool Equals(IEvent other) => other is ExecutionErrorEvent;
+    }
+    #endregion
+    #region Sendable Events
+    public interface ISendableEvent : IEvent
+    {
+        string Name { get; }
+    }
+    public interface INamedEvent : ISendableEvent { }
+    public interface INamedDataEvent : ISendableEvent { }
+    public class NamedEvent : IEventDefinition, INamedEvent
+    {
+        public string Name { get; }
+        public object Data => null;
+        public NamedEvent(string eventName) => Name = eventName;
+        public bool Equals(IEvent other) => other is INamedEvent @event && @event.Name == Name;
+        public override string ToString() => $"@{Name}";
+    }
+    public class NamedDataEvent<TData> : IDataEventDefinition, INamedDataEvent
+    {
+        private readonly TData _data;
+        public string Name { get; }
+        public object Data => _data;
+
+        public NamedDataEvent(string eventName, TData data)
+        {
+            Name = eventName;
+            _data = data;
+        }
+        public bool Equals(IEvent other) => other is INamedEvent @event && @event.Name == Name;
+        public override string ToString() => $"@{Name} (Data: {_data})";
     }
     #endregion
 }

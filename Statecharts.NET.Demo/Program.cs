@@ -70,6 +70,9 @@ namespace Statecharts.NET.Demo
                                     () => Console.WriteLine("started"),
                                     () => Console.WriteLine("stopped")))));
 
+        private static NamedEvent Increment => Event.Define("INCREMENT");
+        private static NamedDataEventFactory<int> IncrementBy => Event.Define("INCREMENTBY").WithData<int>();
+
         private static readonly StatechartDefinition<FetchContext> DemoDefinition = Statechart
             .WithInitialContext(new FetchContext { Retries = 0 })
             .WithRootState(
@@ -77,7 +80,10 @@ namespace Statecharts.NET.Demo
                     .AsCompound()
                     .WithInitialState("1")
                     .WithStates(
-                        "1".WithTransitions( On("START").TransitionTo.Sibling("mc")),
+                        "1".WithTransitions(
+                            On("START").TransitionTo.Sibling("mc"),
+                            //On(IncrementBy).TransitionTo.Sibling("mc"),
+                            On(Increment).TransitionTo.Sibling("mc")),
                         "mc".WithTransitions(On("RETRY").TransitionTo.Child("initial"))
                             .AsCompound().WithInitialState("initial").WithStates(
                             "initial".WithTransitions(
