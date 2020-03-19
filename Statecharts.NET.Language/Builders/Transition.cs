@@ -69,6 +69,8 @@ namespace Statecharts.NET.Language.Builders.Transition
             new WithTarget(Event, Keywords.Sibling(stateName));
         public WithTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
             new WithTarget(Event, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public WithTarget Self =>
+            new WithTarget(Event, new SelfTarget());
         public WithTarget Multiple(Target target, params Target[] targets) =>
             new WithTarget(Event, target, targets);
     }

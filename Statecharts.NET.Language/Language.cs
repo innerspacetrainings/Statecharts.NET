@@ -84,7 +84,7 @@ namespace Statecharts.NET.Language
             => new LogAction(label);
         public static LogAction<TContext> Log<TContext>(Func<TContext, string> message)
             => new LogAction<TContext>(message);
-        public static LogAction<TContext, TData> Assign<TContext, TData>(Func<TContext, TData, string> message)
+        public static LogAction<TContext, TData> Log<TContext, TData>(Func<TContext, TData, string> message)
             => new LogAction<TContext, TData>(message);
         public static AssignAction Assign(System.Action mutation)
             => new AssignAction(mutation);

@@ -48,8 +48,8 @@ namespace Statecharts.NET.XState
         {
             var properties = new List<JSProperty>();
 
-            ArrayValue Targets(IEnumerable<Model.Target> targets)
-                => ArrayValue(targets.Select(target => target.Serialize(statechartDefinition)));
+            ArrayValue Targets(IEnumerable<Target> targets)
+                => ArrayValue(targets.Select(target => target.Serialize(definition.Name, statechartDefinition)));
             string Event(IEventDefinition @event)
             {
                 switch (@event)
@@ -60,10 +60,14 @@ namespace Statecharts.NET.XState
                     default: throw new Exception("oh shit");
                 }
             }
-            JSProperty Unguarded(string @event, IEnumerable<Model.Target> targets)
-                => (@event, ObjectValue(("target", Targets(targets))));
-            JSProperty Guarded(string @event, IEnumerable<Model.Target> targets)
-                => (@event, ObjectValue(("target", Targets(targets)), ("cond", SimpleValue("() => false", true))));
+            JSProperty Unguarded(string @event, IEnumerable<Target> targets, int? actionsCount)
+                => (@event, actionsCount == 0
+                    ? ObjectValue(("target", Targets(targets)))
+                    : ObjectValue(("target", Targets(targets)), ("actions", SimpleValue(actionsCount == 1 ? "1 Action" : $"{actionsCount} Actions"))));
+            JSProperty Guarded(string @event, IEnumerable<Target> targets, int actionsCount)
+                => (@event, actionsCount == 0
+                    ? ObjectValue(("target", Targets(targets)), ("cond", SimpleValue("() => false", true)))
+                    : ObjectValue(("target", Targets(targets)), ("cond", SimpleValue("() => false", true)), ("actions", SimpleValue(actionsCount == 1 ? "1 Action" : $"{actionsCount} Actions"))));
 
             // transitions
             var transitions = definition.Match(
@@ -74,18 +78,18 @@ namespace Statecharts.NET.XState
                 transition => transition
                     .Match(
                         forbidden => (forbidden.Event.Name, SimpleValue("undefined", true)),
-                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets),
-                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets),
-                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets),
-                        guarded => Guarded(Event(guarded.Event), guarded.Targets),
-                        guarded => Guarded(Event(guarded.Event), guarded.Targets),
-                        guarded => Guarded(Event(guarded.Event), guarded.Targets))).ToList();
+                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets, unguarded.Actions?.Count() ?? 0),
+                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets, unguarded.Actions?.Count() ?? 0),
+                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets, unguarded.Actions?.Count() ?? 0),
+                        guarded => Guarded(Event(guarded.Event), guarded.Targets, guarded.Actions?.Count() ?? 0),
+                        guarded => Guarded(Event(guarded.Event), guarded.Targets, guarded.Actions?.Count() ?? 0),
+                        guarded => Guarded(Event(guarded.Event), guarded.Targets, guarded.Actions?.Count() ?? 0))).ToList();
             if(transitions.Any()) properties.Add(("on", ObjectValue(transitions)));
 
             JSProperty MapDoneTransition(DoneTransitionDefinition transition) =>
                 transition.Guard.Match(
-                    guarded => Guarded("onDone", transition.Targets),
-                    () => Unguarded("onDone", transition.Targets));
+                    guarded => Guarded("onDone", transition.Targets, transition.Actions?.Count() ?? 0),
+                    () => Unguarded("onDone", transition.Targets, transition.Actions?.Count() ?? 0));
 
             // DoneTransition
             var onDoneTransition = definition.Match(
@@ -96,8 +100,8 @@ namespace Statecharts.NET.XState
             onDoneTransition.SwitchSome(properties.Add);
 
             // actions
-            var entryCount = definition.EntryActions.Count();
-            var exitCount = definition.ExitActions.Count();
+            var entryCount = definition.EntryActions?.Count() ?? 0;
+            var exitCount = definition.ExitActions?.Count() ?? 0;
             if(entryCount > 0) properties.Add(("entry", entryCount == 1 ? "1 Action" : $"{entryCount} Actions"));
             if(exitCount > 0) properties.Add(("exit", exitCount == 1 ? "1 Action" : $"{exitCount} Actions"));
 
@@ -106,17 +110,17 @@ namespace Statecharts.NET.XState
                 {
                     var idProperty = service.Id.Map<JSProperty>(id => ("id", id));
                     var onErrorProperty = service.OnErrorTransition.Map(transition => transition.Match(
-                        unguarded => Unguarded("onError", unguarded.Targets),
-                        unguarded => Unguarded("onError", unguarded.Targets)));
+                        unguarded => Unguarded("onError", unguarded.Targets, unguarded.Actions?.Count() ?? 0),
+                        unguarded => Unguarded("onError", unguarded.Targets, unguarded.Actions?.Count() ?? 0)));
                     var onSuccessProperty = service.Match(
                         _ => Option.None<JSProperty>(),
                         taskService => taskService.OnSuccessDefinition.Map(transition => transition.Match(
-                            unguarded => Unguarded("onDone", unguarded.Targets),
-                            unguarded => Unguarded("onDone", unguarded.Targets))),
+                            unguarded => Unguarded("onDone", unguarded.Targets, unguarded.Actions?.Count() ?? 0),
+                            unguarded => Unguarded("onDone", unguarded.Targets, unguarded.Actions?.Count() ?? 0))),
                         taskDataService => taskDataService.OnSuccessDefinition.Map(transition => transition.Match(
-                            unguarded => Unguarded("onDone", unguarded.Targets),
-                            unguarded => Unguarded("onDone", unguarded.Targets),
-                            unguarded => Unguarded("onDone", unguarded.Targets))));
+                            unguarded => Unguarded("onDone", unguarded.Targets, unguarded.Actions?.Count() ?? 0),
+                            unguarded => Unguarded("onDone", unguarded.Targets, unguarded.Actions?.Count() ?? 0),
+                            unguarded => Unguarded("onDone", unguarded.Targets, unguarded.Actions?.Count() ?? 0))));
 
                     var serviceProperties = new[] {idProperty, onErrorProperty, onSuccessProperty}
                         .Where(property => property.HasValue).Select(property => property.ValueOr(default(JSProperty)));
@@ -135,12 +139,14 @@ namespace Statecharts.NET.XState
     internal static class Extensions
     {
         internal static SimpleValue Serialize<TContext>(
-            this Model.Target target,
+            this Target target,
+            string sourceStatenodeName,
             StatechartDefinition<TContext> statechartDefinition)
             where TContext : IContext<TContext>
             => SimpleValue(target.Match(
                 absolute => $"#{statechartDefinition.Id}." + string.Join(".", absolute.Id.Values),
                 sibling => $"{sibling.StatenodeName}",
-                child => $".{child.StatenodeName}"));
+                child => $".{child.StatenodeName}",
+                self => sourceStatenodeName));
     }
 }

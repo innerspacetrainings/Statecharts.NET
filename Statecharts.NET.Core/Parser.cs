@@ -27,7 +27,11 @@ namespace Statecharts.NET
     internal static class TargetExtensions
     {
         private static StatenodeId StatenodeIdFor(StatenodeId sourceId, Target target) =>
-            target.Match(absolute => absolute.Id, sibling => sourceId.Sibling(sibling.StatenodeName), child => sourceId.Child(child.StatenodeName));
+            target.Match(
+                absolute => absolute.Id,
+                sibling => sourceId.Sibling(sibling.StatenodeName),
+                child => sourceId.Child(child.StatenodeName),
+                self => sourceId);
         internal static IEnumerable<Statenode> GetTargetStatenodes(this IEnumerable<Target> targets, StatenodeId sourceId, Func<StatenodeId, Statenode> getStatenode) =>
             targets.Select(target => getStatenode(StatenodeIdFor(sourceId, target)));
         internal static Statenode GetTargetStatenode(this Target target, StatenodeId sourceId, Func<StatenodeId, Statenode> getStatenode) =>

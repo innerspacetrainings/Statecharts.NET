@@ -83,7 +83,7 @@ namespace Statecharts.NET.Demo
                         "1".WithTransitions(
                             On("START").TransitionTo.Sibling("mc"),
                             //On(IncrementBy).TransitionTo.Sibling("mc"),
-                            On(Increment).TransitionTo.Sibling("mc")),
+                            On(Increment).TransitionTo.Self.WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++))),
                         "mc".WithTransitions(On("RETRY").TransitionTo.Child("initial"))
                             .AsCompound().WithInitialState("initial").WithStates(
                             "initial".WithTransitions(
@@ -102,13 +102,17 @@ namespace Statecharts.NET.Demo
             var statechart = Parser.Parse(definition) as ExecutableStatechart<FetchContext>;
             var running = Interpreter.Interpret(statechart);
 
-            running.OnMacroStep += macrostep => Console.WriteLine("StateNodes: " + string.Join(", ", macrostep.State.StateConfiguration.StateNodeIds));
+            running.OnMacroStep += macrostep =>
+            {
+                Console.WriteLine($"StateNodes: {string.Join(", ", macrostep.State.StateConfiguration.StateNodeIds)}");
+                Console.WriteLine($"Context: {macrostep.State.Context}");
+            };
 
             running.Start().ContinueWith(_ => Environment.Exit(0));
 
             while (true)
             {
-                Console.WriteLine("Next possible events: " + string.Join(", ", running.NextEvents));
+                Console.WriteLine($"Next possible events: {string.Join(", ", running.NextEvents)}");
                 var eventType = Console.ReadLine();
                 running.Send(new NamedEvent(eventType?.ToUpper()));
             }
