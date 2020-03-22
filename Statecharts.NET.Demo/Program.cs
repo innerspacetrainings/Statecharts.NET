@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Statecharts.NET.Interfaces;
 using Statecharts.NET.Language;
 using Statecharts.NET.Model;
@@ -82,7 +81,7 @@ namespace Statecharts.NET.Demo
                     .WithStates(
                         "1".WithTransitions(
                             On("START").TransitionTo.Sibling("mc"),
-                            //On(IncrementBy).TransitionTo.Sibling("mc"),
+                            On(IncrementBy).TransitionTo.Self.WithActions<FetchContext>(Assign<FetchContext, int>((context, amount) => context.Retries += amount)),
                             On(Increment).TransitionTo.Self.WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++))),
                         "mc".WithTransitions(On("RETRY").TransitionTo.Child("initial"))
                             .AsCompound().WithInitialState("initial").WithStates(
@@ -113,15 +112,15 @@ namespace Statecharts.NET.Demo
             while (true)
             {
                 Console.WriteLine($"Next possible events: {string.Join(", ", running.NextEvents)}");
-                var eventType = Console.ReadLine();
-                running.Send(new NamedEvent(eventType?.ToUpper()));
+                var eventType = Console.ReadLine()?.ToUpper();
+                switch (eventType)
+                {
+                    case { } when eventType.StartsWith("INCREMENTBY"): running.Send(IncrementBy(int.Parse(eventType.Substring(11)))); break;
+                    case null: break;
+                    default: running.Send(new NamedEvent(eventType)); break;
+                }
             }
-        }
-
-        private static void LogState(State<FetchContext> state)
-        {
-            Console.WriteLine("StateConfig:");
-            Console.WriteLine(string.Join(Environment.NewLine, state.StateConfiguration.StateNodeIds.Select(text => $"  {text}")));
+            // ReSharper disable once FunctionNeverReturns
         }
     }
 }

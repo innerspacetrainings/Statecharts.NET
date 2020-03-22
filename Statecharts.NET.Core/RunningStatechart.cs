@@ -48,7 +48,7 @@ namespace Statecharts.NET
         public IEnumerable<string> NextEvents => _statechart
             .GetActiveStatenodes(_currentState.StateConfiguration)
             .SelectMany(statenode => statenode.GetTransitions())
-            .Select(transition => transition.Event is NamedEvent named ? named.Name : null)
+            .Select(transition => transition.Event is ISendableEvent @event ? @event.Name : null)
             .WhereNotNull();
 
         public Task Start() => Start(

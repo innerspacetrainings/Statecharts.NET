@@ -94,7 +94,7 @@ namespace Statecharts.NET.Model
     }
     public abstract class GuardedContextDataTransitionDefinition : TransitionDefinition
     {
-        public abstract IEventDefinition Event { get; }
+        public abstract IDataEventDefinition Event { get; }
         public abstract OneOfUnion<Guard, InStateGuard, ConditionContextGuard, ConditionContextDataGuard> Guard { get; }
         public abstract IEnumerable<Target> Targets { get; }
         public abstract IEnumerable<OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> Actions { get; }

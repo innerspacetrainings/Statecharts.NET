@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Statecharts.NET.Interfaces;
+using Statecharts.NET.Language.Builders.Transition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
@@ -58,12 +59,12 @@ namespace Statecharts.NET.Language
         public static ForbiddenTransitionDefinition Ignore(string eventName) =>
             new ForbiddenTransitionDefinition(eventName);
         
-        public static Builders.Transition.WithEvent On(string eventName)
-            => Builders.Transition.WithEvent.OfNamedEvent(new NamedEvent(eventName));
-        public static Builders.Transition.WithEvent On(NamedEvent @event)
-            => Builders.Transition.WithEvent.OfNamedEvent(@event);
-        public static Builders.Transition.WithDataEvent<TEventData> On<TEventData>(NamedDataEventFactory<TEventData> factory)
-            => Builders.Transition.WithEvent.OfNamedDataEvent(factory(default));
+        public static Builders.Transition.WithNamedEvent On(string eventName)
+            => new WithNamedEvent(eventName);
+        public static Builders.Transition.WithNamedEvent On(NamedEvent @event)
+            => new WithNamedEvent(@event);
+        public static Builders.Transition.WithNamedDataEvent<TEventData> On<TEventData>(NamedDataEventFactory<TEventData> factory)
+            => new WithNamedDataEvent<TEventData>(factory(default));
         public static Builders.Transition.WithEvent Immediately
             => Builders.Transition.WithEvent.Immediately();
         public static Builders.Transition.WithEvent After(TimeSpan delay)

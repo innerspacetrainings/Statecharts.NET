@@ -105,7 +105,7 @@ namespace Statecharts.NET.Model
         public string Name { get; }
         public object Data => null;
         public NamedEvent(string eventName) => Name = eventName;
-        public bool Equals(IEvent other) => other is INamedEvent @event && @event.Name == Name;
+        public bool Equals(IEvent other) => other is ISendableEvent @event && @event.Name == Name; // TODO: check whether INamedEvent would be better
         public override string ToString() => $"@{Name}";
     }
     public class NamedDataEvent<TData> : IDataEventDefinition, INamedDataEvent
@@ -119,7 +119,7 @@ namespace Statecharts.NET.Model
             Name = eventName;
             _data = data;
         }
-        public bool Equals(IEvent other) => other is INamedEvent @event && @event.Name == Name;
+        public bool Equals(IEvent other) => other is ISendableEvent @event && @event.Name == Name; // TODO: check whether IDataNamedEvent would be better
         public override string ToString() => $"@{Name} (Data: {_data})";
     }
     #endregion

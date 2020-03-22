@@ -17,12 +17,20 @@ namespace Statecharts.NET.Language
     public abstract class Action<TContext> : OneOfBase<LogAction<TContext>, AssignAction<TContext>, SideEffectAction<TContext>>
     {
         internal ContextActionDefinition ToDefinitionAction() =>
-            this.Match(
+            Match(
                 log => new LogContextActionDefinition(context => log.Message((TContext)context)) as ContextActionDefinition,
                 assign => new AssignContextActionDefinition(context => assign.Mutation((TContext) context)), 
                 sideEffect => new SideEffectContextActionDefinition(context => sideEffect.Function((TContext) context)));
     }
-    public abstract class Action<TContext, TData> : OneOfBase<LogAction<TContext, TData>, AssignAction<TContext, TData>, SideEffectAction<TContext, TData>> { }
+    public abstract class Action<TContext, TEventData> : OneOfBase<LogAction<TContext, TEventData>, AssignAction<TContext, TEventData>,
+        SideEffectAction<TContext, TEventData>>
+    {
+        internal ContextDataActionDefinition ToDefinitionAction() =>
+            Match(
+                log => new LogContextDataActionDefinition((context, eventData) => log.Message((TContext)context, (TEventData)eventData)) as ContextDataActionDefinition,
+                assign => new AssignContextDataActionDefinition((context, eventData) => assign.Mutation((TContext)context, (TEventData)eventData)),
+                sideEffect => new SideEffectContextDataActionDefinition((context, eventData) => sideEffect.Function((TContext)context, (TEventData) eventData)));
+    }
 
     public class SendAction : Action {
         public string EventName { get; }

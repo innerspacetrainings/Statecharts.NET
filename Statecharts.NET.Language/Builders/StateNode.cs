@@ -228,7 +228,7 @@ namespace Statecharts.NET.Language.Builders.StateNode
     public class CompoundWithDoneTransition : CompoundStatenodeDefinition
     {
         internal DefinitionData DefinitionData { get; }
-        internal WithTarget DoneTransitionBuilder { get; }
+        internal UnguardedWithTarget DoneTransitionBuilder { get; }
 
         public CompoundWithDoneTransition(CompoundWithDoneTransitionTo compound, Model.Target target, params Model.Target[] targets)
         {
@@ -251,7 +251,7 @@ namespace Statecharts.NET.Language.Builders.StateNode
     public class CompoundWithDoneTransitionWithActions : CompoundStatenodeDefinition
     {
         internal DefinitionData DefinitionData { get; }
-        internal Transition.WithActions DoneTransitionBuilder { get; }
+        internal UnguardedWithActions DoneTransitionBuilder { get; }
         public CompoundWithDoneTransitionWithActions(CompoundWithDoneTransition compound, Language.Action action, Language.Action[] actions)
         {
             DefinitionData = compound.DefinitionData;
