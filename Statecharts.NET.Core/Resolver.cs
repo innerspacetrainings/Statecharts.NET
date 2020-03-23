@@ -59,8 +59,8 @@ namespace Statecharts.NET
         {
             Option<Transition> FirstMatchingTransition(Statenode node) =>
                 node.GetTransitions()
-                    .Where(transition => transition.IsEnabled(context, @event.Data))
-                    .FirstOrDefault(transition => @event.Equals(transition.Event)).ToOption();
+                    .Where(transition => @event.Equals(transition.Event))
+                    .FirstOrDefault(transition => transition.IsEnabled(context, @event.Data)).ToOption();
 
              return statechart
                 .GetActiveStatenodes(stateConfiguration)
