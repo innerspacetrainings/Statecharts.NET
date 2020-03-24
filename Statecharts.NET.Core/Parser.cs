@@ -238,7 +238,7 @@ namespace Statecharts.NET
                 Functions.NoOp,
                 root =>
                     root.Transitions =
-                        new Transition(new DoneEvent(root.Id),
+                        new Transition(new DoneEvent(root.Id), // TODO: make this transition internal
                             root,
                             root.Yield(),
                             Actionblock.From(new SideEffectAction((context, eventData) => statechart.Done?.Invoke((TContext)context, eventData)).Yield()),

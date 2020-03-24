@@ -66,6 +66,12 @@ namespace Statecharts.NET.Model
             other is InitializeEvent initializeEvent && initializeEvent.StatenodeId.Equals(StatenodeId);
         public override string ToString() => $"Initialize({StatenodeId})";
     }
+    public class InitializeStatechartEvent : IEvent
+    {
+        public object Data => null;
+        public bool Equals(IEvent other) => other is InitializeStatechartEvent;
+        public override string ToString() => $"InitializeStatechart";
+    }
     public class ServiceSuccessEvent : IdEvent<ServiceSuccessEvent>
     {
         public override object Data { get; }

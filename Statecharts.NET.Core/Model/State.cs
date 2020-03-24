@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Statecharts.NET.Interfaces;
 
 namespace Statecharts.NET.Model
@@ -14,5 +15,8 @@ namespace Statecharts.NET.Model
             StateConfiguration = stateConfiguration ?? throw new ArgumentNullException(nameof(stateConfiguration));
             Context = context;
         }
+
+        internal static State<TContext> Initial(TContext context) =>
+            new State<TContext>(StateConfiguration.Empty(), context);
     }
 }

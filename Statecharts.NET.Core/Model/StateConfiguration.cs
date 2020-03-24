@@ -22,6 +22,7 @@ namespace Statecharts.NET.Model
         private StateConfiguration(IEnumerable<StatenodeId> statenodeIds) =>
             StateNodeIds = statenodeIds?.ToList() ?? throw new ArgumentNullException(nameof(statenodeIds));
         public StateConfiguration(IEnumerable<Statenode> statenodes) : this (Ids(statenodes)) { }
+        public static StateConfiguration Empty() => new StateConfiguration(Enumerable.Empty<StatenodeId>());
 
         public bool Contains(Statenode statenode)
             => StateNodeIds.Contains(statenode.Id);

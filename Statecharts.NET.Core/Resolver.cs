@@ -151,7 +151,8 @@ namespace Statecharts.NET
             ExecuteExitActions();
             functions.stopServices(microStep.ExitedStatenodes);
             ExecuteTransitionActions();
-            ExecuteEntryActions();
+            if(!(microStep.Event is DoneEvent && !microStep.Transition.Source.Parent.HasValue)) // TODO: remove this if after the OnRootDoneTransition is internal
+                ExecuteEntryActions();
 
             return events;
         }
@@ -182,7 +183,9 @@ namespace Statecharts.NET
             var context = sourceState.Context.CopyDeep();
 
             IReadOnlyCollection<Microstep> ResolveMicroSteps(IEvent @event) =>
-                ResolveSingleEvent(statechart, context, stateConfiguration, @event).ToList().AsReadOnly();
+                (@event is InitializeStatechartEvent
+                    ? Microstep.InitializeStatechart(statechart.Rootnode).Yield()
+                    : ResolveSingleEvent(statechart, context, stateConfiguration, @event)).ToList().AsReadOnly();
             void Execute(IEnumerable<Microstep> microSteps)
             {
                 foreach (var step in microSteps)
@@ -226,13 +229,6 @@ namespace Statecharts.NET
                 stateConfiguration = stateConfiguration.Without(microSteps.GetExitedStateNodes()).With(microSteps.GetEnteredStateNodes());
             void AddMicrosteps(IEnumerable<Microstep> steps) => microsteps.AddRange(steps);
 
-            // TODO: execute EntryActions for Start Statenodes & start services (but somewhere else)
-            //var entryActions = statechart.GetActiveStatenodes(stateConfiguration)
-            //    .SelectMany(statenode => statenode.EntryActions);
-            //var services = statechart.GetActiveStatenodes(stateConfiguration)
-            //    .SelectMany(statenode =>
-            //        statenode.Match(final => Enumerable.Empty<Service>(), nonfinal => nonfinal.Services));
-
             while (events.IsNotEmpty && events.NextIsInternal)
             {
                 Console.WriteLine($"events: {events}");
@@ -274,8 +270,8 @@ namespace Statecharts.NET
             ExecutableStatechart<TContext> statechart) where TContext : IContext<TContext> =>
             ResolveMacrostep(
                 statechart,
-                new State<TContext>(new StateConfiguration(statechart.Rootnode.Yield()), statechart.InitialContext.CopyDeep()),
-                new InitializeEvent(statechart.Rootnode.Id),
+                State<TContext>.Initial(statechart.InitialContext.CopyDeep()),
+                new InitializeStatechartEvent(),
                 (SideffectFreeExecuteAction, Functions.NoOp))
                 .Match<OneOf<State<TContext>, Exception>>(macrostep => macrostep.State, exception => exception);
     }

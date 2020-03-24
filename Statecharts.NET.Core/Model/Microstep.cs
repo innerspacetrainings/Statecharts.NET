@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
 {
@@ -12,13 +13,13 @@ namespace Statecharts.NET.Model
         public IEnumerable<Statenode> ExitedStatenodes { get; }
 
         public Microstep(
-            Model.IEvent @event,
+            IEvent @event,
             Transition transition,
             IEnumerable<Statenode> enteredStatenodes,
             IEnumerable<Statenode> exitedStatenodes)
         {
             Event = @event ?? throw new ArgumentNullException(nameof(@event));
-            Transition = transition ?? throw new ArgumentNullException(nameof(transition));
+            Transition = transition;
             EnteredStatenodes = enteredStatenodes ?? throw new ArgumentNullException(nameof(enteredStatenodes));
             ExitedStatenodes = exitedStatenodes ?? throw new ArgumentNullException(nameof(exitedStatenodes));
         }
@@ -28,6 +29,9 @@ namespace Statecharts.NET.Model
         public IEnumerable<Actionblock> ExitedActionBlocks =>
             ExitedStatenodes.Select(stateNode => stateNode.ExitActions);
         public Actionblock TransitionActionBlock =>
-            Transition.Actions;
+            Transition?.Actions ?? Actionblock.Empty();
+
+        public static Microstep InitializeStatechart(Statenode statechartRootnode) =>
+            new Microstep(new InitializeStatechartEvent(), null, statechartRootnode.Yield(), Enumerable.Empty<Statenode>());
     }
 }

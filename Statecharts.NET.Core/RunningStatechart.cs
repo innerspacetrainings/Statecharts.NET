@@ -53,9 +53,9 @@ namespace Statecharts.NET
             .WhereNotNull();
 
         public Task Start() => Start(
-            new StateConfiguration(_statechart.Rootnode.Yield()),
+            StateConfiguration.Empty(),
             _statechart.InitialContext,
-            () => HandleEvent(new InitializeEvent(_statechart.Rootnode.Id)));
+            () => HandleEvent(new InitializeStatechartEvent()));
 
         private Task Start(
             StateConfiguration stateConfiguration,
@@ -63,6 +63,7 @@ namespace Statecharts.NET
             System.Action initAction)
         {
             _currentState = new State<TContext>(stateConfiguration, context.CopyDeep());
+            StartServices(_statechart.GetActiveStatenodes(stateConfiguration));
             initAction();
             return _taskSource.Task;
         }
