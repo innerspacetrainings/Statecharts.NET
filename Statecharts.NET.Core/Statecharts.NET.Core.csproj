@@ -10,14 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="_OLD\RunningStatechart.cs" />
-    <Compile Remove="_OLD\Service.cs" />
-    <Compile Remove="_OLD\Statechart.cs" />
-    <Compile Remove="_OLD\StateNode.cs" />
-    <Compile Remove="_OLD\Transition.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
@@ -52,14 +44,6 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>OneOfUnion.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="_OLD\RunningStatechart.cs" />
-    <None Include="_OLD\Service.cs" />
-    <None Include="_OLD\Statechart.cs" />
-    <None Include="_OLD\StateNode.cs" />
-    <None Include="_OLD\Transition.cs" />
   </ItemGroup>
 
 </Project>

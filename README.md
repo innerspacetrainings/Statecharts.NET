@@ -2,6 +2,31 @@
 
 ![Statecharts.NET.Core](https://github.com/innerspacetrainings/Statecharts.NET/workflows/Statecharts.NET.Core/badge.svg)
 
+## Example
+```csharp
+static readonly StatechartDefinition<FetchContext> Behaviour = Statechart
+    .WithInitialContext(new FetchContext { Retries = 0 })
+    .WithRootState(
+        "demo"
+            .WithEntryActions(Run(() => Console.WriteLine("NOW THIS WORKS AS WELL 🎉")))
+            .AsCompound()
+            .WithInitialState("1")
+            .WithStates(
+                "1".WithTransitions(
+                    On("START").TransitionTo.Sibling("mc"),
+                    On(IncrementBy).TransitionTo.Self.WithActions<FetchContext>(Assign<FetchContext, int>((context, amount) => context.Retries += amount)),
+                    On(Increment).TransitionTo.Self.WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++))),
+                "mc".WithTransitions(On("RETRY").TransitionTo.Child("initial"))
+                    .AsCompound().WithInitialState("initial").WithStates(
+                    "initial".WithTransitions(
+                        On("START").TransitionTo.Sibling("selecting")),
+                    "selecting".WithTransitions(
+                        On("CORRECT").TransitionTo.Sibling("solved")),
+                    "solved".AsFinal())
+                    .OnDone.TransitionTo.Sibling("final"),
+                "final".AsFinal()));
+```
+
 ## Roadmap
 - [x] Model the Statechart Types
 - [x] Build basic xstate Serialization
@@ -12,10 +37,9 @@
 - [x] Add xstate-like "Invoked Services"
 - [x] Create the DSL
 - [x] Build Unity-Integration
-- ...
 - [x] Fix the xstate Serialization
-- [ ] Finish SCXML EcmaScript Parser
-- [ ] Fix the Algorithm
+- [x] Finish SCXML EcmaScript Parser
+- [x] Fix the Algorithm
 - ...
 - [ ] Introduce the "Hole"-Concept into StatechartDefinition
 - [ ] Build a wasm-based Visualization Tool
@@ -25,50 +49,19 @@
 
 ## TODOs
 
-- Code Quality
-	- [ ] Eventless Guard (for Eventless Transitions)
-	- [ ] `<service>.Send(...)` should not be callable when `<service>.Start(...)` wasn't called previously
-	- [ ] Prettify `Execute()`
-	- [ ] unify `.Map(...)` in `CreateSteps(...)`
-	- [ ] Remodel `CreateSteps(...)` and `SelectTransitions(...)` (@event is null)
-	- [ ] think of InitialTransition in `CreateSteps(...)` and `SelectTransitions(...)`
-	- [ ] `<T>.Equals(...)` vs. `operator==`
-	- [ ] Stricter Types for TargetDefinition and StateNode (child + sibling only on StateNodes with children or siblings)
-	- [ ] Handle empty Transitions, Actions, ...
-	- [ ] think about access modifiers
-	- [ ] document public things
-	- [ ] constructors instead of setters
-
-- Algorithm
-	- [ ] Events (raised, sent, internal, external, priority)
-	- [ ] Final State Handling
-	- [ ] Execution Blocks (https://github.com/davidkpiano/xstate/issues/603)
-	- [ ] Actually execute the Actions
-	- [ ] Return Events from Action Execution
-	- [ ] fix `SelectTransitions(...)` (so that not all are taken, document order, SCXML compatible)
-	- Missing Features
-		- [ ] Deep Initial IDs (https://github.com/davidkpiano/xstate/issues/675)
-		- [ ] In State Guards
-		- [ ] Delayed Events
-		- [ ] ObservableService
-		- [ ] NestedStatechartService
-		- [ ] TaskService<T>
-		- [ ] Keywords for all Action Types
-
-- Modelling
-	- [ ] OnDone Transition should only be available on Compound and Orthogonal States
-	- [ ] Final State Node can only have OnEntryActions and OnExitActions
-
+- [ ] `<service>.Send(...)` should not be callable when `<service>.Start(...)` wasn't called previously
+- [ ] Stricter Types for TargetDefinition and StateNode (child + sibling only on StateNodes with children or siblings)
+- [ ] think about access modifiers
+- [ ] document public things
+- Missing Features
+	- [ ] Deep Initial IDs (https://github.com/davidkpiano/xstate/issues/675)
+	- [ ] In State Guards
+	- [ ] Delayed Events
+	- [ ] ObservableService
+	- [ ] NestedStatechartService
+	- [ ] DoneData
 - Tooling
 	- [ ] Add missing properties to xstate Serialization, and fix it (e.g. same event twice)
-	- [ ] Improve SCXML Test-Server
-	- [ ] create the DSL
-	- [ ] separate SCXML Parsing & Testing
-
-- Non-Important Bugs
-	- [ ] CurrentConfiguration (unify, expose)
-	- [ ] `RootStateNodeKey` find a way to preserve the Statechart's name
-	- [ ] Get real Statechart Id
 
 - Blog About
 	- Testing using SCION.Tests & JInt
