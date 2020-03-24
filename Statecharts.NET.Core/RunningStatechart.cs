@@ -31,6 +31,7 @@ namespace Statecharts.NET
         private readonly ILogger _logger;
 
         public event Action<Macrostep<TContext>> OnMacroStep;
+        public event Action<ISendableEvent> OnEventSent;
 
         internal RunningStatechart(ExecutableStatechart<TContext> statechart, CancellationToken cancellationToken)
         {
@@ -85,7 +86,12 @@ namespace Statecharts.NET
             if(_isFinished) CompleteSuccessfully();
         }
 
-        public void Send(ISendableEvent @event) => HandleEvent(@event);
+        public void Send(ISendableEvent @event)
+        {
+            OnEventSent?.Invoke(@event);
+            HandleEvent(@event);
+        }
+
         private void StopServices(IEnumerable<Statenode> statenodes)
         {
             foreach (var (stateNode, token) in statenodes
