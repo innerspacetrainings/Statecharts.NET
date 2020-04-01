@@ -78,7 +78,7 @@ namespace Statecharts.NET.Demo
             .WithInitialContext(new FetchContext { Retries = 0 })
             .WithRootState(
                 "demo"
-                    .WithEntryActions(Run(() => Console.WriteLine("NOW THIS WORKS AS WELL :party:")))
+                    .WithEntryActions(Log("NOW THIS WORKS AS WELL :party:"))
                     .AsCompound()
                     .WithInitialState("initial")
                     .WithStates(

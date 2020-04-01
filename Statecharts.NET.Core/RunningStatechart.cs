@@ -55,12 +55,12 @@ namespace Statecharts.NET
         private bool _isFinished;
 
         // TODO: config object
-        private readonly ILogger _logger;
+        private readonly InterpreterOptions _options;
 
         public event Action<Macrostep<TContext>> OnMacroStep;
         public event Action<IEvent> OnEventOccurred;
 
-        internal RunningStatechart(ExecutableStatechart<TContext> statechart, CancellationToken cancellationToken)
+        internal RunningStatechart(ExecutableStatechart<TContext> statechart, CancellationToken cancellationToken, InterpreterOptions options)
         {
             _statechart = statechart;
             _taskSource = new TaskCompletionSource<object>();
@@ -69,6 +69,8 @@ namespace Statecharts.NET
             _statechart.Done = (context, eventData) => _isFinished = true;
             cancellationToken.Register(CompleteCancelled);
             // TODO: register failed ActionBlock that was not handled as cancelled
+
+            _options = options;
 
             _isFinished = false;
         }
@@ -102,7 +104,7 @@ namespace Statecharts.NET
 
             while (events.IsNotEmpty && !_isFinished)
             {
-                var result = Resolver.ResolveMacrostep(_statechart, _currentState, events.Dequeue(), (ExecuteAction, StopServices));
+                var result = Resolver.ResolveMacrostep(_statechart, _currentState, events.Dequeue(), (ExecuteAction, StopExitedStatenodes));
                 result.Switch(macrostep =>
                 {
                     _currentState = macrostep.State;
@@ -117,7 +119,7 @@ namespace Statecharts.NET
 
         public void Send(ISendableEvent @event) => HandleEvent(@event);
 
-        private void StopServices(IEnumerable<Statenode> statenodes)
+        private void StopExitedStatenodes(IEnumerable<Statenode> statenodes)
         {
             foreach (var statenode in statenodes)
                 _cancellation.TryCancel(statenode.Id);
@@ -128,14 +130,14 @@ namespace Statecharts.NET
             action.Switch(
                 send => result = ((OneOf<CurrentStep, NextStep>)new NextStep(new NamedEvent(send.EventName))).ToOption(),
                 raise => result = ((OneOf<CurrentStep, NextStep>)new CurrentStep(new NamedEvent(raise.EventName))).ToOption(),
-                log => _logger?.Log(log.Message(context, eventData)),
+                log => _options.Log(log.Message(context, eventData)),
                 assign => assign.Mutation(context, eventData),
                 sideEffect => sideEffect.Function(context, eventData),
                 async startDelayed =>
                 {
                     try
                     {
-                        await Task.Delay(startDelayed.Delay, _cancellation.GetToken(startDelayed.StatenodeId));
+                        await _options.Wait(startDelayed.Delay, _cancellation.GetToken(startDelayed.StatenodeId));
                         HandleEvent(new DelayedEvent(startDelayed.StatenodeId, startDelayed.Delay));
                     }
                     catch (OperationCanceledException) { }

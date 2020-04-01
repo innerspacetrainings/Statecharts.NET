@@ -121,7 +121,7 @@ namespace Statecharts.NET
         private static EventList Apply(
             Microstep microStep,
             object context,
-            (Func<Model.Action, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopServices) functions)
+            (Func<Model.Action, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopExitedStatenodes) functions)
         {
             EventList ExecuteActionBlock(Actionblock actions)
             {
@@ -149,7 +149,7 @@ namespace Statecharts.NET
             void ExecuteEntryActions() => events.AddRange(ExecuteMultiple(microStep.EnteredActionBlocks));
 
             ExecuteExitActions();
-            functions.stopServices(microStep.ExitedStatenodes);
+            functions.stopExitedStatenodes(microStep.ExitedStatenodes);
             ExecuteTransitionActions();
             if(!(microStep.Event is DoneEvent && !microStep.Transition.Source.Parent.HasValue)) // TODO: remove this if after the OnRootDoneTransition is internal
                 ExecuteEntryActions();
@@ -175,7 +175,7 @@ namespace Statecharts.NET
             ExecutableStatechart<TContext> statechart,
             State<TContext> sourceState,
             IEvent macrostepEvent,
-            (Func<Model.Action, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopServices) functions)
+            (Func<Model.Action, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopExitedStatenodes) functions)
             where TContext : IContext<TContext>
         {
             var microsteps = new List<Microstep>();
