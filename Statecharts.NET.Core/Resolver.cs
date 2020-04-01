@@ -168,7 +168,8 @@ namespace Statecharts.NET
                     assign.Mutation(context, eventData);
                     return Option.None<OneOf<CurrentStep, NextStep>>();
                 },
-                sideEffect => Option.None<OneOf<CurrentStep, NextStep>>());
+                sideEffect => Option.None<OneOf<CurrentStep, NextStep>>(),
+                startDelayedTransition => Option.None<OneOf<CurrentStep, NextStep>>());
 
         internal static OneOf<Macrostep<TContext>, Exception> ResolveMacrostep<TContext>(
             ExecutableStatechart<TContext> statechart,
@@ -231,7 +232,10 @@ namespace Statecharts.NET
 
             while (events.IsNotEmpty && events.NextIsInternal)
             {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine($"events: {events}");
+                Console.ResetColor();
+
                 var @event = events.Dequeue();
                 var steps = ResolveMicroSteps(@event);
                 var isRootDoneEvent = @event.Equals(new DoneEvent(statechart.Rootnode.Id));

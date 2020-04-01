@@ -53,9 +53,15 @@ namespace Statecharts.NET.Model
     }
     public class DelayedEvent : IdEvent<DelayedEvent>
     {
-        public DelayedEvent(Statenode statenode, TimeSpan delay) :
-            base($"{statenode.Id}:after:{delay.TotalMilliseconds}") { } // TODO: think of this key (lookup xstate)
-        public override string ToString() => "Delayed";
+        private readonly StatenodeId _statenodeId;
+        public override object Data { get; }
+        public DelayedEvent(StatenodeId statenodeId, TimeSpan delay) :
+            base($"{statenodeId}:after:{delay.TotalMilliseconds}")
+        {
+            _statenodeId = statenodeId;
+            Data = delay;
+        }
+        public override string ToString() => $"Delayed ({_statenodeId}, {((TimeSpan) Data).TotalMilliseconds}ms)";
     }
     public class InitializeEvent : IEvent
     {
@@ -64,32 +70,43 @@ namespace Statecharts.NET.Model
         public InitializeEvent(StatenodeId id) => StatenodeId = id; // TODO: probably limit this to Compund & Orthogonal
         public bool Equals(IEvent other) =>
             other is InitializeEvent initializeEvent && initializeEvent.StatenodeId.Equals(StatenodeId);
-        public override string ToString() => $"Initialize({StatenodeId})";
+        public override string ToString() => $"Initialize Statenode ({StatenodeId})";
     }
     public class InitializeStatechartEvent : IEvent
     {
         public object Data => null;
         public bool Equals(IEvent other) => other is InitializeStatechartEvent;
-        public override string ToString() => $"InitializeStatechart";
+        public override string ToString() => "Initialize Statechart";
     }
     public class ServiceSuccessEvent : IdEvent<ServiceSuccessEvent>
     {
+        private readonly string _serviceId;
         public override object Data { get; }
         public ServiceSuccessEvent(string serviceId, object result) :
             base($"{serviceId}.success") // TODO: think of this key (lookup xstate)
-            => Data = result;
+        {
+            _serviceId = serviceId;
+            Data = result;
+        }
+        public override string ToString() => $"Service Success ({_serviceId})";
     }
     public class ServiceErrorEvent : IdEvent<ServiceErrorEvent>
     {
+        private readonly string _serviceId;
         internal Exception Exception { get; }
         public override object Data => Exception;
         public ServiceErrorEvent(string serviceId, Exception exception) : base($"{serviceId}.error") // TODO: think of this key (lookup xstate)
-            => Exception = exception;
+        {
+            _serviceId = serviceId;
+            Exception = exception;
+        }
 
-        public override string ToString() => $"ServiceErrorEvent({Data})";
+        public override string ToString() => $"Service Error ({_serviceId}, {Exception.GetType().Name}: {Exception.Message})";
     }
     public class DoneEvent : IdEvent<DoneEvent> {
-        public DoneEvent(StatenodeId statenodeId) : base($"{statenodeId}.done") { } // TODO: think of this key (lookup xstate)
+        private readonly StatenodeId _statenodeId;
+        public DoneEvent(StatenodeId statenodeId) : base($"{statenodeId}.done") => _statenodeId = statenodeId;
+        public override string ToString() => $"Done ({_statenodeId})";
     }
     public class ExecutionErrorEvent : IEvent
     {

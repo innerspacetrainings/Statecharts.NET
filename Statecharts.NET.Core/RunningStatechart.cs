@@ -19,25 +19,52 @@ namespace Statecharts.NET
             macrostep.Microsteps.SelectMany(microstep => microstep.EnteredStatenodes);
     }
 
+    internal class CancellationCollection
+    {
+        private readonly Dictionary<StatenodeId, CancellationTokenSource> _cancellationTokenSources;
+
+        public CancellationCollection() => _cancellationTokenSources = new Dictionary<StatenodeId, CancellationTokenSource>();
+
+        public CancellationToken GetToken(StatenodeId statenodeId)
+        {
+            if (!_cancellationTokenSources.ContainsKey(statenodeId))
+                _cancellationTokenSources.Add(statenodeId, new CancellationTokenSource());
+            return _cancellationTokenSources[statenodeId].Token;
+        }
+
+        public void TryCancel(StatenodeId statenodeId)
+        {
+            if (!_cancellationTokenSources.ContainsKey(statenodeId)) return;
+            _cancellationTokenSources[statenodeId].Cancel();
+            _cancellationTokenSources.Remove(statenodeId);
+        }
+
+        public void CancelAll()
+        {
+            foreach (var statenodeId in _cancellationTokenSources.Keys)
+                TryCancel(statenodeId);
+        }
+    }
+
     public class RunningStatechart<TContext> where TContext : IContext<TContext>
     {
         private readonly ExecutableStatechart<TContext> _statechart;
         private State<TContext> _currentState;
         private readonly TaskCompletionSource<object> _taskSource;
-        private readonly Dictionary<Statenode, CancellationTokenSource> _serviceCancellationTokens;
+        private readonly CancellationCollection _cancellation;
         private bool _isFinished;
 
         // TODO: config object
         private readonly ILogger _logger;
 
         public event Action<Macrostep<TContext>> OnMacroStep;
-        public event Action<ISendableEvent> OnEventSent;
+        public event Action<IEvent> OnEventOccurred;
 
         internal RunningStatechart(ExecutableStatechart<TContext> statechart, CancellationToken cancellationToken)
         {
             _statechart = statechart;
             _taskSource = new TaskCompletionSource<object>();
-            _serviceCancellationTokens = new Dictionary<Statenode, CancellationTokenSource>();
+            _cancellation = new CancellationCollection();
 
             _statechart.Done = (context, eventData) => _isFinished = true;
             cancellationToken.Register(CompleteCancelled);
@@ -70,6 +97,7 @@ namespace Statecharts.NET
 
         private void HandleEvent(IEvent @event)
         {
+            OnEventOccurred?.Invoke(@event);
             var events = EventQueue.WithEvent(@event);
 
             while (events.IsNotEmpty && !_isFinished)
@@ -87,21 +115,12 @@ namespace Statecharts.NET
             if(_isFinished) CompleteSuccessfully();
         }
 
-        public void Send(ISendableEvent @event)
-        {
-            OnEventSent?.Invoke(@event);
-            HandleEvent(@event);
-        }
+        public void Send(ISendableEvent @event) => HandleEvent(@event);
 
         private void StopServices(IEnumerable<Statenode> statenodes)
         {
-            foreach (var (stateNode, token) in statenodes
-                .Select(stateNode => (stateNode, cancellationTokenSource: _serviceCancellationTokens.GetValue(stateNode)))
-                .Where(o => o.cancellationTokenSource != null))
-            {
-                token.Cancel();
-                _serviceCancellationTokens.Remove(stateNode);
-            }
+            foreach (var statenode in statenodes)
+                _cancellation.TryCancel(statenode.Id);
         }
         private Option<OneOf<CurrentStep, NextStep>> ExecuteAction(Action action, object context, object eventData)
         {
@@ -111,7 +130,16 @@ namespace Statecharts.NET
                 raise => result = ((OneOf<CurrentStep, NextStep>)new CurrentStep(new NamedEvent(raise.EventName))).ToOption(),
                 log => _logger?.Log(log.Message(context, eventData)),
                 assign => assign.Mutation(context, eventData),
-                sideEffect => sideEffect.Function(context, eventData));
+                sideEffect => sideEffect.Function(context, eventData),
+                async startDelayed =>
+                {
+                    try
+                    {
+                        await Task.Delay(startDelayed.Delay, _cancellation.GetToken(startDelayed.StatenodeId));
+                        HandleEvent(new DelayedEvent(startDelayed.StatenodeId, startDelayed.Delay));
+                    }
+                    catch (OperationCanceledException) { }
+                });
             return result;
         }
         private async void StartServices(IEnumerable<Statenode> statenodes)
@@ -122,13 +150,11 @@ namespace Statecharts.NET
 
             foreach (var (stateNode, services) in entered)
             {
-                _serviceCancellationTokens.Add(stateNode, new CancellationTokenSource());
-
                 var tasks = services.Select(async service =>
                 {
                     try
                     {
-                        var result = await service.Invoke(_serviceCancellationTokens[stateNode].Token);
+                        var result = await service.Invoke(_cancellation.GetToken(stateNode.Id));
                         HandleEvent(new ServiceSuccessEvent(service.Id, result));
                     }
                     catch (Exception e)
@@ -143,7 +169,7 @@ namespace Statecharts.NET
 
         private void Complete(System.Action finalAction)
         {
-            _serviceCancellationTokens.CancelAll();
+            _cancellation.CancelAll();
             finalAction();
         }
         private void CompleteSuccessfully() => Complete(() => _taskSource.TrySetResult(null));

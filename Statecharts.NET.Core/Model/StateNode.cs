@@ -67,7 +67,7 @@ namespace Statecharts.NET.Model
         public Option<Statenode> Parent { get; }
         public string Name { get; }
         public int DocumentIndex { get; }
-        public Actionblock EntryActions { get; }
+        public Actionblock EntryActions { get; private set; }
         public Actionblock ExitActions { get; }
 
         public StatenodeId Id { get; }
@@ -96,6 +96,9 @@ namespace Statecharts.NET.Model
 
         public override bool Equals(object other) => other is Statenode statenode && statenode.Id.Equals(Id);
         public override int GetHashCode() => Id.GetHashCode() ^ 217;
+
+        internal void AddDelayedTransitionAction(IEnumerable<StartDelayedTransitionAction> actions) =>
+            EntryActions = Actionblock.From(EntryActions.Concat(actions));
 
         internal TResult Match<TResult>(Func<FinalStatenode, TResult> fFinalStatenode,
             Func<NonFinalStatenode, TResult> fNonFinalStatenode) =>

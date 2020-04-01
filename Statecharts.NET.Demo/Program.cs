@@ -2,9 +2,11 @@
 using Statecharts.NET.Interfaces;
 using Statecharts.NET.Language;
 using Statecharts.NET.Model;
+using Statecharts.NET.Utilities;
 using Statecharts.NET.XState;
 using static Statecharts.NET.XState.JPropertyConstructorFunctions;
 using static Statecharts.NET.Language.Keywords;
+using Service = Statecharts.NET.Language.Service;
 
 namespace Statecharts.NET.Demo
 {
@@ -76,15 +78,16 @@ namespace Statecharts.NET.Demo
             .WithInitialContext(new FetchContext { Retries = 0 })
             .WithRootState(
                 "demo"
-                    .WithEntryActions(Run(() => Console.WriteLine("NOW THIS WORKS AS WELL 🎉")))
+                    .WithEntryActions(Run(() => Console.WriteLine("NOW THIS WORKS AS WELL :party:")))
                     .AsCompound()
-                    .WithInitialState("1")
+                    .WithInitialState("initial")
                     .WithStates(
-                        "1".WithTransitions(
-                            On("START").TransitionTo.Sibling("mc"),
+                        "initial".WithTransitions(
+                            After(5.Seconds()).TransitionTo.Sibling("timeout"),
+                            On("START").TransitionTo.Sibling("multiplechoice"),
                             On(IncrementBy).TransitionTo.Self.WithActions<FetchContext>(Assign<FetchContext, int>((context, amount) => context.Retries += amount)),
                             On(Increment).TransitionTo.Self.WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++))),
-                        "mc".WithTransitions(On("RETRY").TransitionTo.Child("initial"))
+                        "multiplechoice".WithTransitions(On("RETRY").TransitionTo.Child("initial"))
                             .AsCompound().WithInitialState("initial").WithStates(
                             "initial".WithTransitions(
                                 On("START").TransitionTo.Sibling("selecting")),
@@ -92,27 +95,33 @@ namespace Statecharts.NET.Demo
                                 On("CORRECT").TransitionTo.Sibling("solved")),
                             "solved".AsFinal())
                             .OnDone.TransitionTo.Sibling("final"),
+                        "timeout".WithTransitions(
+                            On("COMPLETE").TransitionTo.Sibling("final")),
                         "final".AsFinal()));
 
         private static void Main()
         {
             var definition = DemoDefinition;
-            Console.WriteLine(definition.AsXStateVisualizerV4Definition());
+            Console.WriteLine(definition.AsXStateVisualizerV4Definition() + Environment.NewLine);
 
             var statechart = Parser.Parse(definition) as ExecutableStatechart<FetchContext>;
             var running = Interpreter.Interpret(statechart);
 
             running.OnMacroStep += macrostep =>
             {
-                Console.WriteLine($"StateNodes: {string.Join(", ", macrostep.State.StateConfiguration.StateNodeIds)}");
-                Console.WriteLine($"Context: {macrostep.State.Context}");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine();
+                Console.WriteLine($" Statenodes: {string.Join(", ", macrostep.State.StateConfiguration.StateNodeIds)}");
+                Console.WriteLine($"    Context: {macrostep.State.Context}");
+                Console.WriteLine($"Next events: {string.Join(", ", running.NextEvents)}");
+                Console.ResetColor();
             };
 
             running.Start().ContinueWith(_ => Environment.Exit(0));
 
             while (true)
             {
-                Console.WriteLine($"Next possible events: {string.Join(", ", running.NextEvents)}");
+                Console.Write("@");
                 var eventType = Console.ReadLine()?.ToUpper();
                 switch (eventType)
                 {

@@ -96,6 +96,16 @@ namespace Statecharts.NET.Model
         public Action<object, object> Function { get; }
         public SideEffectAction(Action<object, object> function) => Function = function;
     }
+    public class StartDelayedTransitionAction : Action
+    {
+        public StatenodeId StatenodeId { get; }
+        public TimeSpan Delay { get; }
+        internal StartDelayedTransitionAction(StatenodeId statenodeId, TimeSpan delay)
+        {
+            StatenodeId = statenodeId;
+            Delay = delay;
+        }
+    }
     #endregion
 
     // TODO: refactor this
@@ -109,7 +119,7 @@ namespace Statecharts.NET.Model
             => definitionActions.Select(action => action.Match(Action.From, Action.From, Action.From));
     }
 
-    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction>
+    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction, StartDelayedTransitionAction>
     {
         public static Action From(ActionDefinition actionDefinition) =>
             actionDefinition.Match(

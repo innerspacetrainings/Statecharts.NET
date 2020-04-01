@@ -47,7 +47,7 @@ namespace Statecharts.NET
                 case INamedDataEvent definition: return new NamedDataEvent<object>(definition.Name, definition.Data); // TODO: check this
                 case INamedEvent definition: return new NamedEvent(definition.Name);
                 case ImmediateEventDefinition _: return new ImmediateEvent();
-                case DelayedEventDefinition definition: return new DelayedEvent(source, definition.Delay);
+                case DelayedEventDefinition definition: return new DelayedEvent(source.Id, definition.Delay);
                 case ServiceSuccessEventDefinition _: return new ServiceSuccessEvent(serviceDefinition.GetId(source.Id, serviceIndex), null);
                 case ServiceErrorEventDefinition _: return new ServiceErrorEvent(serviceDefinition.GetId(source.Id, serviceIndex), null);
                 case DoneEventDefinition _: return new DoneEvent(source.Id);
@@ -120,7 +120,7 @@ namespace Statecharts.NET
     internal static class ServiceDefinitionExtensions
     {
         internal static string GetId(this ServiceDefinition serviceDefinition, StatenodeId statenodeId, int serviceIndex)
-            => serviceDefinition.Id.ValueOr($"service:{statenodeId.String}#{serviceIndex}");
+            => serviceDefinition.Id.ValueOr($"{statenodeId.String}:service#{serviceIndex}");
         internal static IEnumerable<Service> Convert(this IEnumerable<ServiceDefinition> serviceDefinitions, NonFinalStatenode statenode)
         {
             Service CreateServiceFromActivity(ActivityServiceDefinition service, string id) =>
@@ -232,6 +232,18 @@ namespace Statecharts.NET
             }
         }
 
+        private static void ParseAndSetDelayedTransitions(IEnumerable<Statenode> statenodes)
+        {
+            IEnumerable<StartDelayedTransitionAction> GetDelayedActions(NonFinalStatenode nonFinalStatenode) =>
+                nonFinalStatenode.Transitions.Select(transition =>
+                    transition.Event is DelayedEvent delayed
+                        ? new StartDelayedTransitionAction(nonFinalStatenode.Id, (TimeSpan)delayed.Data)
+                        : null).WhereNotNull();
+
+            foreach (var statenode in statenodes)
+                statenode.AddDelayedTransitionAction(statenode.Match(_ => Enumerable.Empty<StartDelayedTransitionAction>(), GetDelayedActions));
+        }
+
         private static void SetRootDoneTransition<TContext>(ExecutableStatechart<TContext> statechart) where TContext : IContext<TContext>
         {
             statechart.Rootnode.Switch(
@@ -258,6 +270,7 @@ namespace Statecharts.NET
                 .ToDictionary(statenode => statenode.Id);
 
             ParseAndSetTransitions(lookup);
+            ParseAndSetDelayedTransitions(statenodes.Values);
 
             var statechart = new ExecutableStatechart<TContext>(
                 rootnode,
