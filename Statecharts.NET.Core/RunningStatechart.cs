@@ -42,7 +42,8 @@ namespace Statecharts.NET
         public void CancelAll()
         {
             foreach (var statenodeId in _cancellationTokenSources.Keys)
-                TryCancel(statenodeId);
+                _cancellationTokenSources[statenodeId].Cancel();
+            _cancellationTokenSources.Clear();
         }
     }
 
@@ -150,9 +151,10 @@ namespace Statecharts.NET
                 .Select(statenode => (statenode, services: statenode.Match(final => Enumerable.Empty<Service>(), nonFinal => nonFinal.Services)))
                 .Where(entry => entry.services != null && entry.services.Any());
 
+            var tasks = new List<Task>();
             foreach (var (stateNode, services) in entered)
             {
-                var tasks = services.Select(async service =>
+                tasks.AddRange(services.Select(async service =>
                 {
                     try
                     {
@@ -163,10 +165,9 @@ namespace Statecharts.NET
                     {
                         HandleEvent(new ServiceErrorEvent(service.Id, e));
                     }
-                });
-
-                await Task.WhenAll(tasks.ToArray());
+                }));
             }
+            await Task.WhenAll(tasks.ToArray());
         }
 
         private void Complete(System.Action finalAction)
