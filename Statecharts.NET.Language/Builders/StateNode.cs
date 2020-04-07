@@ -286,7 +286,7 @@ namespace Statecharts.NET.Language.Builders.StateNode
     }
     public class OrthogonalWithStates : OrthogonalStatenodeDefinition
     {
-        private DefinitionData DefinitionData { get; }
+        internal DefinitionData DefinitionData { get; }
 
         internal OrthogonalWithStates(Orthogonal orthogonal)
             => DefinitionData = orthogonal.DefinitionData;
@@ -298,6 +298,69 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
         public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
         public override Option<DoneTransitionDefinition> DoneTransition => Option.None<DoneTransitionDefinition>();
-        public object OnDone => throw new NotImplementedException();
+        public OrthogonalWithOnDone OnDone => new OrthogonalWithOnDone(this);
+    }
+    public class OrthogonalWithOnDone
+    {
+        internal DefinitionData DefinitionData { get; }
+
+        public OrthogonalWithOnDone(OrthogonalWithStates orthogonal) => DefinitionData = orthogonal.DefinitionData;
+
+        public OrthogonalWithDoneTransitionTo TransitionTo => new OrthogonalWithDoneTransitionTo(this);
+    }
+    public class OrthogonalWithDoneTransitionTo
+    {
+        internal DefinitionData DefinitionData { get; }
+
+        public OrthogonalWithDoneTransitionTo(OrthogonalWithOnDone orthogonal) => DefinitionData = orthogonal.DefinitionData;
+
+        public OrthogonalWithDoneTransition Child(string stateName) =>
+            new OrthogonalWithDoneTransition(this, Keywords.Child(stateName));
+        public OrthogonalWithDoneTransition Sibling(string stateName) =>
+            new OrthogonalWithDoneTransition(this, Keywords.Sibling(stateName));
+        public OrthogonalWithDoneTransition Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
+            new OrthogonalWithDoneTransition(this, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public OrthogonalWithDoneTransition Multiple(Model.Target target, params Model.Target[] targets) =>
+            new OrthogonalWithDoneTransition(this, target, targets);
+    }
+    public class OrthogonalWithDoneTransition : OrthogonalStatenodeDefinition
+    {
+        internal DefinitionData DefinitionData { get; }
+        internal UnguardedWithTarget DoneTransitionBuilder { get; }
+
+        public OrthogonalWithDoneTransition(OrthogonalWithDoneTransitionTo orthogonal, Model.Target target, params Model.Target[] targets)
+        {
+            DefinitionData = orthogonal.DefinitionData;
+            DoneTransitionBuilder = WithEvent.OnDone().TransitionTo.Multiple(target, targets);
+        }
+
+        public OrthogonalWithDoneTransitionWithActions WithActions(Language.Action action, params Language.Action[] actions) =>
+            new OrthogonalWithDoneTransitionWithActions(this, action, actions);
+
+        public override string Name => DefinitionData.Name;
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
+        public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
+        public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
+        public override Option<DoneTransitionDefinition> DoneTransition => new DoneTransitionDefinition(DoneTransitionBuilder.Targets).ToOption(); // TODO: improve this
+    }
+    public class OrthogonalWithDoneTransitionWithActions : OrthogonalStatenodeDefinition
+    {
+        internal DefinitionData DefinitionData { get; }
+        internal UnguardedWithActions DoneTransitionBuilder { get; }
+        public OrthogonalWithDoneTransitionWithActions(OrthogonalWithDoneTransition orthogonal, Language.Action action, Language.Action[] actions)
+        {
+            DefinitionData = orthogonal.DefinitionData;
+            DoneTransitionBuilder = orthogonal.DoneTransitionBuilder.WithActions(action, actions);
+        }
+
+        public override string Name => DefinitionData.Name;
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
+        public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
+        public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
+        public override Option<DoneTransitionDefinition> DoneTransition => new DoneTransitionDefinition(DoneTransitionBuilder.Targets).ToOption(); // TODO: improve this
     }
 }
