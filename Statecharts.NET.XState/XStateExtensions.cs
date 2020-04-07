@@ -56,7 +56,7 @@ namespace Statecharts.NET.XState
                 {
                     case ISendableEvent named: return named.Name;
                     case ImmediateEventDefinition _: return "\"\"";
-                    case DelayedEventDefinition _: return "after";
+                    case DelayedEventDefinition delayed: return ((int)delayed.Delay.TotalMilliseconds).ToString();
                     default: throw new Exception("oh shit");
                 }
             }
@@ -74,8 +74,9 @@ namespace Statecharts.NET.XState
                 atomic => atomic.Transitions,
                 final => Enumerable.Empty<TransitionDefinition>(),
                 compound => compound.Transitions,
-                orthogonal => orthogonal.Transitions).Select(
-                transition => transition
+                orthogonal => orthogonal.Transitions)
+                .Where(transition => transition.Match(_ => true, unguarded => !IsDelayed(unguarded.Event), unguarded => !IsDelayed(unguarded.Event), unguarded => !IsDelayed(unguarded.Event), guarded => !IsDelayed(guarded.Event), guarded => !IsDelayed(guarded.Event), guarded => !IsDelayed(guarded.Event)))
+                .Select(transition => transition
                     .Match(
                         forbidden => (forbidden.Event.Name, SimpleValue("undefined", true)),
                         unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets, unguarded.Actions?.Count() ?? 0),
@@ -85,6 +86,24 @@ namespace Statecharts.NET.XState
                         guarded => Guarded(Event(guarded.Event), guarded.Targets, guarded.Actions?.Count() ?? 0),
                         guarded => Guarded(Event(guarded.Event), guarded.Targets, guarded.Actions?.Count() ?? 0))).ToList();
             if(transitions.Any()) properties.Add(("on", ObjectValue(transitions)));
+
+            bool IsDelayed(IEventDefinition eventDefinition) => eventDefinition is DelayedEventDefinition;
+            var delayedTransitions = definition.Match(
+                atomic => atomic.Transitions,
+                final => Enumerable.Empty<TransitionDefinition>(),
+                compound => compound.Transitions,
+                orthogonal => orthogonal.Transitions)
+                .Where(transition => transition.Match(_ => false, unguarded => IsDelayed(unguarded.Event), unguarded => IsDelayed(unguarded.Event), unguarded => IsDelayed(unguarded.Event), guarded => IsDelayed(guarded.Event), guarded => IsDelayed(guarded.Event), guarded => IsDelayed(guarded.Event)))
+                .Select(transition => transition
+                    .Match(
+                        forbidden => (forbidden.Event.Name, SimpleValue("undefined", true)),
+                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets, unguarded.Actions?.Count() ?? 0),
+                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets, unguarded.Actions?.Count() ?? 0),
+                        unguarded => Unguarded(Event(unguarded.Event), unguarded.Targets, unguarded.Actions?.Count() ?? 0),
+                        guarded => Guarded(Event(guarded.Event), guarded.Targets, guarded.Actions?.Count() ?? 0),
+                        guarded => Guarded(Event(guarded.Event), guarded.Targets, guarded.Actions?.Count() ?? 0),
+                        guarded => Guarded(Event(guarded.Event), guarded.Targets, guarded.Actions?.Count() ?? 0))).ToList();
+            if (delayedTransitions.Any()) properties.Add(("after", ObjectValue(delayedTransitions)));
 
             JSProperty MapDoneTransition(DoneTransitionDefinition transition) =>
                 transition.Guard.Match(
