@@ -7,6 +7,7 @@ using Statecharts.NET.XState;
 using static Statecharts.NET.XState.JPropertyConstructorFunctions;
 using static Statecharts.NET.Language.Keywords;
 using Service = Statecharts.NET.Language.Service;
+using Task = System.Threading.Tasks.Task;
 
 namespace Statecharts.NET.Demo
 {
@@ -19,7 +20,7 @@ namespace Statecharts.NET.Demo
         ObjectValue IXStateSerializable.AsJSObject()
             => ObjectValue(("retries", Retries));
 
-        public FetchContext CopyDeep() => new FetchContext {Retries = Retries};
+        public FetchContext CopyDeep() => new FetchContext { Retries = Retries };
 
         public override string ToString()
             => $"FetchContext: (Retries = {Retries})";
@@ -62,7 +63,8 @@ namespace Statecharts.NET.Demo
                                 On("RETRY").TransitionTo.Sibling("loading")
                                     .WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++)))
                             .WithInvocations(
-                                Language.Service.DefineTask(async token => {
+                                Language.Service.DefineTask(async token =>
+                                {
                                     Console.WriteLine("waiting 3 seconds");
                                     await System.Threading.Tasks.Task.Delay(3000, token);
                                     Console.WriteLine("waiting finished");
@@ -90,7 +92,8 @@ namespace Statecharts.NET.Demo
                         "multiplechoice".WithTransitions(On("RETRY").TransitionTo.Child("initial"))
                             .AsCompound().WithInitialState("initial").WithStates(
                             "initial".WithTransitions(
-                                On("START").TransitionTo.Sibling("selecting")),
+                                On("START").TransitionTo.Sibling("selecting"))
+                                .WithInvocations(Service.DefineActivity(() => Console.WriteLine("start"), () => Console.WriteLine("stop"))),
                             "selecting".WithTransitions(
                                 On("CORRECT").TransitionTo.Sibling("solved")),
                             "solved".AsFinal())
@@ -99,13 +102,56 @@ namespace Statecharts.NET.Demo
                             On("COMPLETE").TransitionTo.Sibling("final")),
                         "final".AsFinal()));
 
+        private static string test = null;
+
+        private static readonly StatechartDefinition<FetchContext> TestDefinition = Statechart
+            .WithInitialContext(new FetchContext { Retries = 0 })
+            .WithRootState(
+                "test"
+                    .AsCompound()
+                    .WithInitialState("initial")
+                    .WithStates(
+                        "initial"
+                            .WithTransitions(
+                                On("START").TransitionTo.Sibling("controllers"),
+                                After(1.6.Seconds()).TransitionTo.Sibling("final"))
+                            .WithInvocations(Chain(
+                                Service.DefineTask(async token =>
+                                {
+                                    await Task.Delay(500);
+                                    Console.WriteLine("after 500");
+                                }), Service.DefineTask(
+                                async token =>
+                                {
+                                    await Task.Delay(1000);
+                                    Console.WriteLine("after 1000");
+                                }),
+                                Service.DefineActivity(() => Console.WriteLine("start"), () => Console.WriteLine("stop")))),
+                        "controllers"
+                            .AsOrthogonal()
+                            .WithStates(
+                                "right"
+                                    .AsCompound()
+                                    .WithInitialState("notpressed")
+                                    .WithStates(
+                                        "notpressed".WithTransitions(On("RPRESSED").TransitionTo.Sibling("pressed")),
+                                        "pressed".AsFinal()),
+                                "left"
+                                    .AsCompound()
+                                    .WithInitialState("notpressed")
+                                    .WithStates(
+                                        "notpressed".WithTransitions(On("LPRESSED").TransitionTo.Sibling("pressed")),
+                                        "pressed".AsFinal()))
+                            .OnDone.TransitionTo.Sibling("final"),
+                        "final".AsFinal()));
+
         private static void Main()
         {
-            var definition = DemoDefinition;
+            var definition = TestDefinition;
             Console.WriteLine(definition.AsXStateVisualizerV4Definition() + Environment.NewLine);
 
             var statechart = Parser.Parse(definition) as ExecutableStatechart<FetchContext>;
-            var running = Interpreter.Interpret(statechart);
+            var running = Interpreter.Interpret(statechart, new InterpreterOptions(wait: (lapse, token) => Task.Delay((int)lapse.TotalMilliseconds / 1, token)));
 
             running.OnMacroStep += macrostep =>
             {
