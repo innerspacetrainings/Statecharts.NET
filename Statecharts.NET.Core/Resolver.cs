@@ -254,7 +254,7 @@ namespace Statecharts.NET
                     EnqueueImmediateEvent(steps);
                 }
                 UpdateStateConfiguration(steps);
-                EnqueueDoneEvents(); // TODO: sometimes enqueuing happens multiple times
+                if(!(@event is DoneEvent)) EnqueueDoneEvents(); // TODO: sometimes enqueuing happens multiple times
                 AddMicrosteps(steps);
             }
 
