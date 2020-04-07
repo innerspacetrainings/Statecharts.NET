@@ -114,19 +114,7 @@ namespace Statecharts.NET.Demo
                         "initial"
                             .WithTransitions(
                                 On("START").TransitionTo.Sibling("controllers"),
-                                After(1.6.Seconds()).TransitionTo.Sibling("final"))
-                            .WithInvocations(Chain(
-                                Service.DefineTask(async token =>
-                                {
-                                    await Task.Delay(500);
-                                    Console.WriteLine("after 500");
-                                }), Service.DefineTask(
-                                async token =>
-                                {
-                                    await Task.Delay(1000);
-                                    Console.WriteLine("after 1000");
-                                }),
-                                Service.DefineActivity(() => Console.WriteLine("start"), () => Console.WriteLine("stop")))),
+                                After(1.6.Seconds()).TransitionTo.Sibling("final")),
                         "controllers"
                             .AsOrthogonal()
                             .WithStates(

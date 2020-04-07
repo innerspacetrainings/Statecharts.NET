@@ -25,6 +25,11 @@ static readonly StatechartDefinition<FetchContext> Behaviour = Statechart
                     "solved".AsFinal())
                     .OnDone.TransitionTo.Sibling("final"),
                 "final".AsFinal()));
+
+// Usage
+var parse = Parser.Parse(Behaviour) as ExecutableStatechart<FetchContext>;
+var statechart = Interpreter.Interpret(statechart);
+statechart.Start();
 ```
 
 ## Roadmap
