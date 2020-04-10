@@ -6,6 +6,11 @@ using Statecharts.NET.Utilities;
 namespace Statecharts.NET.Model
 {
     #region Definition
+    public interface IFinalStatenodeDefinition { }
+    public interface IAtomicStatenodeDefinition { }
+    public interface ICompoundStatenodeDefinition { }
+    public interface IOrthogonalStatenodeDefinition { }
+
     public abstract class StatenodeDefinition :
         OneOfBase<AtomicStatenodeDefinition, FinalStatenodeDefinition, CompoundStatenodeDefinition, OrthogonalStatenodeDefinition>
     {
@@ -40,22 +45,20 @@ namespace Statecharts.NET.Model
         #endregion
     }
 
-    public abstract class FinalStatenodeDefinition : StatenodeDefinition { }
+    public abstract class FinalStatenodeDefinition : StatenodeDefinition, IFinalStatenodeDefinition { }
     public abstract class NonFinalStatenodeDefinition : StatenodeDefinition
     {
         public abstract IEnumerable<TransitionDefinition> Transitions { get; }
         public abstract IEnumerable<ServiceDefinition> Services { get; }
     }
-    public abstract class AtomicStatenodeDefinition : NonFinalStatenodeDefinition
-    {
-    }
-    public abstract class CompoundStatenodeDefinition : NonFinalStatenodeDefinition
+    public abstract class AtomicStatenodeDefinition : NonFinalStatenodeDefinition, IAtomicStatenodeDefinition { }
+    public abstract class CompoundStatenodeDefinition : NonFinalStatenodeDefinition, ICompoundStatenodeDefinition
     {
         public abstract IEnumerable<StatenodeDefinition> Statenodes { get; }
         public abstract InitialCompoundTransitionDefinition InitialTransition { get; }
         public abstract Option<DoneTransitionDefinition> DoneTransition { get; } // TODO: think about done data
     }
-    public abstract class OrthogonalStatenodeDefinition : NonFinalStatenodeDefinition
+    public abstract class OrthogonalStatenodeDefinition : NonFinalStatenodeDefinition, IOrthogonalStatenodeDefinition
     {
         public abstract IEnumerable<StatenodeDefinition> Statenodes { get; }
         public abstract Option<DoneTransitionDefinition> DoneTransition { get; } // TODO: think about done data

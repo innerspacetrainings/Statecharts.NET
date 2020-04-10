@@ -3,12 +3,12 @@ using Statecharts.NET.Model;
 
 namespace Statecharts.NET.Language.Builders
 {
-    public class Statechart<TContext>
+    public class StatechartDefinitionWithInitialContext<TContext>
         where TContext : IContext<TContext>
     {
         private readonly TContext _initialContext;
 
-        internal Statechart(TContext initialContext)
+        internal StatechartDefinitionWithInitialContext(TContext initialContext)
             => _initialContext = initialContext;
 
         public StatechartDefinition<TContext> WithRootState(CompoundStatenodeDefinition rootStateNode)

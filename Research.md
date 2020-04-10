@@ -11,6 +11,17 @@
 
 
 
+# Analyzers
+- Validate Transition Targets
+- Validate no Final Statenode
+- Quick Fix, wrap Action, Invocation in Run/Service.DefineTask
+- WrapInParallelState/WrapInOrthogonalState
+- QuickFix InsertStateBefore, ...
+- Parse Tree without non local variables and map with visualizer
+- detect possible faulty Null ExtensionMethodInvocations
+
+
+
 merging json: https://stackoverflow.com/a/25621089
 building DSLs in C#: https://www.codemag.com/Article/0902041/Building-Domain-Specific-Languages-in-C
 statecharts comments: https://www.bcobb.net/hacker-school-read-along-statecharts/#fn1

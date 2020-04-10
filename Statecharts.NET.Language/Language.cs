@@ -9,9 +9,9 @@ namespace Statecharts.NET.Language
 {
     public static class Statechart
     {
-        public static Builders.Statechart<TContext> WithInitialContext<TContext>(TContext initialContext)
+        public static Builders.StatechartDefinitionWithInitialContext<TContext> WithInitialContext<TContext>(TContext initialContext)
             where TContext : IContext<TContext>
-            => new Builders.Statechart<TContext>(initialContext);
+            => new Builders.StatechartDefinitionWithInitialContext<TContext>(initialContext);
     }
     public static class Service
     {
