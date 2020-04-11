@@ -16,9 +16,11 @@ namespace Statecharts.NET.Demos.Statecharts
                     .AsCompound()
                     .WithInitialState("a")
                     .WithStates(
-                        "a".WithTransitions(
-                            On("1").TransitionTo.Child("uuups"),
-                            On("2").TransitionTo.Sibling("c")),
+                        "a"
+                            .WithEntryActions(null)
+                            .WithTransitions(
+                                On("1").TransitionTo.Child("uuups"),
+                                On("2").TransitionTo.Sibling("c")),
                         "b"));
     }
 }
