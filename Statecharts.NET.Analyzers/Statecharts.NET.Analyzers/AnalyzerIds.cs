@@ -6,6 +6,7 @@ namespace Statecharts.NET.Analyzers
 {
     internal static class AnalyzerIds
     {
-        internal static readonly string NoChildTransitionOnAtomicStatenode = "SC0001";
+        internal const string StatechartDefinitionParser = "SC0001";
+        internal const string NoChildTransitionOnAtomicStatenode = "SC0002";
     }
 }

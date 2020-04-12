@@ -54,6 +54,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Statecharts.NET.Language\Statecharts.NET.Language.csproj">
+      <Project>{72401c57-5422-4ec8-8fcd-19ec1a7e6d94}</Project>
+      <Name>Statecharts.NET.Language</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Statecharts.NET.Analyzers\Statecharts.NET.Analyzers.csproj">
       <Project>{CABC0128-0FC9-4251-8B60-9EC1667AFF55}</Project>
       <Name>Statecharts.NET.Analyzers</Name>
