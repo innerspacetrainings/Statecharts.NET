@@ -161,6 +161,7 @@ namespace Statecharts.NET
                         var result = await service.Invoke(_cancellation.GetToken(stateNode.Id));
                         HandleEvent(new ServiceSuccessEvent(service.Id, result));
                     }
+                    catch (TaskCanceledException) { /* nothing should be done here */ }
                     catch (Exception e)
                     {
                         HandleEvent(new ServiceErrorEvent(service.Id, e));

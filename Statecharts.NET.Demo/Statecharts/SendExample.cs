@@ -30,7 +30,15 @@ namespace Statecharts.NET.Demos.Statecharts
                                             .WithTransitions(
                                                 On("red").TransitionTo.Sibling("red"),
                                                 On("yellow").TransitionTo.Self.WithActions(Send(ShowError("et voilà, a custom message appears"))))
-                                            .WithInvocations(Service.DefineTask(token => System.Threading.Tasks.Task.Delay(10000, token))),
+                                            .WithInvocations(Service.DefineTask(async token =>
+                                            {
+                                                await System.Threading.Tasks.Task.Delay(3000, token);
+                                                Console.WriteLine(1);
+                                                await System.Threading.Tasks.Task.Delay(3000, token);
+                                                Console.WriteLine(2);
+                                                await System.Threading.Tasks.Task.Delay(3000, token);
+                                                Console.WriteLine(3);
+                                            })),
                                         "red",
                                         "yellow"),
                                 "error"
