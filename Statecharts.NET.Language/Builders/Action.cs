@@ -8,7 +8,7 @@ namespace Statecharts.NET.Language
     {
         internal ActionDefinition ToDefinitionAction() =>
             Match(
-                send => new SendActionDefinition(send.EventName) as ActionDefinition, 
+                send => new SendActionDefinition(send.Event) as ActionDefinition, 
                 raise => new RaiseActionDefinition(raise.EventName),
                 log => new LogActionDefinition(log.Label),
                 assign => new AssignActionDefinition(assign.Mutation),
@@ -33,8 +33,8 @@ namespace Statecharts.NET.Language
     }
 
     public class SendAction : Action {
-        public string EventName { get; }
-        public SendAction(string eventName) => EventName = eventName;
+        public ISendableEvent Event { get; }
+        public SendAction(ISendableEvent @event) => Event = @event;
     }
 
     public class RaiseAction : Action {

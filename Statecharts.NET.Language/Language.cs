@@ -78,7 +78,9 @@ namespace Statecharts.NET.Language
             new AbsoluteTarget(StatenodeId.Absolute(stateNodeName.Append(stateNodeNames))); // TODO: fix this
 
         public static SendAction Send(string eventName)
-            => new SendAction(eventName);
+            => Send(new NamedEvent(eventName));
+        public static SendAction Send(ISendableEvent @event)
+            => new SendAction(@event);
         public static RaiseAction Raise(string eventName)
             => new RaiseAction(eventName);
         public static LogAction Log(string label)

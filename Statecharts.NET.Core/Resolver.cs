@@ -160,7 +160,7 @@ namespace Statecharts.NET
         // TODO: return FailableOption
         private static Option<OneOf<CurrentStep, NextStep>> SideffectFreeExecuteAction(Model.Action action, object context, object eventData) =>
             action.Match(
-                send => ((OneOf<CurrentStep, NextStep>)new NextStep(new NamedEvent(send.EventName))).ToOption(),
+                send => ((OneOf<CurrentStep, NextStep>)new NextStep(send.Event)).ToOption(),
                 raise => ((OneOf<CurrentStep, NextStep>)new CurrentStep(new NamedEvent(raise.EventName))).ToOption(),
                 log => Option.None<OneOf<CurrentStep, NextStep>>(),
                 assign =>

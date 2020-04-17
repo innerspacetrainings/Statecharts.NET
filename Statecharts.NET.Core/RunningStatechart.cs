@@ -129,7 +129,7 @@ namespace Statecharts.NET
         {
             var result = Option.None<OneOf<CurrentStep, NextStep>>();
             action.Switch(
-                send => result = ((OneOf<CurrentStep, NextStep>)new NextStep(new NamedEvent(send.EventName))).ToOption(),
+                send => result = ((OneOf<CurrentStep, NextStep>)new NextStep(send.Event)).ToOption(),
                 raise => result = ((OneOf<CurrentStep, NextStep>)new CurrentStep(new NamedEvent(raise.EventName))).ToOption(),
                 log => _options.Log(log.Message(context, eventData)),
                 assign => assign.Mutation(context, eventData),

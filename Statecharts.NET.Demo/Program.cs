@@ -142,8 +142,9 @@ namespace Statecharts.NET.Demo
 
         private static readonly Dictionary<string, Action> _statecharts = new Dictionary<string, Action>
         {
-            {"Door", Run(Door.Behaviour)}
-        };
+            {"Door", Run(Door.Behaviour)},
+            {"SendExample", Run(SendExample.Behaviour)}
+    };
 
         private static Action Run<TContext>(StatechartDefinition<TContext> definition)
             where TContext : IContext<TContext>, IXStateSerializable => () =>
@@ -171,7 +172,7 @@ namespace Statecharts.NET.Demo
                 while (true)
                 {
                     Console.Write("@");
-                    var eventType = Console.ReadLine()?.ToUpper();
+                    var eventType = Console.ReadLine();
                     switch (eventType)
                     {
                         case { } when eventType.StartsWith("INCREMENTBY"):
@@ -189,7 +190,7 @@ namespace Statecharts.NET.Demo
 
         private static void Main()
         {
-            _statecharts["Door"]();
+            _statecharts["SendExample"]();
         }
     }
 }
