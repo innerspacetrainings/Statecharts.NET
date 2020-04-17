@@ -10,7 +10,6 @@
 
 namespace Statecharts.NET.Analyzers {
     using System;
-    using System.Reflection;
     
     
     /// <summary>
@@ -40,7 +39,7 @@ namespace Statecharts.NET.Analyzers {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Statecharts.NET.Analyzers.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Statecharts.NET.Analyzers.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -62,7 +61,7 @@ namespace Statecharts.NET.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Atomic statenodes don&apos;t have children and therefore can&apos;t have transitions to them either..
+        ///   Looks up a localized string similar to &apos;{0}&apos; and some text.
         /// </summary>
         internal static string SC0001_Description {
             get {
@@ -71,7 +70,7 @@ namespace Statecharts.NET.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; cannot contain child transitions.
+        ///   Looks up a localized string similar to {0}.
         /// </summary>
         internal static string SC0001_MessageFormat {
             get {
@@ -80,11 +79,38 @@ namespace Statecharts.NET.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Atomic statenodes cannot contain child transitions.
+        ///   Looks up a localized string similar to Statechart Definition (xstate).
         /// </summary>
         internal static string SC0001_Title {
             get {
                 return ResourceManager.GetString("SC0001.Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Atomic statenodes don&apos;t have children and therefore can&apos;t have transitions to them either..
+        /// </summary>
+        internal static string SC0002_Description {
+            get {
+                return ResourceManager.GetString("SC0002.Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; cannot contain child transitions.
+        /// </summary>
+        internal static string SC0002_MessageFormat {
+            get {
+                return ResourceManager.GetString("SC0002.MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Atomic statenodes cannot contain child transitions.
+        /// </summary>
+        internal static string SC0002_Title {
+            get {
+                return ResourceManager.GetString("SC0002.Title", resourceCulture);
             }
         }
     }

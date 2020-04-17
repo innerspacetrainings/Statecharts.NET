@@ -54,9 +54,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Statecharts.NET.Core\Statecharts.NET.Core.csproj">
+      <Project>{2ab196f4-e2b9-424e-a957-a4c5600e384b}</Project>
+      <Name>Statecharts.NET.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Statecharts.NET.Language\Statecharts.NET.Language.csproj">
       <Project>{72401c57-5422-4ec8-8fcd-19ec1a7e6d94}</Project>
       <Name>Statecharts.NET.Language</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Statecharts.NET.XState\Statecharts.NET.XState.csproj">
+      <Project>{708eb39c-bdd9-46e0-9f33-709574000aef}</Project>
+      <Name>Statecharts.NET.XState</Name>
     </ProjectReference>
     <ProjectReference Include="..\Statecharts.NET.Analyzers\Statecharts.NET.Analyzers.csproj">
       <Project>{CABC0128-0FC9-4251-8B60-9EC1667AFF55}</Project>
