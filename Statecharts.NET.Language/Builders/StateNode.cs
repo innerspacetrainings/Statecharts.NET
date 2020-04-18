@@ -164,10 +164,13 @@ namespace Statecharts.NET.Language.Builders.StateNode
             OneOf<string, StatenodeDefinition> state,
             params OneOf<string, StatenodeDefinition>[] states) =>
             WithStates(state.Append(states));
-        public CompoundWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states)
+        public CompoundWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states) =>
+            WithStates(states.Select(definition => definition.Match(name => new WithName(name), valid => valid)));
+        public CompoundWithStates WithStates(IEnumerable<string> states) =>
+            WithStates(states.Select(name => new WithName(name)));
+        public CompoundWithStates WithStates(IEnumerable<StatenodeDefinition> states)
         {
-            DefinitionData.States = states.Select(
-                definition => definition.Match(name => new WithName(name), valid => valid));
+            DefinitionData.States = states;
             return new CompoundWithStates(this);
         }
     }
@@ -182,10 +185,13 @@ namespace Statecharts.NET.Language.Builders.StateNode
             OneOf<string, StatenodeDefinition> state,
             params OneOf<string, StatenodeDefinition>[] states) =>
             WithStates(state.Append(states));
-        public CompoundWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states)
+        public CompoundWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states) =>
+            WithStates(states.Select(definition => definition.Match(name => new WithName(name), valid => valid)));
+        public CompoundWithStates WithStates(IEnumerable<string> states) =>
+            WithStates(states.Select(name => new WithName(name)));
+        public CompoundWithStates WithStates(IEnumerable<StatenodeDefinition> states)
         {
-            DefinitionData.States = states.Select(
-                definition => definition.Match(name => new WithName(name), valid => valid));
+            DefinitionData.States = states;
             return new CompoundWithStates(this);
         }
     }
@@ -286,10 +292,13 @@ namespace Statecharts.NET.Language.Builders.StateNode
             OneOf<string, StatenodeDefinition> state,
             params OneOf<string, StatenodeDefinition>[] states) =>
             WithStates(state.Append(states));
-        public OrthogonalWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states)
+        public OrthogonalWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states) =>
+            WithStates(states.Select(definition => definition.Match(name => new WithName(name), valid => valid)));
+        public OrthogonalWithStates WithStates(IEnumerable<string> states) =>
+            WithStates(states.Select(name => new WithName(name)));
+        public OrthogonalWithStates WithStates(IEnumerable<StatenodeDefinition> states)
         {
-            DefinitionData.States = states.Select(
-                definition => definition.Match(name => new WithName(name), valid => valid));
+            DefinitionData.States = states;
             return new OrthogonalWithStates(this);
         }
     }

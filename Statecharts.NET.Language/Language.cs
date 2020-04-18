@@ -143,6 +143,8 @@ namespace Statecharts.NET.Language
             ServiceDefinition service,
             params ServiceDefinition[] services)
             => new Builders.StateNode.WithName(name).WithInvocations(service, services);
+        public static StatenodeDefinition AsStatenodeDefinition(this string name)
+            => new Builders.StateNode.WithName(name);
         public static Builders.StateNode.Final AsFinal(this string name)
             => new Builders.StateNode.WithName(name).AsFinal();
         public static Builders.StateNode.Compound AsCompound(this string name)
