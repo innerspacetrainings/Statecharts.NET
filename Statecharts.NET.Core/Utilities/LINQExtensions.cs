@@ -47,5 +47,7 @@ namespace Statecharts.NET.Utilities
             => source.Where(o => o != null);
         public static IEnumerable<T> WhereSome<T>(this IEnumerable<Option<T>> source)
             => source.Where(o => o.HasValue).Select(o => o.Value);
+        public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> self)
+            => self.Select((item, index) => (item, index));
     }
 }

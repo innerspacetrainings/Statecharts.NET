@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Statecharts.NET.Interfaces;
 using Statecharts.NET.Language.Builders.Transition;
@@ -57,8 +58,12 @@ namespace Statecharts.NET.Language
             });
 
         public static ForbiddenTransitionDefinition Ignore(string eventName) =>
-            new ForbiddenTransitionDefinition(eventName);
-        
+            new ForbiddenTransitionDefinition(new NamedEvent(eventName));
+        public static ForbiddenTransitionDefinition Ignore(NamedEvent @event) =>
+            new ForbiddenTransitionDefinition(@event);
+        public static ForbiddenTransitionDefinition Ignore<TEventData>(NamedDataEventFactory<TEventData> factory) =>
+            new ForbiddenTransitionDefinition(factory(default));
+
         public static Builders.Transition.WithNamedEvent On(string eventName)
             => new WithNamedEvent(eventName);
         public static Builders.Transition.WithNamedEvent On(NamedEvent @event)
@@ -129,6 +134,10 @@ namespace Statecharts.NET.Language
             TransitionDefinition transition,
             params TransitionDefinition[] transitions)
             => new Builders.StateNode.WithName(name).WithTransitions(transition, transitions);
+        public static Builders.StateNode.WithTransitions WithTransitions(
+            this string name,
+            IEnumerable<TransitionDefinition> transitions)
+            => new Builders.StateNode.WithName(name).WithTransitions(transitions);
         public static Builders.StateNode.WithInvocations WithInvocations(
             this string name,
             ServiceDefinition service,

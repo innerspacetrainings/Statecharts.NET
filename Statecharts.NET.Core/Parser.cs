@@ -60,17 +60,17 @@ namespace Statecharts.NET
     {
         private static Transition Convert(this TransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode, ServiceDefinition serviceDefinition, int serviceIndex) =>
             definition.Match(
-                forbidden => new Transition(forbidden.Event.Convert(source, serviceDefinition, serviceIndex), source, Enumerable.Empty<Statenode>(), Actionblock.Empty(), (new ConditionContextGuard(_ => false) as Guard).ToOption()),
-                unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>()),
-                unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>()),
-                unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>()),
-                guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), (guarded.Guard as Guard).ToOption()),
-                guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption()),
-                guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption()));
+                forbidden => new Transition(forbidden.Event, source, Enumerable.Empty<Statenode>(), Actionblock.Empty(), Option.None<Guard>(), true),
+                unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>(), false),
+                unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>(), false),
+                unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>(), false),
+                guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), (guarded.Guard as Guard).ToOption(), false),
+                guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption(), false),
+                guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption(), false));
         private static Transition Convert(this InitialCompoundTransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode) =>
-            new Transition(new InitializeEvent(source.Id), source, definition.Target.GetTargetStatenode(source.Id, getStatenode).Yield(), definition.Actions.Convert(), Option.None<Guard>());
+            new Transition(new InitializeEvent(source.Id), source, definition.Target.GetTargetStatenode(source.Id, getStatenode).Yield(), definition.Actions.Convert(), Option.None<Guard>(), false);
         private static Transition Convert(this DoneTransitionDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode) =>
-            new Transition(new DoneEvent(source.Id), source, definition.Targets.GetTargetStatenodes(source.Id, getStatenode), definition.Actions.Convert(), definition.Guard.Map(guard => guard.AsBase()));
+            new Transition(new DoneEvent(source.Id), source, definition.Targets.GetTargetStatenodes(source.Id, getStatenode), definition.Actions.Convert(), definition.Guard.Map(guard => guard.AsBase()), false);
 
         private static IEnumerable<Transition> GetNonFinalStatenodeTransitions(this NonFinalStatenodeDefinition definition, Statenode source, Func<StatenodeId, Statenode> getStatenode)
         {
@@ -114,7 +114,7 @@ namespace Statecharts.NET
             return done.Concat(transitions);
         }
         internal static Transition GetInitialTransition(this OrthogonalStatenode statenode) =>
-            new Transition(new InitializeEvent(statenode.Id), statenode, statenode.Statenodes, Actionblock.Empty(), Option.None<Guard>());
+            new Transition(new InitializeEvent(statenode.Id), statenode, statenode.Statenodes, Actionblock.Empty(), Option.None<Guard>(), false);
     }
 
     internal static class ServiceDefinitionExtensions
@@ -155,7 +155,7 @@ namespace Statecharts.NET
                 IEnumerable<StatenodeDefinition> substateNodeDefinitions,
                 Statenode recursedParent) =>
                 substateNodeDefinitions.Select((substateDefinition, index) =>
-                    (ParseStatenode(substateDefinition, recursedParent, definitions, documentIndex + index).root, substateDefinition));
+                    (ParseStatenode(substateDefinition, recursedParent, definitions, index).root, substateDefinition));
 
             var name = definition.Name;
             var entryActions = definition.EntryActions.Convert();
@@ -254,7 +254,8 @@ namespace Statecharts.NET
                             root,
                             root.Yield(),
                             Actionblock.From(new SideEffectAction((context, eventData) => statechart.Done?.Invoke((TContext)context, eventData)).Yield()),
-                            Option.None<Guard>()).Yield().Concat(root.Transitions));
+                            Option.None<Guard>(),
+                            false).Yield().Concat(root.Transitions));
         }
 
         // TODO: return actual ParsedStatechart based on results from parsing

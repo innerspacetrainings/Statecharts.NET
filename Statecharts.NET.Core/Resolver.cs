@@ -62,17 +62,20 @@ namespace Statecharts.NET
                     .Where(transition => @event.Equals(transition.Event))
                     .FirstOrDefault(transition => transition.IsEnabled(context, @event.Data)).ToOption();
 
-             return statechart
+            return statechart
                 .GetActiveStatenodes(stateConfiguration)
+                .OrderByDescending(statenode => statenode.Depth)
                 .Aggregate(
-                     (excluded: Enumerable.Empty<Statenode>(), transitions: Enumerable.Empty<Transition>()),
+                    (excluded: Enumerable.Empty<Statenode>(), transitions: Enumerable.Empty<Transition>()),
                      (tuple, current) =>
                          tuple.excluded.Contains(current)
                              ? tuple
                              : FirstMatchingTransition(current).Match(
                                  transition => (
                                      excluded: tuple.excluded.Concat(current.GetParents()),
-                                     transitions: tuple.transitions.Append(transition)),
+                                     transitions: transition.IsForbidden
+                                         ? tuple.transitions
+                                         : tuple.transitions.Append(transition)),
                                  () => tuple))
                 .transitions;
         }

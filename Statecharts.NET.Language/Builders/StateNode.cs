@@ -81,9 +81,12 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public WithTransitions WithTransitions(
             TransitionDefinition transitionDefinition,
-            params TransitionDefinition[] transitionDefinitions)
+            params TransitionDefinition[] transitionDefinitions) =>
+            WithTransitions(transitionDefinition.Append(transitionDefinitions));
+
+        public WithTransitions WithTransitions(IEnumerable<TransitionDefinition> transitionDefinitions)
         {
-            DefinitionData.Transitions = transitionDefinition.Append(transitionDefinitions);
+            DefinitionData.Transitions = transitionDefinitions;
             return this;
         }
 
@@ -159,9 +162,11 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public CompoundWithStates WithStates(
             OneOf<string, StatenodeDefinition> state,
-            params OneOf<string, StatenodeDefinition>[] states)
+            params OneOf<string, StatenodeDefinition>[] states) =>
+            WithStates(state.Append(states));
+        public CompoundWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states)
         {
-            DefinitionData.States = state.Append(states).Select(
+            DefinitionData.States = states.Select(
                 definition => definition.Match(name => new WithName(name), valid => valid));
             return new CompoundWithStates(this);
         }
@@ -175,9 +180,11 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public CompoundWithStates WithStates(
             OneOf<string, StatenodeDefinition> state,
-            params OneOf<string, StatenodeDefinition>[] states)
+            params OneOf<string, StatenodeDefinition>[] states) =>
+            WithStates(state.Append(states));
+        public CompoundWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states)
         {
-            DefinitionData.States = state.Append(states).Select(
+            DefinitionData.States = states.Select(
                 definition => definition.Match(name => new WithName(name), valid => valid));
             return new CompoundWithStates(this);
         }
@@ -277,9 +284,11 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public OrthogonalWithStates WithStates(
             OneOf<string, StatenodeDefinition> state,
-            params OneOf<string, StatenodeDefinition>[] states)
+            params OneOf<string, StatenodeDefinition>[] states) =>
+            WithStates(state.Append(states));
+        public OrthogonalWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states)
         {
-            DefinitionData.States = state.Append(states).Select(
+            DefinitionData.States = states.Select(
                 definition => definition.Match(name => new WithName(name), valid => valid));
             return new OrthogonalWithStates(this);
         }

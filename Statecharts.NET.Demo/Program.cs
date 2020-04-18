@@ -89,14 +89,20 @@ namespace Statecharts.NET.Demo
                     .AsCompound()
                     .WithInitialState("initial")
                     .WithStates(
-                        "initial".WithTransitions(
-                            After(5.Seconds()).TransitionTo.Sibling("timeout"),
+                        "initial"
+                            .WithEntryActions<FetchContext>(Assign<FetchContext>(context => context.Retries += 20))
+                            .WithTransitions(
                             On("START").TransitionTo.Sibling("multiplechoice"),
                             On(IncrementBy).TransitionTo.Self
                                 .WithActions<FetchContext>(Assign<FetchContext, int>((context, amount) =>
                                     context.Retries += amount)),
                             On(Increment).TransitionTo.Self
-                                .WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++))),
+                                .WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++)))
+                            .AsCompound()
+                            .WithInitialState("1")
+                            .WithStates(
+                                "1".WithTransitions(Ignore(Increment)),
+                                "2"),
                         "multiplechoice".WithTransitions(On("RETRY").TransitionTo.Child("initial"))
                             .AsCompound().WithInitialState("initial").WithStates(
                                 "initial".WithTransitions(
@@ -143,7 +149,8 @@ namespace Statecharts.NET.Demo
         private static readonly Dictionary<string, Action> _statecharts = new Dictionary<string, Action>
         {
             {"Door", Run(Door.Behaviour)},
-            {"SendExample", Run(SendExample.Behaviour)}
+            {"SendExample", Run(SendExample.Behaviour)},
+            {"Assign", Run(DemoDefinition)}
     };
 
         private static Action Run<TContext>(StatechartDefinition<TContext> definition)
@@ -190,7 +197,7 @@ namespace Statecharts.NET.Demo
 
         private static void Main()
         {
-            _statecharts["SendExample"]();
+            _statecharts["Assign"]();
         }
     }
 }

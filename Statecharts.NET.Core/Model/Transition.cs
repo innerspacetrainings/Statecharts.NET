@@ -57,8 +57,8 @@ namespace Statecharts.NET.Model
 
     public sealed class ForbiddenTransitionDefinition : TransitionDefinition
     {
-        public NamedEvent Event { get; }
-        public ForbiddenTransitionDefinition(string eventName) => Event = new NamedEvent(eventName);
+        public ISendableEvent Event { get; }
+        public ForbiddenTransitionDefinition(ISendableEvent @event) => Event = @event;
     }
     public abstract class UnguardedTransitionDefinition : TransitionDefinition
     {
@@ -109,14 +109,16 @@ namespace Statecharts.NET.Model
         public IEnumerable<Statenode> Targets { get; }
         public Actionblock Actions { get; }
         public Option<Guard> Guard { get; }
+        public bool IsForbidden { get; }
 
-        internal Transition(IEvent @event, Statenode source, IEnumerable<Statenode> targets, Actionblock actions, Option<Guard> guard)
+        internal Transition(IEvent @event, Statenode source, IEnumerable<Statenode> targets, Actionblock actions, Option<Guard> guard, bool isForbidden)
         {
             Event = @event;
             Source = source;
             Targets = targets;
             Actions = actions;
             Guard = guard;
+            IsForbidden = isForbidden;
         }
 
         public bool IsEnabled(object context, object eventData) => Guard.Match(
