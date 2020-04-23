@@ -21,7 +21,9 @@ namespace Statecharts.NET.Demos.Statecharts
                         "Loading"
                             .WithTransitions(On("stop").TransitionTo.Sibling("Inactive"))
                             .WithInvocations(Service.DefineTask(token => System.Threading.Tasks.Task.Delay(5000, token))
-                                .OnSuccess.TransitionTo.Sibling("ReportLoadingFinished").WithActions(Raise("test?"))),
+                                .OnSuccess.TransitionTo.Sibling("ReportLoadingFinished").WithActions<FetchContext>(
+                                    Assign<FetchContext>(context => context.Retries = 42),
+                                    Raise("test?"))),
                         "ReportLoadingFinished"
                             .WithEntryActions(Raise("CancelPlaying"))
                             .WithTransitions(Immediately.TransitionTo.Sibling("Playing")),

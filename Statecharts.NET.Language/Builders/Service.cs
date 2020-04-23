@@ -1,4 +1,5 @@
 ﻿using System;
+using Statecharts.NET.Interfaces;
 using Statecharts.NET.Language.Builders.Service;
 using Statecharts.NET.Language.Builders.Transition;
 using Statecharts.NET.Model;
@@ -86,18 +87,23 @@ namespace Statecharts.NET.Language.Builders.TaskService
     }
     public class WithOnSuccessTransition : TaskServiceDefinition
     {
-        private readonly UnguardedWithTarget _onSuccessTransition;
         internal Language.TaskService Service { get; }
+        internal UnguardedWithTarget OnSuccessTransition { get; }
 
         internal WithOnSuccessTransition(WithOnSuccessTransitionTo service, Target target, params Target[] targets)
         {
             Service = service.Service;
-            _onSuccessTransition = WithEvent.OnServiceSuccess().TransitionTo.Multiple(target, targets);
-            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(_onSuccessTransition);
+            OnSuccessTransition = WithEvent.OnServiceSuccess().TransitionTo.Multiple(target, targets);
+            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
         }
 
         public WithOnSuccessTransitionWithActions WithActions(Action action, params Action[] actions) =>
-            new WithOnSuccessTransitionWithActions(this, _onSuccessTransition, action, actions);
+            new WithOnSuccessTransitionWithActions(this, action, actions);
+        public WithOnSuccessTransitionWithActions<TContext> WithActions<TContext>(
+            OneOf<Action, Action<TContext>> action,
+            params OneOf<Action, Action<TContext>>[] actions)
+            where TContext : IContext<TContext> =>
+            new WithOnSuccessTransitionWithActions<TContext>(this, action, actions);
 
         public override Model.Task Task => Service.Task;
         public override Option<string> Id => Service.DefinitionData.Id;
@@ -109,10 +115,30 @@ namespace Statecharts.NET.Language.Builders.TaskService
         private Language.TaskService Service { get; }
         internal UnguardedWithActions OnSuccessTransition { get; }
 
-        internal WithOnSuccessTransitionWithActions(WithOnSuccessTransition service, UnguardedWithTarget onSuccessTransition, Action action, params Action[] actions)
+        internal WithOnSuccessTransitionWithActions(WithOnSuccessTransition service, Action action, params Action[] actions)
         {
             Service = service.Service;
-            OnSuccessTransition = onSuccessTransition.WithActions(action, actions);
+            OnSuccessTransition = service.OnSuccessTransition.WithActions(action, actions);
+            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
+        }
+
+        public override Model.Task Task => Service.Task;
+        public override Option<string> Id => Service.DefinitionData.Id;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.DefinitionData.OnSuccessDefinition;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
+    }
+    public class WithOnSuccessTransitionWithActions<TContext> : TaskServiceDefinition where TContext : IContext<TContext>
+    {
+        private Language.TaskService Service { get; }
+        internal ContextUnguardedWithActions<TContext> OnSuccessTransition { get; }
+
+        internal WithOnSuccessTransitionWithActions(
+            WithOnSuccessTransition service,
+            OneOf<Action, Action<TContext>> action,
+            params OneOf<Action, Action<TContext>>[] actions)
+        {
+            Service = service.Service;
+            OnSuccessTransition = service.OnSuccessTransition.WithActions(action, actions);
             Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
         }
 
