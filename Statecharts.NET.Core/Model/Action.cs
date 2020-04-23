@@ -18,8 +18,8 @@ namespace Statecharts.NET.Model
 
     public class RaiseActionDefinition : ActionDefinition
     {
-        public string EventName { get; }
-        public RaiseActionDefinition(string eventName) => EventName = eventName;
+        public ISendableEvent Event { get; }
+        public RaiseActionDefinition(ISendableEvent @event) => Event = @event;
     }
 
     public class LogActionDefinition : ActionDefinition
@@ -78,8 +78,8 @@ namespace Statecharts.NET.Model
     }
     public class RaiseAction : Action
     {
-        public string EventName { get; }
-        public RaiseAction(string eventName) => EventName = eventName;
+        public ISendableEvent Event { get; }
+        public RaiseAction(ISendableEvent @event) => Event = @event;
     }
     public class LogAction : Action
     {
@@ -124,7 +124,7 @@ namespace Statecharts.NET.Model
         public static Action From(ActionDefinition actionDefinition) =>
             actionDefinition.Match(
                 send => new SendAction(send.Event) as Action,
-                raise => new RaiseAction(raise.EventName),
+                raise => new RaiseAction(raise.Event),
                 log => new LogAction((context, data) => log.Label),
                 assign => new AssignAction((context, data) => assign.Mutation()),
                 sideEffect => new SideEffectAction((context, data) => sideEffect.Function()));

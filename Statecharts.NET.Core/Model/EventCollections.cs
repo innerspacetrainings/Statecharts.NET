@@ -52,7 +52,7 @@ namespace Statecharts.NET.Model
         }
         public void EnqueueImmediateEvent()
         {
-            var @event = new Stabilization(new ImmediateEvent());
+            var @event = new CurrentStep(new ImmediateEvent());
             if(!_queue.Any(queuedEvent => queuedEvent.AsBase().Event is ImmediateEvent)) _queue.Enqueue(@event, @event.Priority);
         }
         public void Enqueue(CurrentStep @event) => _queue.Enqueue(@event, @event.Priority);

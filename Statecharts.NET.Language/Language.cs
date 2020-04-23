@@ -87,7 +87,9 @@ namespace Statecharts.NET.Language
         public static SendAction Send(ISendableEvent @event)
             => new SendAction(@event);
         public static RaiseAction Raise(string eventName)
-            => new RaiseAction(eventName);
+            => Raise(new NamedEvent(eventName));
+        public static RaiseAction Raise(ISendableEvent @event)
+            => new RaiseAction(@event);
         public static LogAction Log(string label)
             => new LogAction(label);
         public static LogAction<TContext> Log<TContext>(Func<TContext, string> message)

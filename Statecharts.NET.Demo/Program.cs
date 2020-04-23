@@ -5,6 +5,7 @@ using Statecharts.NET.Interfaces;
 using Statecharts.NET.Language;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
+using Statecharts.NET.Utilities.Time;
 using Statecharts.NET.XState;
 using static Statecharts.NET.XState.JPropertyConstructorFunctions;
 using static Statecharts.NET.Language.Keywords;
@@ -150,6 +151,7 @@ namespace Statecharts.NET.Demo
         {
             {"Door", Run(Door.Behaviour)},
             {"SendExample", Run(SendExample.Behaviour)},
+            {"RaiseExample", Run(RaiseExample.Behaviour)},
             {"Assign", Run(DemoDefinition)}
     };
 
@@ -197,7 +199,7 @@ namespace Statecharts.NET.Demo
 
         private static void Main()
         {
-            _statecharts["Assign"]();
+            _statecharts["RaiseExample"]();
         }
     }
 }

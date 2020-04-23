@@ -164,7 +164,7 @@ namespace Statecharts.NET
         private static Option<OneOf<CurrentStep, NextStep>> SideffectFreeExecuteAction(Model.Action action, object context, object eventData) =>
             action.Match(
                 send => ((OneOf<CurrentStep, NextStep>)new NextStep(send.Event)).ToOption(),
-                raise => ((OneOf<CurrentStep, NextStep>)new CurrentStep(new NamedEvent(raise.EventName))).ToOption(),
+                raise => ((OneOf<CurrentStep, NextStep>)new CurrentStep(raise.Event)).ToOption(),
                 log => Option.None<OneOf<CurrentStep, NextStep>>(),
                 assign =>
                 {
@@ -181,7 +181,7 @@ namespace Statecharts.NET
             (Func<Model.Action, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopExitedStatenodes) functions)
             where TContext : IContext<TContext>
         {
-            var microsteps = new List<Microstep>();
+            var occuredEvents = new List<(IEvent @event, IEnumerable<Microstep> causedMicrosteps)>();
             var events = EventQueue.WithEvent(macrostepEvent);
             var stateConfiguration = sourceState.StateConfiguration;
             var context = sourceState.Context.CopyDeep();
@@ -231,7 +231,11 @@ namespace Statecharts.NET
             }
             void UpdateStateConfiguration(IReadOnlyCollection<Microstep> microSteps) =>
                 stateConfiguration = stateConfiguration.Without(microSteps.GetExitedStateNodes()).With(microSteps.GetEnteredStateNodes());
-            void AddMicrosteps(IEnumerable<Microstep> steps) => microsteps.AddRange(steps);
+            void AddMicrosteps(IEvent @event, IReadOnlyCollection<Microstep> microsteps)
+            {
+                if(!(@event is ImmediateEvent && !microsteps.Any()))
+                    occuredEvents.Add((@event, microsteps));
+            }
 
             while (events.IsNotEmpty && events.NextIsInternal)
             {
@@ -258,10 +262,10 @@ namespace Statecharts.NET
                 }
                 UpdateStateConfiguration(steps);
                 if(!(@event is DoneEvent)) EnqueueDoneEvents(); // TODO: sometimes enqueuing happens multiple times
-                AddMicrosteps(steps);
+                AddMicrosteps(@event, steps);
             }
 
-            return new Macrostep<TContext>(new State<TContext>(stateConfiguration, context), events.NextStepEvents, microsteps);
+            return new Macrostep<TContext>(new State<TContext>(stateConfiguration, context), macrostepEvent, events.NextStepEvents, occuredEvents);
         }
 
 

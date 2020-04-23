@@ -9,7 +9,7 @@ namespace Statecharts.NET.Language
         internal ActionDefinition ToDefinitionAction() =>
             Match(
                 send => new SendActionDefinition(send.Event) as ActionDefinition, 
-                raise => new RaiseActionDefinition(raise.EventName),
+                raise => new RaiseActionDefinition(raise.Event),
                 log => new LogActionDefinition(log.Label),
                 assign => new AssignActionDefinition(assign.Mutation),
                 sideEffect => new SideEffectActionDefinition(sideEffect.Function));
@@ -38,8 +38,8 @@ namespace Statecharts.NET.Language
     }
 
     public class RaiseAction : Action {
-        public string EventName { get; }
-        public RaiseAction(string eventName) => EventName = eventName;
+        public ISendableEvent Event { get; }
+        public RaiseAction(ISendableEvent @event) => Event = @event;
     }
 
     public class LogAction : Action

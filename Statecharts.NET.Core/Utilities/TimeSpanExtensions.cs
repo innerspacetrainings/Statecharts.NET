@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statecharts.NET.Utilities
+namespace Statecharts.NET.Utilities.Time
 {
     public static class TimeSpanExtensions
     {

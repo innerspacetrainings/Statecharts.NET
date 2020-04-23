@@ -59,7 +59,6 @@ namespace Statecharts.NET
         private readonly InterpreterOptions _options;
 
         public event Action<Macrostep<TContext>> OnMacroStep;
-        public event Action<IEvent> OnEventOccurred;
 
         internal RunningStatechart(ExecutableStatechart<TContext> statechart, CancellationToken cancellationToken, InterpreterOptions options)
         {
@@ -100,7 +99,6 @@ namespace Statecharts.NET
 
         private void HandleEvent(IEvent @event)
         {
-            OnEventOccurred?.Invoke(@event);
             var events = EventQueue.WithEvent(@event);
 
             while (events.IsNotEmpty && !_isFinished)
@@ -109,6 +107,7 @@ namespace Statecharts.NET
                 result.Switch(macrostep =>
                 {
                     _currentState = macrostep.State;
+                    var evts = macrostep.Microsteps.Select(microstep => microstep.Event);
                     foreach (var queuedEvent in macrostep.QueuedEvents) events.Enqueue(new NextStep(queuedEvent));
                     OnMacroStep?.Invoke(macrostep);
                     StartServices(macrostep.GetEnteredStateNodes());
@@ -130,7 +129,7 @@ namespace Statecharts.NET
             var result = Option.None<OneOf<CurrentStep, NextStep>>();
             action.Switch(
                 send => result = ((OneOf<CurrentStep, NextStep>)new NextStep(send.Event)).ToOption(),
-                raise => result = ((OneOf<CurrentStep, NextStep>)new CurrentStep(new NamedEvent(raise.EventName))).ToOption(),
+                raise => result = ((OneOf<CurrentStep, NextStep>)new CurrentStep(raise.Event)).ToOption(),
                 log => _options.Log(log.Message(context, eventData)),
                 assign => assign.Mutation(context, eventData),
                 sideEffect => sideEffect.Function(context, eventData),
@@ -161,7 +160,7 @@ namespace Statecharts.NET
                         var result = await service.Invoke(_cancellation.GetToken(stateNode.Id));
                         HandleEvent(new ServiceSuccessEvent(service.Id, result));
                     }
-                    catch (TaskCanceledException) { /* nothing should be done here */ }
+                    catch (OperationCanceledException) { /* nothing should be done here */ }
                     catch (Exception e)
                     {
                         HandleEvent(new ServiceErrorEvent(service.Id, e));
