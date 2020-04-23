@@ -86,12 +86,34 @@ namespace Statecharts.NET.Language.Builders.TaskService
     }
     public class WithOnSuccessTransition : TaskServiceDefinition
     {
-        private Language.TaskService Service { get; }
+        private readonly UnguardedWithTarget _onSuccessTransition;
+        internal Language.TaskService Service { get; }
 
         internal WithOnSuccessTransition(WithOnSuccessTransitionTo service, Target target, params Target[] targets)
         {
             Service = service.Service;
-            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(WithEvent.OnServiceSuccess().TransitionTo.Multiple(target, targets));
+            _onSuccessTransition = WithEvent.OnServiceSuccess().TransitionTo.Multiple(target, targets);
+            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(_onSuccessTransition);
+        }
+
+        public WithOnSuccessTransitionWithActions WithActions(Action action, params Action[] actions) =>
+            new WithOnSuccessTransitionWithActions(this, _onSuccessTransition, action, actions);
+
+        public override Model.Task Task => Service.Task;
+        public override Option<string> Id => Service.DefinitionData.Id;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.DefinitionData.OnSuccessDefinition;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
+    }
+    public class WithOnSuccessTransitionWithActions : TaskServiceDefinition
+    {
+        private Language.TaskService Service { get; }
+        internal UnguardedWithActions OnSuccessTransition { get; }
+
+        internal WithOnSuccessTransitionWithActions(WithOnSuccessTransition service, UnguardedWithTarget onSuccessTransition, Action action, params Action[] actions)
+        {
+            Service = service.Service;
+            OnSuccessTransition = onSuccessTransition.WithActions(action, actions);
+            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
         }
 
         public override Model.Task Task => Service.Task;
