@@ -22,6 +22,7 @@ namespace Statecharts.NET.Tests.Shared.Definition
         }
 
         public override string Name { get; }
+        public override Option<string> UniqueIdentifier => Name.ToOption();
         public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; }
         public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; }
         public override IEnumerable<TransitionDefinition> Transitions { get; }
@@ -51,6 +52,7 @@ namespace Statecharts.NET.Tests.Shared.Definition
         }
 
         public override string Name { get; }
+        public override Option<string> UniqueIdentifier => Name.ToOption();
 
         public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; }
         public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; }
@@ -74,6 +76,7 @@ namespace Statecharts.NET.Tests.Shared.Definition
         }
 
         public override string Name { get; }
+        public override Option<string> UniqueIdentifier => Name.ToOption();
         public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; }
         public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; }
     }

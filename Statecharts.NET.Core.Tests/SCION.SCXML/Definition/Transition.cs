@@ -14,7 +14,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         internal IList<OneOf<ActionDefinition, ContextActionDefinition>> _actions = new List<OneOf<ActionDefinition, ContextActionDefinition>>();
 
         private IEventDefinition Event => new NamedEvent(_eventName);
-        private IEnumerable<Target> Targets => new [] { new SiblingTarget(_target) };
+        private IEnumerable<Target> Targets => new [] { new UniquelyIdentifiedTarget(_target) };
         private IEnumerable<ActionDefinition> Actions => _actions.Select(a => a.Match(action => action, contextAction => null)).Where(action => action != null);
         private IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ContextActions => _actions;
 

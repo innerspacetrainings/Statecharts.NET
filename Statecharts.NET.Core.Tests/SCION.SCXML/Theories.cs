@@ -21,6 +21,10 @@ namespace Statecharts.NET.Tests.SCION.SCXML
         [MemberData(nameof(GetTestSuite), "documentOrder")]
         public void DocumentOrder(Test test) => TestStatechart(test);
 
+        [Theory]
+        [MemberData(nameof(GetTestSuite), "hierarchy")]
+        public void Hierarchy(Test test) => TestStatechart(test);
+
         private static void TestStatechart(Test test)
         {
             var scxmlDefinition = File.ReadAllText(test.Path);

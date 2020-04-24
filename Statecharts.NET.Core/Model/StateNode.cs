@@ -15,6 +15,7 @@ namespace Statecharts.NET.Model
         OneOfBase<AtomicStatenodeDefinition, FinalStatenodeDefinition, CompoundStatenodeDefinition, OrthogonalStatenodeDefinition>
     {
         public abstract string Name { get; }
+        public abstract Option<string> UniqueIdentifier { get; }
         public abstract IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; }
         public abstract IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; }
 
@@ -69,6 +70,7 @@ namespace Statecharts.NET.Model
     {
         public Option<Statenode> Parent { get; }
         public string Name { get; }
+        public Option<string> UniqueIdentifier { get; }
         public int DocumentIndex { get; }
         public Actionblock EntryActions { get; private set; }
         public Actionblock ExitActions { get; }
@@ -76,15 +78,17 @@ namespace Statecharts.NET.Model
         public StatenodeId Id { get; }
         internal int Depth { get; }
 
-        public Statenode(
+        protected Statenode(
             Statenode parent,
             string name,
+            Option<string> uniqueIdentifier,
             int documentIndex,
             Actionblock entryActions,
             Actionblock exitActions)
         {
             Parent = parent.ToOption();
             Name = name;
+            UniqueIdentifier = uniqueIdentifier;
             DocumentIndex = documentIndex;
             EntryActions = entryActions;
             ExitActions = exitActions;
@@ -130,7 +134,13 @@ namespace Statecharts.NET.Model
 
     public class FinalStatenode : Statenode
     {
-        public FinalStatenode(Statenode parent, string name, int documentIndex, Actionblock entryActions, Actionblock exitActions) : base(parent, name, documentIndex, entryActions, exitActions)
+        public FinalStatenode(
+            Statenode parent,
+            string name,
+            Option<string> uniqueIdentifier,
+            int documentIndex,
+            Actionblock entryActions,
+            Actionblock exitActions) : base(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions)
         {
         }
     }
@@ -143,9 +153,10 @@ namespace Statecharts.NET.Model
         protected NonFinalStatenode(
             Statenode parent,
             string name,
+            Option<string> uniqueIdentifier,
             int documentIndex,
             Actionblock entryActions,
-            Actionblock exitActions) : base(parent, name, documentIndex, entryActions, exitActions) { }
+            Actionblock exitActions) : base(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions) { }
     }
 
     public class AtomicStatenode : NonFinalStatenode
@@ -153,21 +164,34 @@ namespace Statecharts.NET.Model
         public AtomicStatenode(
             Statenode parent,
             string name,
+            Option<string> uniqueIdentifier,
             int documentIndex,
             Actionblock entryActions,
-            Actionblock exitActions) : base(parent, name, documentIndex, entryActions, exitActions) { }
+            Actionblock exitActions) : base(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions) { }
     }
 
     public class CompoundStatenode : NonFinalStatenode
     {
         public IEnumerable<Statenode> Statenodes { get; internal set; }
 
-        public CompoundStatenode(Statenode parent, string name, int documentIndex, Actionblock entryActions, Actionblock exitActions) : base(parent, name, documentIndex, entryActions, exitActions) { }
+        public CompoundStatenode(
+            Statenode parent,
+            string name,
+            Option<string> uniqueIdentifier,
+            int documentIndex,
+            Actionblock entryActions,
+            Actionblock exitActions) : base(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions) { }
     }
     public class OrthogonalStatenode : NonFinalStatenode
     {
         public IEnumerable<Statenode> Statenodes { get; internal set; }
 
-        public OrthogonalStatenode(Statenode parent, string name, int documentIndex, Actionblock entryActions, Actionblock exitActions) : base(parent, name, documentIndex, entryActions, exitActions) { }
+        public OrthogonalStatenode(
+            Statenode parent,
+            string name,
+            Option<string> uniqueIdentifier,
+            int documentIndex,
+            Actionblock entryActions,
+            Actionblock exitActions) : base(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions) { }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Statecharts.NET.Model
 {
-    public class Target : OneOfBase<AbsoluteTarget, SiblingTarget, ChildTarget, SelfTarget> { }
+    public class Target : OneOfBase<AbsoluteTarget, SiblingTarget, ChildTarget, SelfTarget, UniquelyIdentifiedTarget> { }
 
     public class AbsoluteTarget : Target
     {
@@ -23,4 +23,9 @@ namespace Statecharts.NET.Model
         public ChildTarget(string statenodeName) : base(statenodeName) { }
     }
     public class SelfTarget : Target { }
+    public class UniquelyIdentifiedTarget : Target
+    {
+        public string Id { get; }
+        public UniquelyIdentifiedTarget(string id) => Id = id;
+    }
 }
