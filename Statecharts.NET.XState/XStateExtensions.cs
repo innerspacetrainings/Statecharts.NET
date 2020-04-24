@@ -32,12 +32,12 @@ namespace Statecharts.NET.XState
             StatechartDefinition<TContext> statechartDefinition)
             where TContext : IContext<TContext>
             => stateNodeDefinition.CataFold<JSProperty>( // TODO: add actions, transitions
-                atomic => (atomic.Name, atomic.Properties(statechartDefinition)),
-                final => (final.Name, final.Properties(statechartDefinition).With(("type", "final"))),
-                (compound, subDefinitions) => (compound.Name, compound.Properties(statechartDefinition).With(
+                atomic => ($"\"{atomic.Name}\"", atomic.Properties(statechartDefinition)),
+                final => ($"\"{final.Name}\"", final.Properties(statechartDefinition).With(("type", "final"))),
+                (compound, subDefinitions) => ($"\"{compound.Name}\"", compound.Properties(statechartDefinition).With(
                     ("initial", compound.InitialTransition.Target.StatenodeName),
                     ("states", subDefinitions))),
-                (orthogonal, subDefinitions) => (orthogonal.Name, orthogonal.Properties(statechartDefinition).With(
+                (orthogonal, subDefinitions) => ($"\"{orthogonal.Name}\"", orthogonal.Properties(statechartDefinition).With(
                     ("type", "parallel"),
                     ("states", subDefinitions))));
 
