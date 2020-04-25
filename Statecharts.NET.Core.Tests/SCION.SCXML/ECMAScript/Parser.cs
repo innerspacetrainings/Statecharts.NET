@@ -5,6 +5,7 @@ using Statecharts.NET.Tests.SCION.SCXML.Definition;
 using Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions;
 using AssignAction = Statecharts.NET.Tests.SCION.SCXML.Definition.AssignAction;
 using LogAction = Statecharts.NET.Tests.SCION.SCXML.Definition.LogAction;
+using RaiseAction = Statecharts.NET.Tests.SCION.SCXML.Definition.RaiseAction;
 using Transition = Statecharts.NET.Tests.SCION.SCXML.Definition.Transition;
 
 namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
@@ -20,29 +21,37 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
                 { "parallel", Construct.OrthogonalStateNode },
                 { "final", Construct.FinalStateNode },
                 { "transition", Construct.Transition },
+                { "initial", Construct.InitialTransition },
                 { "data", Construct.ContextDataEntry },
                 { "onentry", Construct.EntryActions },
+                { "onexit", Construct.ExitActions },
                 { "log", Construct.LogAction },
-                { "assign", Construct.AssignAction }
-            };
+                { "assign", Construct.AssignAction },
+                { "raise", Construct.RaiseAction }
+    };
         private static Dictionary<(System.Type, string), System.Action<object, string>> AttributeSetters =>
             new Dictionary<(System.Type, string), System.Action<object, string>>
             {
                 { (typeof(Statechart), "xmlns"), IntentionallyIgnore },
                 { (typeof(Statechart), "version"), IntentionallyIgnore },
                 { (typeof(Statechart), "datamodel"), IntentionallyIgnore },
+                { (typeof(Statechart), "ns0"), IntentionallyIgnore },
                 { (typeof(Statechart), "initial"), EraseType<Statechart>(Attribute.SetStatechartInitial) },
+                { (typeof(Statechart), "name"), EraseType<Statechart>(Attribute.SetStatechartName) },
                 { (typeof(PartialStateNode), "id"), EraseType<PartialStateNode>(Attribute.SetStateNodeName) },
+                { (typeof(PartialStateNode), "initial"), EraseType<PartialStateNode>(Attribute.SetStatenodeInitial) },
                 { (typeof(FinalStateNode), "id"), EraseType<FinalStateNode>(Attribute.SetStateNodeName) },
                 { (typeof(Transition), "event"), EraseType<Transition>(Attribute.SetTransitionEvent) },
                 { (typeof(Transition), "target"), EraseType<Transition>(Attribute.SetTransitionTarget) },
+                { (typeof(Transition), "cond"), EraseType<Transition>(Attribute.SetTransitionCondition) },
                 { (typeof(ContextDataEntry), "id"), EraseType<ContextDataEntry>(Attribute.SetContextDataEntryId) },
                 { (typeof(ContextDataEntry), "expr"), EraseType<ContextDataEntry>(Attribute.SetContextDataEntryExpression) },
                 { (typeof(LogAction), "expr"), EraseType<LogAction>(Attribute.SetLogExpression) },
                 { (typeof(LogAction), "label"), EraseType<LogAction>(Attribute.SetLogLabel) },
                 { (typeof(AssignAction), "location"), EraseType<AssignAction>(Attribute.SetAssignProperty) },
-                { (typeof(AssignAction), "expr"), EraseType<AssignAction>(Attribute.SetAssignExpression) }
-        };
+                { (typeof(AssignAction), "expr"), EraseType<AssignAction>(Attribute.SetAssignExpression) },
+                { (typeof(RaiseAction), "event"), EraseType<RaiseAction>(Attribute.SetRaiseEvent) },
+            };
         private static Dictionary<(System.Type, System.Type), System.Action<object, object>> ElementSetters =>
             new Dictionary<(System.Type, System.Type), System.Action<object, object>>
             {
@@ -51,13 +60,20 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
                 { (typeof(Statechart), typeof(FinalStateNode)), EraseTypes<Statechart, IStatenodeDefinition>(Element.StatechartAddStateNode) },
                 { (typeof(PartialStateNode), typeof(Transition)), EraseTypes<PartialStateNode, Transition>(Element.StateNodeAddTransition) },
                 { (typeof(PartialStateNode), typeof(EntryActions)), EraseTypes<PartialStateNode, EntryActions>(Element.StateNodeSetEntryActions) },
+                { (typeof(PartialStateNode), typeof(ExitActions)), EraseTypes<PartialStateNode, ExitActions>(Element.StateNodeSetExitActions) },
                 { (typeof(PartialStateNode), typeof(PartialStateNode)), EraseTypes<PartialStateNode, PartialStateNode>(Element.StateNodeAddChildren) },
+                { (typeof(PartialStateNode), typeof(InitialTransition)), EraseTypes<PartialStateNode, InitialTransition>(Element.StateNodeSetInitialTransition) },
                 { (typeof(FinalStateNode), typeof(EntryActions)), EraseTypes<FinalStateNode, EntryActions>(Element.StateNodeSetEntryActions) },
                 { (typeof(ECMAScriptContext), typeof(ContextDataEntry)), EraseTypes<ECMAScriptContext, ContextDataEntry>(Element.ContextAddProperty) },
                 { (typeof(Transition), typeof(LogAction)), EraseTypes<Transition, LogAction>(Element.TransitionAddLogAction) },
                 { (typeof(Transition), typeof(AssignAction)), EraseTypes<Transition, AssignAction>(Element.TransitionAddAssignAction) },
+                { (typeof(Transition), typeof(RaiseAction)), EraseTypes<Transition, RaiseAction>(Element.TransitionAddRaiseAction) },
+                { (typeof(InitialTransition), typeof(Transition)), EraseTypes<InitialTransition, Transition>(Element.InitialTransitionAddTransition) },
                 { (typeof(EntryActions), typeof(LogAction)), EraseTypes<EntryActions, LogAction>(Element.EntryActionsAddLogAction) },
-                { (typeof(EntryActions), typeof(AssignAction)), EraseTypes<EntryActions, AssignAction>(Element.EntryActionsAddAssignAction) }
+                { (typeof(EntryActions), typeof(AssignAction)), EraseTypes<EntryActions, AssignAction>(Element.EntryActionsAddAssignAction) },
+                { (typeof(EntryActions), typeof(RaiseAction)), EraseTypes<EntryActions, RaiseAction>(Element.EntryActionsAddRaiseAction) },
+                { (typeof(ExitActions), typeof(LogAction)), EraseTypes<ExitActions, LogAction>(Element.ExitActionsAddLogAction) },
+                { (typeof(ExitActions), typeof(RaiseAction)), EraseTypes<ExitActions, RaiseAction>(Element.ExitActionsAddRaiseAction) }
         };
 
         internal static StatechartDefinition<ECMAScriptContext> ParseStatechart(string scxmlDefinition)

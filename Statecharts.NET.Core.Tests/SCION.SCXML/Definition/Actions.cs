@@ -13,9 +13,12 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
             Actions.Add(logAction.AsContextAction());
         internal void AddAction(AssignAction assignAction) =>
             Actions.Add(assignAction.AsContextAction());
+        internal void AddAction(RaiseAction raiseAction) =>
+            Actions.Add(raiseAction.AsActionDefinition());
     }
 
     internal class EntryActions : ActionsArray { }
+    internal class ExitActions : ActionsArray { }
 
     internal class LogAction
     {
@@ -25,14 +28,21 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         public LogContextActionDefinition AsContextAction() => new LogContextActionDefinition(
             context => $"{Label}: {((ECMAScriptContext) context).Engine.Execute(Expression).GetCompletionValue().AsString()}");
     }
+
     internal class AssignAction
     {
         internal string Property { get; set; }
         internal string Expression { get; set; }
 
         public AssignContextActionDefinition AsContextAction() => new AssignContextActionDefinition(
-            context => ((ECMAScriptContext)context).Engine.SetValue(
+            context => ((ECMAScriptContext) context).Engine.SetValue(
                 Property,
-                $"({((ECMAScriptContext)context).Engine.Execute(Expression).GetCompletionValue()})"));
+                $"({((ECMAScriptContext) context).Engine.Execute(Expression).GetCompletionValue()})"));
+    }
+
+    internal class RaiseAction
+    {
+        internal string EventName { get; set; }
+        public RaiseActionDefinition AsActionDefinition() => new RaiseActionDefinition(new NamedEvent(EventName));
     }
 }

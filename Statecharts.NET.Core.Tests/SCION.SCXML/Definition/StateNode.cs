@@ -13,10 +13,11 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
     internal class PartialStateNode : IStatenodeDefinition
     {
         internal string Name { get; set; }
-        internal Option<string> InitialStateNodeName { get; set; }
+        internal Option<OneOf<InitialTransition, string>> Initial { get; set; }
         internal IList<StatenodeDefinition> Children { get; } = new List<StatenodeDefinition>();
         internal IList<TransitionDefinition> Transitions { get; } = new List<TransitionDefinition>();
         internal IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; set; }
+        internal IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; set; }
         internal DoneTransitionDefinition DoneTransition { get; set; }
 
         public StatenodeDefinition AsDefinition() =>
@@ -24,16 +25,19 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
                 ? new TestCompoundStatenodeDefinition(
                     Name,
                     EntryActions,
-                    null,
+                    ExitActions,
                     Transitions,
                     null,
                     Children,
-                    new InitialCompoundTransitionDefinition(new ChildTarget(InitialStateNodeName.ValueOr(Children.First().Name))), 
+                    Initial.Match(
+                        some => some.Match(transition => transition.ToDefinition(),
+                            statenodeName => new InitialCompoundTransitionDefinition(new ChildTarget(statenodeName))),
+                        () => new InitialCompoundTransitionDefinition(new ChildTarget(Children.First().Name))), 
                     DoneTransition.ToOption()) as StatenodeDefinition
                 : new TestAtomicStatenodeDefinition(
                     Name,
                     EntryActions,
-                    null,
+                    ExitActions,
                     Transitions,
                     null);
     }

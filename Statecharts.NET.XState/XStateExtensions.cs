@@ -166,6 +166,7 @@ namespace Statecharts.NET.XState
                 absolute => $"#{statechartDefinition.Id}." + string.Join(".", absolute.Id.Values),
                 sibling => $"{sibling.StatenodeName}",
                 child => $".{child.StatenodeName}",
-                self => sourceStatenodeName));
+                self => sourceStatenodeName,
+                uniqueIdentifier => $"#{uniqueIdentifier.Id}"));
     }
 }

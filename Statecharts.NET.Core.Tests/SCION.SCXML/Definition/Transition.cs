@@ -6,6 +6,16 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Tests.SCION.SCXML.Definition
 {
+    internal class InitialTransition
+    {
+        internal IList<Transition> _transitions = new List<Transition>();
+
+        public void AddTransition(Transition transition) => _transitions.Add(transition);
+
+        public InitialCompoundTransitionDefinition ToDefinition() =>
+            new InitialCompoundTransitionDefinition(new ChildTarget(_transitions.FirstOrDefault()?._target));
+    }
+
     internal class Transition
     {
         internal string _eventName;
@@ -13,7 +23,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         internal Option<string> _condition;
         internal IList<OneOf<ActionDefinition, ContextActionDefinition>> _actions = new List<OneOf<ActionDefinition, ContextActionDefinition>>();
 
-        private IEventDefinition Event => new NamedEvent(_eventName);
+        private IEventDefinition Event => string.IsNullOrEmpty(_eventName) ? new ImmediateEventDefinition() as IEventDefinition : new NamedEvent(_eventName);
         private IEnumerable<Target> Targets => new [] { new UniquelyIdentifiedTarget(_target) };
         private IEnumerable<ActionDefinition> Actions => _actions.Select(a => a.Match(action => action, contextAction => null)).Where(action => action != null);
         private IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ContextActions => _actions;
@@ -22,6 +32,8 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
             _actions.Add(logAction.AsContextAction());
         internal void AddAction(AssignAction assignAction) =>
             _actions.Add(assignAction.AsContextAction());
+        internal void AddAction(RaiseAction assignAction) =>
+            _actions.Add(assignAction.AsActionDefinition());
 
         internal TransitionDefinition AsTransitionDefinition()
             => _condition.Match<TransitionDefinition>(

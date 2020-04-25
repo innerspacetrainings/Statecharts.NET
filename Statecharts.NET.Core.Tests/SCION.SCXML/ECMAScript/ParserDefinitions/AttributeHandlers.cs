@@ -7,14 +7,20 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions
     {
         internal static void SetStatechartInitial(Statechart statechart, string initialStateNode) =>
             statechart.InitialStateNodeName = initialStateNode.ToOption();
+        internal static void SetStatechartName(Statechart statechart, string name) =>
+            statechart.Name = name.ToOption();
         internal static void SetStateNodeName(PartialStateNode stateNode, string name) =>
             stateNode.Name = name;
+        internal static void SetStatenodeInitial(PartialStateNode stateNode, string initialStatenode) =>
+            stateNode.Initial = Option.From<OneOf<InitialTransition, string>>(initialStatenode);
         internal static void SetStateNodeName(FinalStateNode stateNode, string name) =>
             stateNode.Name = name;
         public static void SetTransitionEvent(Transition transition, string @event) =>
             transition._eventName = @event;
         public static void SetTransitionTarget(Transition transition, string target) =>
             transition._target = target;
+        public static void SetTransitionCondition(Transition transition, string condition) =>
+            transition._condition = condition.ToOption();
         public static void SetContextDataEntryId(ContextDataEntry entry, string id) =>
             entry.Id = id;
         public static void SetContextDataEntryExpression(ContextDataEntry entry, string expression) =>
@@ -27,5 +33,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions
             assignAction.Property = property;
         public static void SetAssignExpression(AssignAction assignAction, string expression) =>
             assignAction.Expression = expression;
+        public static void SetRaiseEvent(RaiseAction raiseAction, string eventName) =>
+            raiseAction.EventName = eventName;
     }
 }
