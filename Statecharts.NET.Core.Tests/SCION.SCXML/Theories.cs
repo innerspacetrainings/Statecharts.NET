@@ -19,8 +19,8 @@ namespace Statecharts.NET.Tests.SCION.SCXML
         [MemberData(nameof(GetTestSuite), "assign", new[] { "assign_obj_literal:Deep Initial States aren't yet supported..." })]
         public void Assign(Test test) => TestStatechart(test);
 
-        [SkippableTheory(Skip = "Nothing working yet...")]
-        [MemberData(nameof(GetTestSuite), "assign-current-small-step")]
+        [SkippableTheory]
+        [MemberData(nameof(GetTestSuite), "assign-current-small-step", new[] { "test0:Not supported..." })]
         public void AssignCurrentSmallStep(Test test) => TestStatechart(test);
 
         [SkippableTheory]

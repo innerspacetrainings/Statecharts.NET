@@ -25,15 +25,14 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
 
         private IEventDefinition Event => string.IsNullOrEmpty(_eventName) ? new ImmediateEventDefinition() as IEventDefinition : new NamedEvent(_eventName);
         private IEnumerable<Target> Targets => new [] { new UniquelyIdentifiedTarget(_target) };
-        private IEnumerable<ActionDefinition> Actions => _actions.Select(a => a.Match(action => action, contextAction => null)).Where(action => action != null);
         private IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ContextActions => _actions;
 
         internal void AddAction(LogAction logAction) =>
             _actions.Add(logAction.AsContextAction());
         internal void AddAction(AssignAction assignAction) =>
             _actions.Add(assignAction.AsContextAction());
-        internal void AddAction(RaiseAction assignAction) =>
-            _actions.Add(assignAction.AsActionDefinition());
+        internal void AddAction(RaiseAction raiseAction) =>
+            _actions.Add(raiseAction.AsActionDefinition());
 
         internal TransitionDefinition AsTransitionDefinition()
             => _condition.Match<TransitionDefinition>(
@@ -42,12 +41,12 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
                     Targets,
                     new ConditionContextGuard(context => TypeConverter.ToBoolean(((ECMAScriptContext)context).Engine.Execute(conditionExpression).GetCompletionValue())),
                     ContextActions),
-                () => new UnguardedTransition(Event, Targets, Actions));
+                () => new UnguardedTransition(Event, Targets, ContextActions));
     }
 
-    internal class UnguardedTransition : UnguardedTransitionDefinition
+    internal class UnguardedTransition : UnguardedContextTransitionDefinition
     {
-        public UnguardedTransition(IEventDefinition @event, IEnumerable<Target> targets, IEnumerable<ActionDefinition> actions)
+        public UnguardedTransition(IEventDefinition @event, IEnumerable<Target> targets, IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> actions)
         {
             Event = @event;
             Targets = targets;
@@ -56,7 +55,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
 
         public override IEventDefinition Event { get; }
         public override IEnumerable<Target> Targets { get; }
-        public override IEnumerable<ActionDefinition> Actions { get; }
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> Actions { get; }
     }
     internal class GuardedTransition : GuardedContextTransitionDefinition
     {

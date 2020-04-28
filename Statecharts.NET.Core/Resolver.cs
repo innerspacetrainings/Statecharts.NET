@@ -98,8 +98,8 @@ namespace Statecharts.NET
                         ? transition.Source.GetDescendants().Where(stateConfiguration.Contains)
                         : lastBeforeLeastCompoundCommonAncestor.Append(lastBeforeLeastCompoundCommonAncestor.GetDescendants()).Where(stateConfiguration.Contains);
                     var entered = isChildTransition
-                        ? target.Append(target.AncestorsUntil(lastBeforeLeastCompoundCommonAncestor).Reverse())
-                        : target.Append(target.AncestorsUntil(lcca).Reverse());
+                        ? target.Append(target.AncestorsUntil(lastBeforeLeastCompoundCommonAncestor)).Reverse()
+                        : target.Append(target.AncestorsUntil(lcca)).Reverse();
 
                     return new Microstep(@event, transition, entered, exited);
                 }));

@@ -37,7 +37,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         public AssignContextActionDefinition AsContextAction() => new AssignContextActionDefinition(
             context => ((ECMAScriptContext) context).Engine.SetValue(
                 Property,
-                $"({((ECMAScriptContext) context).Engine.Execute(Expression).GetCompletionValue()})"));
+                ((ECMAScriptContext)context).Engine.Execute(Expression).GetCompletionValue()));
     }
 
     internal class RaiseAction
