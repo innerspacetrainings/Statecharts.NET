@@ -51,6 +51,26 @@ namespace Statecharts.NET.Tests.SCION.SCXML
         [MemberData(nameof(GetTestSuite), "hierarchy+documentOrder")]
         public void HierarchyAndDocumentOrder(Test test) => TestStatechart(test);
 
+        [SkippableTheory(Skip = "Deep Initial States aren't yet supported...")]
+        [MemberData(nameof(GetTestSuite), "misc")]
+        public void Misc(Test test) => TestStatechart(test);
+
+        [SkippableTheory]
+        [MemberData(nameof(GetTestSuite), "more-parallel")]
+        public void MoreParallel(Test test) => TestStatechart(test);
+
+        [SkippableTheory]
+        [MemberData(nameof(GetTestSuite), "parallel")]
+        public void Parallel(Test test) => TestStatechart(test);
+
+        [SkippableTheory]
+        [MemberData(nameof(GetTestSuite), "parallel+interrupt")]
+        public void ParallelInterrupt(Test test) => TestStatechart(test);
+
+        [SkippableTheory]
+        [MemberData(nameof(GetTestSuite), "targetless-transition")]
+        public void TargetlessTransition(Test test) => TestStatechart(test);
+
         private static void TestStatechart(Test test)
         {
             test.SkipReason.SwitchSome(reason => throw new SkipException(reason));

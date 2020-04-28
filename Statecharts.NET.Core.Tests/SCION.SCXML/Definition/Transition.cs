@@ -13,18 +13,18 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         public void AddTransition(Transition transition) => _transitions.Add(transition);
 
         public InitialCompoundTransitionDefinition ToDefinition() =>
-            new InitialCompoundTransitionDefinition(new ChildTarget(_transitions.FirstOrDefault()?._target));
+            new InitialCompoundTransitionDefinition(new ChildTarget(_transitions.FirstOrDefault()?._target.ValueOr("this should never happen, otherwise there is an error in the SCXML tests")));
     }
 
     internal class Transition
     {
         internal string _eventName;
-        internal string _target;
-        internal Option<string> _condition;
+        internal Option<string> _target = Option.None<string>();
+        internal Option<string> _condition = Option.None<string>();
         internal IList<OneOf<ActionDefinition, ContextActionDefinition>> _actions = new List<OneOf<ActionDefinition, ContextActionDefinition>>();
 
         private IEventDefinition Event => string.IsNullOrEmpty(_eventName) ? new ImmediateEventDefinition() as IEventDefinition : new NamedEvent(_eventName);
-        private IEnumerable<Target> Targets => new [] { new UniquelyIdentifiedTarget(_target) };
+        private IEnumerable<Target> Targets => new [] { _target.Map(statenodeName => new UniquelyIdentifiedTarget(statenodeName) as Target).ValueOr(new SelfTarget()) };
         private IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ContextActions => _actions;
 
         internal void AddAction(LogAction logAction) =>
