@@ -12,6 +12,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
     }
     internal class PartialStateNode : IStatenodeDefinition
     {
+        private readonly bool _isParallel;
         internal string Name { get; set; }
         internal Option<OneOf<InitialTransition, string>> Initial { get; set; }
         internal IList<StatenodeDefinition> Children { get; } = new List<StatenodeDefinition>();
@@ -20,20 +21,31 @@ namespace Statecharts.NET.Tests.SCION.SCXML.Definition
         internal IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; set; }
         internal DoneTransitionDefinition DoneTransition { get; set; }
 
+        public PartialStateNode(bool isParallel) => _isParallel = isParallel;
+
         public StatenodeDefinition AsDefinition() =>
             Children.Any()
-                ? new TestCompoundStatenodeDefinition(
-                    Name,
-                    EntryActions,
-                    ExitActions,
-                    Transitions,
-                    null,
-                    Children,
-                    Initial.Match(
-                        some => some.Match(transition => transition.ToDefinition(),
-                            statenodeName => new InitialCompoundTransitionDefinition(new ChildTarget(statenodeName))),
-                        () => new InitialCompoundTransitionDefinition(new ChildTarget(Children.First().Name))), 
-                    DoneTransition.ToOption()) as StatenodeDefinition
+                ? _isParallel
+                    ? new TestOrthogonalStatenodeDefinition(
+                        Name,
+                        EntryActions,
+                        ExitActions,
+                        Transitions,
+                        null,
+                        Children,
+                        DoneTransition.ToOption()) as StatenodeDefinition
+                    : new TestCompoundStatenodeDefinition(
+                        Name,
+                        EntryActions,
+                        ExitActions,
+                        Transitions,
+                        null,
+                        Children,
+                        Initial.Match(
+                            some => some.Match(transition => transition.ToDefinition(),
+                                statenodeName => new InitialCompoundTransitionDefinition(new ChildTarget(statenodeName))),
+                            () => new InitialCompoundTransitionDefinition(new ChildTarget(Children.First().Name))), 
+                        DoneTransition.ToOption())
                 : new TestAtomicStatenodeDefinition(
                     Name,
                     EntryActions,

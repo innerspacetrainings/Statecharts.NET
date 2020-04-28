@@ -9,8 +9,8 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions
     {
         internal static object Statechart() => new Statechart();
         internal static object Context() => new ECMAScriptContext(new Engine());
-        internal static object PartialStateNode() => new PartialStateNode();
-        internal static object OrthogonalStateNode() => throw new NotImplementedException();
+        internal static object PartialStateNode() => new PartialStateNode(false);
+        internal static object OrthogonalStateNode() => new PartialStateNode(true);
         internal static object FinalStateNode() => new FinalStateNode();
         internal static object Transition() => new Transition();
         internal static object InitialTransition() => new InitialTransition();
