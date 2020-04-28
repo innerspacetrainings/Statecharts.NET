@@ -20,7 +20,7 @@ namespace Statecharts.NET.Demo.UWP
         {
             InitializeComponent();
 
-            var statechartDefinition = Statechart
+            var statechartDefinition = Define.Statechart
                 .WithInitialContext(new DemoContext())
                 .WithRootState(
                     "door"
