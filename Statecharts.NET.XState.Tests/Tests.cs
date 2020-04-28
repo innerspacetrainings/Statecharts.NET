@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using Statecharts.NET.Interfaces;
@@ -15,7 +14,7 @@ namespace Statecharts.NET.XState.Tests
     {
         [Fact]
         public void Simple() => TestSerialization(
-            Statechart
+            Define.Statechart
                 .WithInitialContext(new DemoContext())
                 .WithRootState("a".AsCompound().WithInitialState("a1").WithStates("a1")));
 

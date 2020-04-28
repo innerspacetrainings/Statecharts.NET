@@ -3,16 +3,15 @@ using Statecharts.NET.Demo;
 using Statecharts.NET.Language;
 using Statecharts.NET.Model;
 using static Statecharts.NET.Language.Keywords;
-using Service = Statecharts.NET.Language.Service;
 
 
 namespace Statecharts.NET.Demos.Statecharts
 {
     internal static class SendExample
     {
-        internal static NamedDataEventFactory<string> ShowError = Event.Define("ShowError").WithData<string>();
+        private static readonly NamedDataEventFactory<string> ShowError = Define.EventWithData<string>("ShowError");
 
-        internal static StatechartDefinition<FetchContext> Behaviour => Statechart
+        internal static StatechartDefinition<FetchContext> Behaviour => Define.Statechart
             .WithInitialContext(new FetchContext { Retries = 0 })
             .WithRootState(
                 "SendExample"
@@ -30,7 +29,7 @@ namespace Statecharts.NET.Demos.Statecharts
                                             .WithTransitions(
                                                 On("red").TransitionTo.Sibling("red"),
                                                 On("yellow").TransitionTo.Self.WithActions(Send(ShowError("et voilà, a custom message appears"))))
-                                            .WithInvocations(Service.DefineTask(async token =>
+                                            .WithInvocations(Define.Service.Task(async token =>
                                             {
                                                 await System.Threading.Tasks.Task.Delay(3000, token);
                                                 Console.WriteLine(1);

@@ -10,7 +10,6 @@ using Statecharts.NET.XState;
 using static Statecharts.NET.XState.JPropertyConstructorFunctions;
 using static Statecharts.NET.Language.Keywords;
 using Action = System.Action;
-using Service = Statecharts.NET.Language.Service;
 using Task = System.Threading.Tasks.Task;
 
 namespace Statecharts.NET.Demo
@@ -79,10 +78,10 @@ namespace Statecharts.NET.Demo
         ////                            () => Console.WriteLine("started"),
         ////                            () => Console.WriteLine("stopped")))));
 
-        private static NamedEvent Increment => Event.Define("INCREMENT");
-        private static NamedDataEventFactory<int> IncrementBy => Event.Define("INCREMENTBY").WithData<int>();
+        private static NamedEvent Increment => Define.Event("INCREMENT");
+        private static NamedDataEventFactory<int> IncrementBy => Define.EventWithData<int>("INCREMENTBY");
 
-        private static readonly StatechartDefinition<FetchContext> DemoDefinition = Statechart
+        private static readonly StatechartDefinition<FetchContext> DemoDefinition = Define.Statechart
             .WithInitialContext(new FetchContext {Retries = 0})
             .WithRootState(
                 "demo"
@@ -108,7 +107,7 @@ namespace Statecharts.NET.Demo
                             .AsCompound().WithInitialState("initial").WithStates(
                                 "initial".WithTransitions(
                                         On("START").TransitionTo.Sibling("selecting"))
-                                    .WithInvocations(Service.DefineActivity(() => Console.WriteLine("start"),
+                                    .WithInvocations(Define.Service.Activity(() => Console.WriteLine("start"),
                                         () => Console.WriteLine("stop"))),
                                 "selecting".WithTransitions(
                                     On("CORRECT").TransitionTo.Sibling("solved")),
@@ -118,7 +117,7 @@ namespace Statecharts.NET.Demo
                             On("COMPLETE").TransitionTo.Sibling("final")),
                         "final".AsFinal()));
 
-        private static readonly StatechartDefinition<FetchContext> TestDefinition = Statechart
+        private static readonly StatechartDefinition<FetchContext> TestDefinition = Define.Statechart
             .WithInitialContext(new FetchContext {Retries = 0})
             .WithRootState(
                 "test"

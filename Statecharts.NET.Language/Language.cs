@@ -8,37 +8,46 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Language
 {
-    public static class Statechart
-    {
-        public static Builders.StatechartDefinitionWithInitialContext<TContext> WithInitialContext<TContext>(TContext initialContext)
-            where TContext : IContext<TContext>
-            => new Builders.StatechartDefinitionWithInitialContext<TContext>(initialContext);
-    }
-    public static class Service
-    {
-        public static ActivityService DefineActivity(System.Action start, System.Action stop) =>
-            new ActivityService(new Activity(start, stop));
-        public static ActivityService DefineActivity(Model.Activity activity) =>
-            new ActivityService(activity);
-        public static TaskService DefineTask(Model.Task task) =>
-            new TaskService(task);
-    }
-    public static class SideEffect
-    {
-        public static SideEffectAction Define(System.Action effect) =>
-            new SideEffectAction(effect);
-        public static SideEffectAction<TContext> Define<TContext>(System.Action<TContext> effect) =>
-            new SideEffectAction<TContext>(effect);
-        public static SideEffectAction<TContext, TData> Define<TContext, TData>(System.Action<TContext, TData> effect) =>
-            new SideEffectAction<TContext, TData>(effect);
-    }
     public delegate NamedDataEvent<TEventData> NamedDataEventFactory<TEventData>(TEventData data);
-    public static class Event
+
+    public static class Define
     {
-        public static NamedEvent Define(string eventName) =>
+        public static class Statechart
+        {
+            public static Builders.StatechartDefinitionWithInitialContext<TContext> WithInitialContext<TContext>(TContext initialContext)
+                where TContext : IContext<TContext>
+                => new Builders.StatechartDefinitionWithInitialContext<TContext>(initialContext);
+        }
+        public static class Service
+        {
+            public static ActivityService Activity(System.Action start, System.Action stop) =>
+                new ActivityService(new Activity(start, stop));
+            public static ActivityService Activity(Activity activity) =>
+                new ActivityService(activity);
+            public static TaskService Task(Task task) =>
+                new TaskService(task);
+        }
+        public static class Action
+        {
+            public static SideEffectAction SideEffect(System.Action effect) =>
+                new SideEffectAction(effect);
+            public static SideEffectAction<TContext> SideEffectWithContext<TContext>(System.Action<TContext> effect) =>
+                new SideEffectAction<TContext>(effect);
+            public static SideEffectAction<TContext, TData> SideEffectWithContextAndData<TContext, TData>(System.Action<TContext, TData> effect) =>
+                new SideEffectAction<TContext, TData>(effect);
+            public static AssignAction Assign(System.Action mutation)
+                => new AssignAction(mutation);
+            public static AssignAction<TContext> AssignWithContext<TContext>(System.Action<TContext> mutation)
+                => new AssignAction<TContext>(mutation);
+            public static AssignAction<TContext, TData> AssignWithContextAndData<TContext, TData>(System.Action<TContext, TData> mutation)
+                => new AssignAction<TContext, TData>(mutation);
+        }
+        #region Event
+        public static NamedEvent Event(string eventName) =>
             new NamedEvent(eventName);
-        public static NamedDataEventFactory<TEventData> WithData<TEventData>(this NamedEvent @event) => // TODO: Event.Define("...")[.WithData<TEventData>()];
-            data => new NamedDataEvent<TEventData>(@event.Name, data);
+        public static NamedDataEventFactory<TEventData> EventWithData<TEventData>(string eventName) =>
+            data => new NamedDataEvent<TEventData>(eventName, data);
+        #endregion
     }
 
     public static class Keywords
@@ -47,7 +56,7 @@ namespace Statecharts.NET.Language
             OneOf<Model.Task, TaskServiceDefinition> first,
             OneOf<Model.Task, TaskServiceDefinition> second,
             params OneOf<Model.Task, TaskServiceDefinition>[] remaining)
-            => Service.DefineTask(async token =>
+            => Define.Service.Task(async token =>
             {
                 foreach (var wrappedTask in first.Append(second).Append(remaining))
                 {

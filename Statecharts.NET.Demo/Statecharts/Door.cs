@@ -10,7 +10,7 @@ namespace Statecharts.NET.Demos.Statecharts
     internal static class Door
     {
         private static FinalStatenodeDefinition Broken => "Broken".AsFinal();
-        internal static StatechartDefinition<FetchContext> Behaviour => Statechart
+        internal static StatechartDefinition<FetchContext> Behaviour => Define.Statechart
             .WithInitialContext(new FetchContext { Retries = 0 })
             .WithRootState(
                 "door"

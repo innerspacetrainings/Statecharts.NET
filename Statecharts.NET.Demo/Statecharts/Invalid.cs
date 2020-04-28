@@ -7,7 +7,7 @@ namespace Statecharts.NET.Demos.Statecharts
 {
     internal static class Invalid
     {
-        internal static StatechartDefinition<NoContext> Behaviour => Statechart
+        internal static StatechartDefinition<NoContext> Behaviour => Define.Statechart
             .WithInitialContext(new NoContext())
             .WithRootState(
                 "example"
