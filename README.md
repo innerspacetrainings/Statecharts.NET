@@ -27,11 +27,11 @@ static readonly StatechartDefinition<FetchContext> Behaviour = Statechart
                 "final".AsFinal()));
 
 // Usage
-var parse = Parser.Parse(Behaviour) as ExecutableStatechart<FetchContext>;
-var statechart = Interpreter.Interpret(statechart);
+var parsedStatechart = Parser.Parse(Behaviour) as ExecutableStatechart<FetchContext>;
+var statechart = Interpreter.Interpret(parsedStatechart);
 
 statechart.Start();
-running.Send(new NamedEvent("START"));
+statechart.Send(new NamedEvent("START"));
 ```
 
 ## Roadmap
