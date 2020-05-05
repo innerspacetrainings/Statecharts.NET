@@ -89,7 +89,7 @@ namespace Statecharts.NET.Language
         public static SiblingTarget Sibling(string stateNodeName)
             => new SiblingTarget(stateNodeName);
         public static AbsoluteTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new AbsoluteTarget(StatenodeId.Absolute(stateNodeName.Append(stateNodeNames))); // TODO: fix this
+            new AbsoluteTarget(StatenodeId.Absolute(new[] { stateChartName, stateNodeName }.Concat(stateNodeNames)));
 
         public static SendAction Send(string eventName)
             => Send(new NamedEvent(eventName));
