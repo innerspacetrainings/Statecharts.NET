@@ -16,10 +16,12 @@ namespace Statecharts.NET.Model
 
         internal RelativeTarget(string statenodeName) => StatenodeName = statenodeName;
     }
-    public class SiblingTarget : RelativeTarget {
+    public class SiblingTarget : RelativeTarget 
+    {
         public SiblingTarget(string statenodeName) : base(statenodeName) { }
     }
-    public class ChildTarget : RelativeTarget {
+    public class ChildTarget : RelativeTarget 
+    {
         public ChildTarget(string statenodeName) : base(statenodeName) { }
     }
     public class SelfTarget : Target { }
