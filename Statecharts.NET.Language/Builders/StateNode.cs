@@ -232,12 +232,14 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public CompoundWithDoneTransitionTo(CompoundWithOnDone compound) => DefinitionData = compound.DefinitionData;
 
-        public CompoundWithDoneTransition Child(string stateName) =>
-            new CompoundWithDoneTransition(this, Keywords.Child(stateName));
-        public CompoundWithDoneTransition Sibling(string stateName) =>
-            new CompoundWithDoneTransition(this, Keywords.Sibling(stateName));
-        public CompoundWithDoneTransition Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new CompoundWithDoneTransition(this, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public CompoundWithDoneTransition Child(string stateName, params string[] childStatenodesNames) =>
+            new CompoundWithDoneTransition(this, Keywords.Child(stateName, childStatenodesNames));
+        public CompoundWithDoneTransition Sibling(string stateName, params string[] childStatenodesNames) =>
+            new CompoundWithDoneTransition(this, Keywords.Sibling(stateName, childStatenodesNames));
+        public CompoundWithDoneTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new CompoundWithDoneTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
+        public CompoundWithDoneTransition Target(Target target) =>
+            new CompoundWithDoneTransition(this, target);
         public CompoundWithDoneTransition Multiple(Model.Target target, params Model.Target[] targets) =>
             new CompoundWithDoneTransition(this, target, targets);
     }
@@ -338,12 +340,14 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public OrthogonalWithDoneTransitionTo(OrthogonalWithOnDone orthogonal) => DefinitionData = orthogonal.DefinitionData;
 
-        public OrthogonalWithDoneTransition Child(string stateName) =>
-            new OrthogonalWithDoneTransition(this, Keywords.Child(stateName));
-        public OrthogonalWithDoneTransition Sibling(string stateName) =>
-            new OrthogonalWithDoneTransition(this, Keywords.Sibling(stateName));
-        public OrthogonalWithDoneTransition Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new OrthogonalWithDoneTransition(this, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public OrthogonalWithDoneTransition Child(string stateName, params string[] childStatenodesNames) =>
+            new OrthogonalWithDoneTransition(this, Keywords.Child(stateName, childStatenodesNames));
+        public OrthogonalWithDoneTransition Sibling(string stateName, params string[] childStatenodesNames) =>
+            new OrthogonalWithDoneTransition(this, Keywords.Sibling(stateName, childStatenodesNames));
+        public OrthogonalWithDoneTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new OrthogonalWithDoneTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
+        public OrthogonalWithDoneTransition Target(Target target) =>
+            new OrthogonalWithDoneTransition(this, target);
         public OrthogonalWithDoneTransition Multiple(Model.Target target, params Model.Target[] targets) =>
             new OrthogonalWithDoneTransition(this, target, targets);
     }

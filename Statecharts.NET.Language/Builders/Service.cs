@@ -76,12 +76,14 @@ namespace Statecharts.NET.Language.Builders.TaskService
 
         internal WithOnSuccessTransitionTo(WithOnSuccess service) => Service = service.Service;
 
-        public WithOnSuccessTransition Child(string stateName) =>
-            new WithOnSuccessTransition(this, Keywords.Child(stateName));
-        public WithOnSuccessTransition Sibling(string stateName) =>
-            new WithOnSuccessTransition(this, Keywords.Sibling(stateName));
-        public WithOnSuccessTransition Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new WithOnSuccessTransition(this, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public WithOnSuccessTransition Child(string statenodeName, params string[] childStatenodeNames) =>
+            new WithOnSuccessTransition(this, Keywords.Child(statenodeName, childStatenodeNames));
+        public WithOnSuccessTransition Sibling(string statenodeName, params string[] childStatenodeNames) =>
+            new WithOnSuccessTransition(this, Keywords.Sibling(statenodeName, childStatenodeNames));
+        public WithOnSuccessTransition Absolute(string statechartName, params string[] childStatenodeNames) =>
+            new WithOnSuccessTransition(this, Keywords.Absolute(statechartName, childStatenodeNames));
+        public WithOnSuccessTransition Target(Target target) =>
+            new WithOnSuccessTransition(this, target);
         public WithOnSuccessTransition Multiple(Target target, params Target[] targets) =>
             new WithOnSuccessTransition(this, target, targets);
     }
@@ -181,12 +183,14 @@ namespace Statecharts.NET.Language.Builders.ActivityService
 
         internal WithOnErrorTransitionTo(WithOnError service) => Service = service.Service;
 
-        public WithOnErrorTransition Child(string stateName) =>
-            new WithOnErrorTransition(this, Keywords.Child(stateName));
-        public WithOnErrorTransition Sibling(string stateName) =>
-            new WithOnErrorTransition(this, Keywords.Sibling(stateName));
-        public WithOnErrorTransition Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new WithOnErrorTransition(this, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public WithOnErrorTransition Child(string stateName, params string[] childStatenodesNames) =>
+            new WithOnErrorTransition(this, Keywords.Child(stateName, childStatenodesNames));
+        public WithOnErrorTransition Sibling(string statenodeName, params string[] childStatenodesNames) =>
+            new WithOnErrorTransition(this, Keywords.Sibling(statenodeName, childStatenodesNames));
+        public WithOnErrorTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new WithOnErrorTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
+        public WithOnErrorTransition Target(Target target) =>
+            new WithOnErrorTransition(this, target);
         public WithOnErrorTransition Multiple(Target target, params Target[] targets) =>
             new WithOnErrorTransition(this, target, targets);
     }

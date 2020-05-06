@@ -13,14 +13,19 @@ namespace Statecharts.NET.Model
     public abstract class RelativeTarget : Target
     {
         public string StatenodeName { get; }
+        public string[] ChildStatenodesNames { get; }
 
-        internal RelativeTarget(string statenodeName) => StatenodeName = statenodeName;
+        internal RelativeTarget(string statenodeName, params string[] childStatenodesNames)
+        {
+            StatenodeName = statenodeName;
+            ChildStatenodesNames = childStatenodesNames;
+        }
     }
     public class SiblingTarget : RelativeTarget {
-        public SiblingTarget(string statenodeName) : base(statenodeName) { }
+        public SiblingTarget(string statenodeName, params string[] childStatenodesNames) : base(statenodeName, childStatenodesNames) { }
     }
     public class ChildTarget : RelativeTarget {
-        public ChildTarget(string statenodeName) : base(statenodeName) { }
+        public ChildTarget(string statenodeName, params string[] childStatenodesNames) : base(statenodeName, childStatenodesNames) { }
     }
     public class SelfTarget : Target { }
     public class UniquelyIdentifiedTarget : Target

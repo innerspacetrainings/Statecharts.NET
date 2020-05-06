@@ -79,14 +79,16 @@ namespace Statecharts.NET.Language.Builders.Transition
 
         public UnguardedTransitionTo(IEventDefinition @event) => _event = @event;
 
-        public UnguardedWithTarget Child(string stateName) =>
-            new UnguardedWithTarget(_event, Keywords.Child(stateName));
-        public UnguardedWithTarget Sibling(string stateName) =>
-            new UnguardedWithTarget(_event, Keywords.Sibling(stateName));
-        public UnguardedWithTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new UnguardedWithTarget(_event, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public UnguardedWithTarget Child(string stateName, params string[] childStatenodesNames) =>
+            new UnguardedWithTarget(_event, Keywords.Child(stateName, childStatenodesNames));
+        public UnguardedWithTarget Sibling(string stateName, params string[] childStatenodesNames) =>
+            new UnguardedWithTarget(_event, Keywords.Sibling(stateName, childStatenodesNames));
+        public UnguardedWithTarget Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new UnguardedWithTarget(_event, Keywords.Absolute(statechartName, childStatenodesNames));
         public UnguardedWithTarget Self =>
             new UnguardedWithTarget(_event, new SelfTarget());
+        public UnguardedWithTarget Target(Target target) =>
+            new UnguardedWithTarget(_event, target);
         public UnguardedWithTarget Multiple(Target target, params Target[] targets) =>
             new UnguardedWithTarget(_event, target, targets);
     }
@@ -96,14 +98,16 @@ namespace Statecharts.NET.Language.Builders.Transition
 
         public UnguardedDataTransitionTo(IDataEventDefinition @event) => _event = @event;
 
-        public DataUnguardedWithTarget<TEventData> Child(string stateName) =>
-            new DataUnguardedWithTarget<TEventData>(_event, Keywords.Child(stateName));
-        public DataUnguardedWithTarget<TEventData> Sibling(string stateName) =>
-            new DataUnguardedWithTarget<TEventData>(_event, Keywords.Sibling(stateName));
-        public DataUnguardedWithTarget<TEventData> Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new DataUnguardedWithTarget<TEventData>(_event, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public DataUnguardedWithTarget<TEventData> Child(string stateName, params string[] childStatenodesNames) =>
+            new DataUnguardedWithTarget<TEventData>(_event, Keywords.Child(stateName, childStatenodesNames));
+        public DataUnguardedWithTarget<TEventData> Sibling(string stateName, params string[] childStatenodesNames) =>
+            new DataUnguardedWithTarget<TEventData>(_event, Keywords.Sibling(stateName, childStatenodesNames));
+        public DataUnguardedWithTarget<TEventData> Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new DataUnguardedWithTarget<TEventData>(_event, Keywords.Absolute(statechartName, childStatenodesNames));
         public DataUnguardedWithTarget<TEventData> Self =>
             new DataUnguardedWithTarget<TEventData>(_event, new SelfTarget());
+        public DataUnguardedWithTarget<TEventData> Target(Target target) =>
+            new DataUnguardedWithTarget<TEventData>(_event, target);
         public DataUnguardedWithTarget<TEventData> Multiple(Target target, params Target[] targets) =>
             new DataUnguardedWithTarget<TEventData>(_event, target, targets);
     }
@@ -177,14 +181,16 @@ namespace Statecharts.NET.Language.Builders.Transition
             _guard = guard;
         }
 
-        public GuardedWithTarget Child(string stateName) =>
-            new GuardedWithTarget(_event, _guard, Keywords.Child(stateName));
-        public GuardedWithTarget Sibling(string stateName) =>
-            new GuardedWithTarget(_event, _guard, Keywords.Sibling(stateName));
-        public GuardedWithTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new GuardedWithTarget(_event, _guard, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public GuardedWithTarget Child(string stateName, params string[] childStatenodesNames) =>
+            new GuardedWithTarget(_event, _guard, Keywords.Child(stateName, childStatenodesNames));
+        public GuardedWithTarget Sibling(string stateName, params string[] childStatenodesNames) =>
+            new GuardedWithTarget(_event, _guard, Keywords.Sibling(stateName, childStatenodesNames));
+        public GuardedWithTarget Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new GuardedWithTarget(_event, _guard, Keywords.Absolute(statechartName, childStatenodesNames));
         public GuardedWithTarget Self =>
             new GuardedWithTarget(_event, _guard, new SelfTarget());
+        public GuardedWithTarget Target(Target target) =>
+            new GuardedWithTarget(_event, _guard, target);
         public GuardedWithTarget Multiple(Target target, params Target[] targets) =>
             new GuardedWithTarget(_event, _guard, target, targets);
     }
@@ -200,14 +206,16 @@ namespace Statecharts.NET.Language.Builders.Transition
             _guard = guard;
         }
 
-        public ContextGuardedWithTarget<TContext> Child(string stateName) =>
-            new ContextGuardedWithTarget<TContext>(_event, _guard, Keywords.Child(stateName));
-        public ContextGuardedWithTarget<TContext> Sibling(string stateName) =>
-            new ContextGuardedWithTarget<TContext>(_event, _guard, Keywords.Sibling(stateName));
-        public ContextGuardedWithTarget<TContext> Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new ContextGuardedWithTarget<TContext>(_event, _guard, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public ContextGuardedWithTarget<TContext> Child(string stateName, params string[] childStatenodesNames) =>
+            new ContextGuardedWithTarget<TContext>(_event, _guard, Keywords.Child(stateName, childStatenodesNames));
+        public ContextGuardedWithTarget<TContext> Sibling(string stateName, params string[] childStatenodesNames) =>
+            new ContextGuardedWithTarget<TContext>(_event, _guard, Keywords.Sibling(stateName, childStatenodesNames));
+        public ContextGuardedWithTarget<TContext> Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new ContextGuardedWithTarget<TContext>(_event, _guard, Keywords.Absolute(statechartName, childStatenodesNames));
         public ContextGuardedWithTarget<TContext> Self =>
             new ContextGuardedWithTarget<TContext>(_event, _guard, new SelfTarget());
+        public ContextGuardedWithTarget<TContext> Target(Target target) =>
+            new ContextGuardedWithTarget<TContext>(_event, _guard, target);
         public ContextGuardedWithTarget<TContext> Multiple(Target target, params Target[] targets) =>
             new ContextGuardedWithTarget<TContext>(_event, _guard, target, targets);
     }
@@ -222,14 +230,16 @@ namespace Statecharts.NET.Language.Builders.Transition
             _guard = guard;
         }
 
-        public DataGuardedWithTarget<TEventData> Child(string stateName) =>
-            new DataGuardedWithTarget<TEventData>(_event, _guard, Keywords.Child(stateName));
-        public DataGuardedWithTarget<TEventData> Sibling(string stateName) =>
-            new DataGuardedWithTarget<TEventData>(_event, _guard, Keywords.Sibling(stateName));
-        public DataGuardedWithTarget<TEventData> Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new DataGuardedWithTarget<TEventData>(_event, _guard, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public DataGuardedWithTarget<TEventData> Child(string stateName, params string[] childStatenodesNames) =>
+            new DataGuardedWithTarget<TEventData>(_event, _guard, Keywords.Child(stateName, childStatenodesNames));
+        public DataGuardedWithTarget<TEventData> Sibling(string stateName, params string[] childStatenodesNames) =>
+            new DataGuardedWithTarget<TEventData>(_event, _guard, Keywords.Sibling(stateName, childStatenodesNames));
+        public DataGuardedWithTarget<TEventData> Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new DataGuardedWithTarget<TEventData>(_event, _guard, Keywords.Absolute(statechartName, childStatenodesNames));
         public DataGuardedWithTarget<TEventData> Self =>
             new DataGuardedWithTarget<TEventData>(_event, _guard, new SelfTarget());
+        public DataGuardedWithTarget<TEventData> Target(Target target) =>
+            new DataGuardedWithTarget<TEventData>(_event, _guard, target);
         public DataGuardedWithTarget<TEventData> Multiple(Target target, params Target[] targets) =>
             new DataGuardedWithTarget<TEventData>(_event, _guard, target, targets);
     }
@@ -245,14 +255,16 @@ namespace Statecharts.NET.Language.Builders.Transition
             _guard = guard;
         }
 
-        public ContextDataGuardedWithTarget<TContext, TEventData> Child(string stateName) =>
-            new ContextDataGuardedWithTarget<TContext, TEventData>(_event, _guard, Keywords.Child(stateName));
-        public ContextDataGuardedWithTarget<TContext, TEventData> Sibling(string stateName) =>
-            new ContextDataGuardedWithTarget<TContext, TEventData>(_event, _guard, Keywords.Sibling(stateName));
-        public ContextDataGuardedWithTarget<TContext, TEventData> Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new ContextDataGuardedWithTarget<TContext, TEventData>(_event, _guard, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public ContextDataGuardedWithTarget<TContext, TEventData> Child(string stateName, params string[] childStatenodesNames) =>
+            new ContextDataGuardedWithTarget<TContext, TEventData>(_event, _guard, Keywords.Child(stateName, childStatenodesNames));
+        public ContextDataGuardedWithTarget<TContext, TEventData> Sibling(string stateName, params string[] childStatenodesNames) =>
+            new ContextDataGuardedWithTarget<TContext, TEventData>(_event, _guard, Keywords.Sibling(stateName, childStatenodesNames));
+        public ContextDataGuardedWithTarget<TContext, TEventData> Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new ContextDataGuardedWithTarget<TContext, TEventData>(_event, _guard, Keywords.Absolute(statechartName, childStatenodesNames));
         public ContextDataGuardedWithTarget<TContext, TEventData> Self =>
             new ContextDataGuardedWithTarget<TContext, TEventData>(_event, _guard, new SelfTarget());
+        public ContextDataGuardedWithTarget<TContext, TEventData> Target(Target target) =>
+            new ContextDataGuardedWithTarget<TContext, TEventData>(_event, _guard, target);
         public ContextDataGuardedWithTarget<TContext, TEventData> Multiple(Target target, params Target[] targets) =>
             new ContextDataGuardedWithTarget<TContext, TEventData>(_event, _guard, target, targets);
     }

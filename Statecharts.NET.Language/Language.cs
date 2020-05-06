@@ -84,12 +84,12 @@ namespace Statecharts.NET.Language
         public static Builders.Transition.WithEvent After(TimeSpan delay)
             => Builders.Transition.WithEvent.Delayed(delay);
 
-        public static ChildTarget Child(string stateNodeName)
-            => new ChildTarget(stateNodeName);
-        public static SiblingTarget Sibling(string stateNodeName)
-            => new SiblingTarget(stateNodeName);
-        public static AbsoluteTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new AbsoluteTarget(StatenodeId.Absolute(new []{stateChartName, stateNodeName}.Concat(stateNodeNames))); // TODO: fix this
+        public static ChildTarget Child(string statenodeName, params string[] childStatenodesNames)
+            => new ChildTarget(statenodeName, childStatenodesNames);
+        public static SiblingTarget Sibling(string statenodeName, params string[] childStatenodesNames)
+            => new SiblingTarget(statenodeName, childStatenodesNames);
+        public static AbsoluteTarget Absolute(string statechartName, params string[] childStatenodeNames) =>
+            new AbsoluteTarget(StatenodeId.Absolute(statechartName.Append(childStatenodeNames)));
 
         public static SendAction Send(string eventName)
             => Send(new NamedEvent(eventName));
