@@ -4,17 +4,17 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Language
 {
-    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction>
+    public abstract class ActionDefinition : OneOfBase<SendActionDefinition, RaiseActionDefinition, LogActionDefinition, AssignActionDefinition, SideEffectActionDefinition>
     {
-        internal ActionDefinition ToDefinitionAction() =>
+        internal Model.ActionDefinition ToDefinitionAction() =>
             Match(
-                send => new SendActionDefinition(send.Event) as ActionDefinition, 
-                raise => new RaiseActionDefinition(raise.Event),
-                log => new LogActionDefinition(log.Label),
-                assign => new AssignActionDefinition(assign.Mutation),
-                sideEffect => new SideEffectActionDefinition(sideEffect.Function));
+                send => new Model.SendActionDefinition(send.Event) as Model.ActionDefinition, 
+                raise => new Model.RaiseActionDefinition(raise.Event),
+                log => new Model.LogActionDefinition(log.Label),
+                assign => new Model.AssignActionDefinition(assign.Mutation),
+                sideEffect => new Model.SideEffectActionDefinition(sideEffect.Function));
     }
-    public abstract class Action<TContext> : OneOfBase<LogAction<TContext>, AssignAction<TContext>, SideEffectAction<TContext>>
+    public abstract class ActionDefinition<TContext> : OneOfBase<LogActionDefinition<TContext>, AssignActionDefinition<TContext>, SideEffectActionDefinition<TContext>>
     {
         internal ContextActionDefinition ToDefinitionAction() =>
             Match(
@@ -22,8 +22,8 @@ namespace Statecharts.NET.Language
                 assign => new AssignContextActionDefinition(context => assign.Mutation((TContext) context)), 
                 sideEffect => new SideEffectContextActionDefinition(context => sideEffect.Function((TContext) context)));
     }
-    public abstract class Action<TContext, TEventData> : OneOfBase<LogAction<TContext, TEventData>, AssignAction<TContext, TEventData>,
-        SideEffectAction<TContext, TEventData>>
+    public abstract class ActionDefinition<TContext, TEventData> : OneOfBase<LogActionDefinition<TContext, TEventData>, AssignActionDefinition<TContext, TEventData>,
+        SideEffectActionDefinition<TContext, TEventData>>
     {
         internal ContextDataActionDefinition ToDefinitionAction() =>
             Match(
@@ -32,61 +32,61 @@ namespace Statecharts.NET.Language
                 sideEffect => new SideEffectContextDataActionDefinition((context, eventData) => sideEffect.Function((TContext)context, (TEventData) eventData)));
     }
 
-    public class SendAction : Action {
+    public class SendActionDefinition : ActionDefinition {
         public ISendableEvent Event { get; }
-        public SendAction(ISendableEvent @event) => Event = @event;
+        public SendActionDefinition(ISendableEvent @event) => Event = @event;
     }
 
-    public class RaiseAction : Action {
+    public class RaiseActionDefinition : ActionDefinition {
         public ISendableEvent Event { get; }
-        public RaiseAction(ISendableEvent @event) => Event = @event;
+        public RaiseActionDefinition(ISendableEvent @event) => Event = @event;
     }
 
-    public class LogAction : Action
+    public class LogActionDefinition : ActionDefinition
     {
         public string Label { get; }
-        public LogAction(string label) => Label = label;
+        public LogActionDefinition(string label) => Label = label;
     }
-    public class LogAction<TContext> : Action<TContext>
+    public class LogActionDefinition<TContext> : ActionDefinition<TContext>
     {
         public Func<TContext, string> Message { get; }
-        public LogAction(Func<TContext, string> message) => Message = message;
+        public LogActionDefinition(Func<TContext, string> message) => Message = message;
     }
-    public class LogAction<TContext, TData> : Action<TContext, TData>
+    public class LogActionDefinition<TContext, TData> : ActionDefinition<TContext, TData>
     {
         public Func<TContext, TData, string> Message { get; }
-        public LogAction(Func<TContext, TData, string> message) => Message = message;
+        public LogActionDefinition(Func<TContext, TData, string> message) => Message = message;
     }
 
-    public class AssignAction : Action
+    public class AssignActionDefinition : ActionDefinition
     {
-        public System.Action Mutation { get; }
-        public AssignAction(System.Action mutation) => Mutation = mutation;
+        public Action Mutation { get; }
+        public AssignActionDefinition(Action mutation) => Mutation = mutation;
     }
-    public class AssignAction<TContext> : Action<TContext>
+    public class AssignActionDefinition<TContext> : ActionDefinition<TContext>
     {
-        public System.Action<TContext> Mutation { get; }
-        public AssignAction(System.Action<TContext> mutation) => Mutation = mutation;
+        public Action<TContext> Mutation { get; }
+        public AssignActionDefinition(Action<TContext> mutation) => Mutation = mutation;
     }
-    public class AssignAction<TContext, TData> : Action<TContext, TData>
+    public class AssignActionDefinition<TContext, TData> : ActionDefinition<TContext, TData>
     {
-        public System.Action<TContext, TData> Mutation { get; }
-        public AssignAction(System.Action<TContext, TData> mutation) => Mutation = mutation;
+        public Action<TContext, TData> Mutation { get; }
+        public AssignActionDefinition(Action<TContext, TData> mutation) => Mutation = mutation;
     }
 
-    public class SideEffectAction : Action
+    public class SideEffectActionDefinition : ActionDefinition
     {
-        public System.Action Function { get; }
-        public SideEffectAction(System.Action function) => Function = function;
+        public Action Function { get; }
+        public SideEffectActionDefinition(Action function) => Function = function;
     }
-    public class SideEffectAction<TContext> : Action<TContext>
+    public class SideEffectActionDefinition<TContext> : ActionDefinition<TContext>
     {
-        public System.Action<TContext> Function { get; }
-        public SideEffectAction(System.Action<TContext> function) => Function = function;
+        public Action<TContext> Function { get; }
+        public SideEffectActionDefinition(Action<TContext> function) => Function = function;
     }
-    public class SideEffectAction<TContext, TData> : Action<TContext, TData>
+    public class SideEffectActionDefinition<TContext, TData> : ActionDefinition<TContext, TData>
     {
-        public System.Action<TContext, TData> Function { get; }
-        public SideEffectAction(System.Action<TContext, TData> function) => Function = function;
+        public Action<TContext, TData> Function { get; }
+        public SideEffectActionDefinition(Action<TContext, TData> function) => Function = function;
     }
 }

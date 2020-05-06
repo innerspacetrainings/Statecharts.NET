@@ -71,37 +71,37 @@ namespace Statecharts.NET.Model
     }
     #endregion
     #region Executable
-    public class SendAction : Action
+    public class SendAction : ExecutableAction
     {
         public ISendableEvent Event { get; }
         public SendAction(ISendableEvent @event) => Event = @event;
         public override string ToString() => $"send({Event})";
     }
-    public class RaiseAction : Action
+    public class RaiseAction : ExecutableAction
     {
         public ISendableEvent Event { get; }
         public RaiseAction(ISendableEvent @event) => Event = @event;
         public override string ToString() => $"raise({Event})";
     }
-    public class LogAction : Action
+    public class LogAction : ExecutableAction
     {
         public Func<object, object, string> Message { get; }
         public LogAction(Func<object, object, string> message) => Message = message;
         public override string ToString() => "log";
     }
-    public class AssignAction : Action
+    public class AssignAction : ExecutableAction
     {
         public Action<object, object> Mutation { get; }
         public AssignAction(Action<object, object> mutation) => Mutation = mutation;
         public override string ToString() => "assign";
     }
-    public class SideEffectAction : Action
+    public class SideEffectAction : ExecutableAction
     {
         public Action<object, object> Function { get; }
         public SideEffectAction(Action<object, object> function) => Function = function;
         public override string ToString() => "side effect";
     }
-    public class StartDelayedTransitionAction : Action
+    public class StartDelayedTransitionAction : ExecutableAction
     {
         public StatenodeId StatenodeId { get; }
         public TimeSpan Delay { get; }
@@ -116,37 +116,37 @@ namespace Statecharts.NET.Model
     // TODO: refactor this
     public static class ActionExtensionFunctions
     {
-        internal static IEnumerable<Action> ToModelActions(this IEnumerable<ActionDefinition> definitionActions)
-            => definitionActions.Select(Action.From);
-        internal static IEnumerable<Action> ToModelActions(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> definitionActions)
-            => definitionActions.Select(action => action.Match(Action.From, Action.From));
-        internal static IEnumerable<Action> ToModelActions(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> definitionActions)
-            => definitionActions.Select(action => action.Match(Action.From, Action.From, Action.From));
+        internal static IEnumerable<ExecutableAction> ToModelActions(this IEnumerable<ActionDefinition> definitionActions)
+            => definitionActions.Select(ExecutableAction.From);
+        internal static IEnumerable<ExecutableAction> ToModelActions(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> definitionActions)
+            => definitionActions.Select(action => action.Match(ExecutableAction.From, ExecutableAction.From));
+        internal static IEnumerable<ExecutableAction> ToModelActions(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> definitionActions)
+            => definitionActions.Select(action => action.Match(ExecutableAction.From, ExecutableAction.From, ExecutableAction.From));
     }
 
-    public abstract class Action : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction, StartDelayedTransitionAction>
+    public abstract class ExecutableAction : OneOfBase<SendAction, RaiseAction, LogAction, AssignAction, SideEffectAction, StartDelayedTransitionAction>
     {
-        public static Action From(ActionDefinition actionDefinition) =>
+        public static ExecutableAction From(ActionDefinition actionDefinition) =>
             actionDefinition.Match(
-                send => new SendAction(send.Event) as Action,
+                send => new SendAction(send.Event) as ExecutableAction,
                 raise => new RaiseAction(raise.Event),
                 log => new LogAction((context, data) => log.Label),
                 assign => new AssignAction((context, data) => assign.Mutation()),
                 sideEffect => new SideEffectAction((context, data) => sideEffect.Function()));
-        public static Action From(ContextActionDefinition actionDefinition) =>
+        public static ExecutableAction From(ContextActionDefinition actionDefinition) =>
             actionDefinition.Match(
-                log => new LogAction((context, data) => log.Message(context)) as Action, 
+                log => new LogAction((context, data) => log.Message(context)) as ExecutableAction, 
                 assign => new AssignAction((context, data) => assign.Mutation(context)), 
                 sideEffect => new SideEffectAction((context, data) => sideEffect.Function(context)));
-        public static Action From(ContextDataActionDefinition actionDefinition) =>
+        public static ExecutableAction From(ContextDataActionDefinition actionDefinition) =>
             actionDefinition.Match(
-                log => new LogAction(log.Message) as Action,
+                log => new LogAction(log.Message) as ExecutableAction,
                 assign => new AssignAction(assign.Mutation),
                 sideEffect => new SideEffectAction(sideEffect.Function));
 
-        public static Action From(OneOf<ActionDefinition, ContextActionDefinition> actionDefinition) =>
+        public static ExecutableAction From(OneOf<ActionDefinition, ContextActionDefinition> actionDefinition) =>
             actionDefinition.Match(From, From);
-        public static Action From(OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition> actionDefinition) =>
+        public static ExecutableAction From(OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition> actionDefinition) =>
             actionDefinition.Match(From, From, From);
     }
 }

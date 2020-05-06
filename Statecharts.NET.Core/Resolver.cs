@@ -124,7 +124,7 @@ namespace Statecharts.NET
         private static EventList Apply(
             Microstep microStep,
             object context,
-            (Func<Model.Action, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopExitedStatenodes) functions)
+            (Func<ExecutableAction, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopExitedStatenodes) functions)
         {
             EventList ExecuteActionBlock(Actionblock actions)
             {
@@ -161,7 +161,7 @@ namespace Statecharts.NET
         }
         
         // TODO: return FailableOption
-        private static Option<OneOf<CurrentStep, NextStep>> SideffectFreeExecuteAction(Model.Action action, object context, object eventData) =>
+        private static Option<OneOf<CurrentStep, NextStep>> SideffectFreeExecuteAction(ExecutableAction action, object context, object eventData) =>
             action.Match(
                 send => ((OneOf<CurrentStep, NextStep>)new NextStep(send.Event)).ToOption(),
                 raise => ((OneOf<CurrentStep, NextStep>)new CurrentStep(raise.Event)).ToOption(),
@@ -178,7 +178,7 @@ namespace Statecharts.NET
             ExecutableStatechart<TContext> statechart,
             State<TContext> sourceState,
             IEvent macrostepEvent,
-            (Func<Model.Action, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopExitedStatenodes) functions)
+            (Func<ExecutableAction, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopExitedStatenodes) functions)
             where TContext : IContext<TContext>
         {
             var occuredEvents = new List<(IEvent @event, IEnumerable<Microstep> causedMicrosteps)>();

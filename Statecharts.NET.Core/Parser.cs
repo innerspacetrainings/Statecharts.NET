@@ -5,23 +5,22 @@ using System.Threading.Tasks;
 using Statecharts.NET.Interfaces;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
-using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET
 {
     internal static class ActionDefinitionExtensions
     {
-        private static Actionblock NullsafeConvert(IEnumerable<Action> actions) =>
+        private static Actionblock NullsafeConvert(IEnumerable<ExecutableAction> actions) =>
             actions != null
                 ? Actionblock.From(actions)
                 : Actionblock.Empty();
 
         internal static Actionblock Convert(this IEnumerable<ActionDefinition> actions) =>
-            NullsafeConvert(actions?.Select(Action.From));
+            NullsafeConvert(actions?.Select(ExecutableAction.From));
         internal static Actionblock Convert(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> actions) =>
-            NullsafeConvert(actions?.Select(Action.From));
+            NullsafeConvert(actions?.Select(ExecutableAction.From));
         internal static Actionblock Convert(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> actions) =>
-            NullsafeConvert(actions?.Select(Action.From));
+            NullsafeConvert(actions?.Select(ExecutableAction.From));
     }
 
     internal static class TargetExtensions

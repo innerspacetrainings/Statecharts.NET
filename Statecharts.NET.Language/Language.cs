@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Statecharts.NET.Interfaces;
+using Statecharts.NET.Language.Builders;
+using Statecharts.NET.Language.Builders.StateNode;
 using Statecharts.NET.Language.Builders.Transition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
@@ -14,9 +15,9 @@ namespace Statecharts.NET.Language
     {
         public static class Statechart
         {
-            public static Builders.StatechartDefinitionWithInitialContext<TContext> WithInitialContext<TContext>(TContext initialContext)
+            public static StatechartDefinitionWithInitialContext<TContext> WithInitialContext<TContext>(TContext initialContext)
                 where TContext : IContext<TContext>
-                => new Builders.StatechartDefinitionWithInitialContext<TContext>(initialContext);
+                => new StatechartDefinitionWithInitialContext<TContext>(initialContext);
         }
         public static class Service
         {
@@ -29,18 +30,18 @@ namespace Statecharts.NET.Language
         }
         public static class Action
         {
-            public static SideEffectAction SideEffect(System.Action effect) =>
-                new SideEffectAction(effect);
-            public static SideEffectAction<TContext> SideEffectWithContext<TContext>(System.Action<TContext> effect) =>
-                new SideEffectAction<TContext>(effect);
-            public static SideEffectAction<TContext, TData> SideEffectWithContextAndData<TContext, TData>(System.Action<TContext, TData> effect) =>
-                new SideEffectAction<TContext, TData>(effect);
-            public static AssignAction Assign(System.Action mutation)
-                => new AssignAction(mutation);
-            public static AssignAction<TContext> AssignWithContext<TContext>(System.Action<TContext> mutation)
-                => new AssignAction<TContext>(mutation);
-            public static AssignAction<TContext, TData> AssignWithContextAndData<TContext, TData>(System.Action<TContext, TData> mutation)
-                => new AssignAction<TContext, TData>(mutation);
+            public static SideEffectActionDefinition SideEffect(System.Action effect) =>
+                new SideEffectActionDefinition(effect);
+            public static SideEffectActionDefinition<TContext> SideEffectWithContext<TContext>(Action<TContext> effect) =>
+                new SideEffectActionDefinition<TContext>(effect);
+            public static SideEffectActionDefinition<TContext, TData> SideEffectWithContextAndData<TContext, TData>(Action<TContext, TData> effect) =>
+                new SideEffectActionDefinition<TContext, TData>(effect);
+            public static AssignActionDefinition Assign(System.Action mutation)
+                => new AssignActionDefinition(mutation);
+            public static AssignActionDefinition<TContext> AssignWithContext<TContext>(Action<TContext> mutation)
+                => new AssignActionDefinition<TContext>(mutation);
+            public static AssignActionDefinition<TContext, TData> AssignWithContextAndData<TContext, TData>(Action<TContext, TData> mutation)
+                => new AssignActionDefinition<TContext, TData>(mutation);
         }
         #region Event
         public static NamedEvent Event(string eventName) =>
@@ -53,9 +54,9 @@ namespace Statecharts.NET.Language
     public static class Keywords
     {
         public static TaskService Chain(
-            OneOf<Model.TaskDelegate, TaskServiceDefinition> first,
-            OneOf<Model.TaskDelegate, TaskServiceDefinition> second,
-            params OneOf<Model.TaskDelegate, TaskServiceDefinition>[] remaining)
+            OneOf<TaskDelegate, TaskServiceDefinition> first,
+            OneOf<TaskDelegate, TaskServiceDefinition> second,
+            params OneOf<TaskDelegate, TaskServiceDefinition>[] remaining)
             => Define.Service.Task(async token =>
             {
                 foreach (var wrappedTask in first.Append(second).Append(remaining))
@@ -73,16 +74,16 @@ namespace Statecharts.NET.Language
         public static ForbiddenTransitionDefinition Ignore<TEventData>(NamedDataEventFactory<TEventData> factory) =>
             new ForbiddenTransitionDefinition(factory(default));
 
-        public static Builders.Transition.WithNamedEvent On(string eventName)
+        public static WithNamedEvent On(string eventName)
             => new WithNamedEvent(eventName);
-        public static Builders.Transition.WithNamedEvent On(NamedEvent @event)
+        public static WithNamedEvent On(NamedEvent @event)
             => new WithNamedEvent(@event);
-        public static Builders.Transition.WithNamedDataEvent<TEventData> On<TEventData>(NamedDataEventFactory<TEventData> factory)
+        public static WithNamedDataEvent<TEventData> On<TEventData>(NamedDataEventFactory<TEventData> factory)
             => new WithNamedDataEvent<TEventData>(factory(default));
-        public static Builders.Transition.WithEvent Immediately
-            => Builders.Transition.WithEvent.Immediately();
-        public static Builders.Transition.WithEvent After(TimeSpan delay)
-            => Builders.Transition.WithEvent.Delayed(delay);
+        public static WithEvent Immediately
+            => WithEvent.Immediately();
+        public static WithEvent After(TimeSpan delay)
+            => WithEvent.Delayed(delay);
 
         public static ChildTarget Child(string statenodeName, params string[] childStatenodesNames)
             => new ChildTarget(statenodeName, childStatenodesNames);
@@ -91,76 +92,76 @@ namespace Statecharts.NET.Language
         public static AbsoluteTarget Absolute(string statechartName, params string[] childStatenodeNames) =>
             new AbsoluteTarget(StatenodeId.Absolute(statechartName.Append(childStatenodeNames)));
 
-        public static SendAction Send(string eventName)
+        public static SendActionDefinition Send(string eventName)
             => Send(new NamedEvent(eventName));
-        public static SendAction Send(ISendableEvent @event)
-            => new SendAction(@event);
-        public static RaiseAction Raise(string eventName)
+        public static SendActionDefinition Send(ISendableEvent @event)
+            => new SendActionDefinition(@event);
+        public static RaiseActionDefinition Raise(string eventName)
             => Raise(new NamedEvent(eventName));
-        public static RaiseAction Raise(ISendableEvent @event)
-            => new RaiseAction(@event);
-        public static LogAction Log(string label)
-            => new LogAction(label);
-        public static LogAction<TContext> Log<TContext>(Func<TContext, string> message)
-            => new LogAction<TContext>(message);
-        public static LogAction<TContext, TData> Log<TContext, TData>(Func<TContext, TData, string> message)
-            => new LogAction<TContext, TData>(message);
-        public static AssignAction Assign(System.Action mutation)
-            => new AssignAction(mutation);
-        public static AssignAction<TContext> Assign<TContext>(System.Action<TContext> mutation)
-            => new AssignAction<TContext>(mutation);
-        public static AssignAction<TContext, TData> Assign<TContext, TData>(System.Action<TContext, TData> mutation)
-            => new AssignAction<TContext, TData>(mutation);
-        public static SideEffectAction Run(System.Action sideEffect)
-            => new SideEffectAction(sideEffect);
-        public static SideEffectAction<TContext> Run<TContext>(System.Action<TContext> sideEffect)
-            => new SideEffectAction<TContext>(sideEffect);
-        public static SideEffectAction<TContext, TData> Run<TContext, TData>(System.Action<TContext, TData> sideEffect)
-            => new SideEffectAction<TContext, TData>(sideEffect);
+        public static RaiseActionDefinition Raise(ISendableEvent @event)
+            => new RaiseActionDefinition(@event);
+        public static LogActionDefinition Log(string label)
+            => new LogActionDefinition(label);
+        public static LogActionDefinition<TContext> Log<TContext>(Func<TContext, string> message)
+            => new LogActionDefinition<TContext>(message);
+        public static LogActionDefinition<TContext, TData> Log<TContext, TData>(Func<TContext, TData, string> message)
+            => new LogActionDefinition<TContext, TData>(message);
+        public static AssignActionDefinition Assign(Action mutation)
+            => new AssignActionDefinition(mutation);
+        public static AssignActionDefinition<TContext> Assign<TContext>(Action<TContext> mutation)
+            => new AssignActionDefinition<TContext>(mutation);
+        public static AssignActionDefinition<TContext, TData> Assign<TContext, TData>(Action<TContext, TData> mutation)
+            => new AssignActionDefinition<TContext, TData>(mutation);
+        public static SideEffectActionDefinition Run(Action sideEffect)
+            => new SideEffectActionDefinition(sideEffect);
+        public static SideEffectActionDefinition<TContext> Run<TContext>(Action<TContext> sideEffect)
+            => new SideEffectActionDefinition<TContext>(sideEffect);
+        public static SideEffectActionDefinition<TContext, TData> Run<TContext, TData>(Action<TContext, TData> sideEffect)
+            => new SideEffectActionDefinition<TContext, TData>(sideEffect);
     }
     public static class Helpers
     {
-        public static Builders.StateNode.WithEntryActions WithEntryActions(
+        public static WithEntryActions WithEntryActions(
             this string name,
-            Language.Action action,
-            params Language.Action[] entryActions)
-            => new Builders.StateNode.WithName(name).WithEntryActions(action, entryActions);
-        public static Builders.StateNode.WithEntryActions WithEntryActions<TContext>(
+            ActionDefinition action,
+            params ActionDefinition[] entryActions)
+            => new WithName(name).WithEntryActions(action, entryActions);
+        public static WithEntryActions WithEntryActions<TContext>(
             this string name,
-            OneOf<Language.Action, Language.Action<TContext>> action,
-            params OneOf<Language.Action, Language.Action<TContext>>[] entryActions)
-            => new Builders.StateNode.WithName(name).WithEntryActions(action, entryActions);
-        public static Builders.StateNode.WithExitActions WithExitActions(
+            OneOf<ActionDefinition, ActionDefinition<TContext>> action,
+            params OneOf<ActionDefinition, ActionDefinition<TContext>>[] entryActions)
+            => new WithName(name).WithEntryActions(action, entryActions);
+        public static WithExitActions WithExitActions(
             this string name,
-            Language.Action action,
-            params Language.Action[] exitActions)
-            => new Builders.StateNode.WithName(name).WithExitActions(action, exitActions);
-        public static Builders.StateNode.WithExitActions WithExitActions<TContext>(
+            ActionDefinition action,
+            params ActionDefinition[] exitActions)
+            => new WithName(name).WithExitActions(action, exitActions);
+        public static WithExitActions WithExitActions<TContext>(
             this string name,
-            OneOf<Language.Action, Language.Action<TContext>> action,
-            params OneOf<Language.Action, Language.Action<TContext>>[] exitActions)
-            => new Builders.StateNode.WithName(name).WithExitActions(action, exitActions);
-        public static Builders.StateNode.WithTransitions WithTransitions(
+            OneOf<ActionDefinition, ActionDefinition<TContext>> action,
+            params OneOf<ActionDefinition, ActionDefinition<TContext>>[] exitActions)
+            => new WithName(name).WithExitActions(action, exitActions);
+        public static WithTransitions WithTransitions(
             this string name,
             TransitionDefinition transition,
             params TransitionDefinition[] transitions)
-            => new Builders.StateNode.WithName(name).WithTransitions(transition, transitions);
-        public static Builders.StateNode.WithTransitions WithTransitions(
+            => new WithName(name).WithTransitions(transition, transitions);
+        public static WithTransitions WithTransitions(
             this string name,
             IEnumerable<TransitionDefinition> transitions)
-            => new Builders.StateNode.WithName(name).WithTransitions(transitions);
-        public static Builders.StateNode.WithInvocations WithInvocations(
+            => new WithName(name).WithTransitions(transitions);
+        public static WithInvocations WithInvocations(
             this string name,
             ServiceDefinition service,
             params ServiceDefinition[] services)
-            => new Builders.StateNode.WithName(name).WithInvocations(service, services);
+            => new WithName(name).WithInvocations(service, services);
         public static StatenodeDefinition AsStatenodeDefinition(this string name)
-            => new Builders.StateNode.WithName(name);
-        public static Builders.StateNode.Final AsFinal(this string name)
-            => new Builders.StateNode.WithName(name).AsFinal();
-        public static Builders.StateNode.Compound AsCompound(this string name)
-            => new Builders.StateNode.WithName(name).AsCompound();
-        public static Builders.StateNode.Orthogonal AsOrthogonal(this string name)
-            => new Builders.StateNode.WithName(name).AsOrthogonal();
+            => new WithName(name);
+        public static Final AsFinal(this string name)
+            => new WithName(name).AsFinal();
+        public static Compound AsCompound(this string name)
+            => new WithName(name).AsCompound();
+        public static Orthogonal AsOrthogonal(this string name)
+            => new WithName(name).AsOrthogonal();
     }
 }
