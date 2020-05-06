@@ -94,7 +94,7 @@ namespace Statecharts.NET.Model
             ExitActions = exitActions;
 
             Id = new StatenodeId(Parent, name);
-            Depth = Parent.Map(p => p.Depth).ValueOr(0);
+            Depth = Parent.Map(p => p.Depth + 1).ValueOr(0);
         }
 
         public override bool Equals(object other) => other is Statenode statenode && statenode.Id.Equals(Id);
