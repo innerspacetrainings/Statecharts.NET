@@ -11,13 +11,13 @@ namespace Statecharts.NET.Language
     {
         internal DefinitionData DefinitionData { get; }
 
-        public TaskService(Model.Task task)
+        public TaskService(Model.TaskDelegate task)
         {
             DefinitionData = new DefinitionData();
             Task = task;
         }
 
-        public override Model.Task Task { get; }
+        public override Model.TaskDelegate Task { get; }
         public override Option<string> Id => DefinitionData.Id;
         public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => DefinitionData.OnErrorTransition;
         public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
@@ -105,7 +105,7 @@ namespace Statecharts.NET.Language.Builders.TaskService
             where TContext : IContext<TContext> =>
             new WithOnSuccessTransitionWithActions<TContext>(this, action, actions);
 
-        public override Model.Task Task => Service.Task;
+        public override Model.TaskDelegate Task => Service.Task;
         public override Option<string> Id => Service.DefinitionData.Id;
         public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.DefinitionData.OnSuccessDefinition;
         public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
@@ -122,7 +122,7 @@ namespace Statecharts.NET.Language.Builders.TaskService
             Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
         }
 
-        public override Model.Task Task => Service.Task;
+        public override Model.TaskDelegate Task => Service.Task;
         public override Option<string> Id => Service.DefinitionData.Id;
         public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.DefinitionData.OnSuccessDefinition;
         public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
@@ -142,7 +142,7 @@ namespace Statecharts.NET.Language.Builders.TaskService
             Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
         }
 
-        public override Model.Task Task => Service.Task;
+        public override Model.TaskDelegate Task => Service.Task;
         public override Option<string> Id => Service.DefinitionData.Id;
         public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.DefinitionData.OnSuccessDefinition;
         public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;

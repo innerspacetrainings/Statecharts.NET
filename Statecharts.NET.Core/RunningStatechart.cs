@@ -81,12 +81,12 @@ namespace Statecharts.NET
             .Select(transition => transition.Event is ISendableEvent @event ? @event.Name : null)
             .WhereNotNull();
 
-        public Task Start() => Start(
+        public Task RunAsync() => RunAsync(
             StateConfiguration.Empty(),
             _statechart.InitialContext,
             () => HandleEvent(new InitializeStatechartEvent()));
 
-        private Task Start(
+        private Task RunAsync(
             StateConfiguration stateConfiguration,
             TContext context,
             System.Action initAction)

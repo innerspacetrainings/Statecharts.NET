@@ -33,5 +33,7 @@ namespace Statecharts.NET.Model
 
         public static Microstep InitializeStatechart(Statenode statechartRootnode) =>
             new Microstep(new InitializeStatechartEvent(), null, statechartRootnode.Yield(), Enumerable.Empty<Statenode>());
+
+        public override string ToString() => $"{Transition}, (entered: {EnteredStatenodes.Count()}[{EnteredActionBlocks.Count()}], exited: {ExitedStatenodes.Count()}[{ExitedActionBlocks.Count()}])";
     }
 }

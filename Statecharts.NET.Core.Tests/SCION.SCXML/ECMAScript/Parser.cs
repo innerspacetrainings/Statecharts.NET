@@ -73,6 +73,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript
                 { (typeof(EntryActions), typeof(AssignAction)), EraseTypes<EntryActions, AssignAction>(Element.EntryActionsAddAssignAction) },
                 { (typeof(EntryActions), typeof(RaiseAction)), EraseTypes<EntryActions, RaiseAction>(Element.EntryActionsAddRaiseAction) },
                 { (typeof(ExitActions), typeof(LogAction)), EraseTypes<ExitActions, LogAction>(Element.ExitActionsAddLogAction) },
+                { (typeof(ExitActions), typeof(AssignAction)), EraseTypes<ExitActions, AssignAction>(Element.ExitActionsAddAssignAction) },
                 { (typeof(ExitActions), typeof(RaiseAction)), EraseTypes<ExitActions, RaiseAction>(Element.ExitActionsAddRaiseAction) }
         };
 

@@ -95,11 +95,11 @@ namespace Statecharts.NET
                     var lastBeforeLeastCompoundCommonAncestor = transition.Source.OneBeneath(lcca);
                     var isChildTransition = target.GetParents().Contains(transition.Source);
                     var exited = isChildTransition
-                        ? transition.Source.GetDescendants().Where(stateConfiguration.Contains)
-                        : lastBeforeLeastCompoundCommonAncestor.Append(lastBeforeLeastCompoundCommonAncestor.GetDescendants()).Where(stateConfiguration.Contains);
-                    var entered = isChildTransition
-                        ? target.Append(target.AncestorsUntil(lastBeforeLeastCompoundCommonAncestor)).Reverse()
-                        : target.Append(target.AncestorsUntil(lcca)).Reverse();
+                        ? transition.Source.GetDescendants().Where(stateConfiguration.Contains).Reverse()
+                        : lastBeforeLeastCompoundCommonAncestor.Append(lastBeforeLeastCompoundCommonAncestor.GetDescendants()).Where(stateConfiguration.Contains).Reverse();
+                    var entered = target
+                        .Append(target.AncestorsUntil(isChildTransition ? lastBeforeLeastCompoundCommonAncestor : lcca))
+                        .Reverse();
 
                     return new Microstep(@event, transition, entered, exited);
                 }));
@@ -202,8 +202,8 @@ namespace Statecharts.NET
                     enteredStateNode.Switch(
                         Functions.NoOp,
                         Functions.NoOp,
-                        compound => events.EnqueueStabilizationEvent(compound.Id),
-                        orthogonal => events.EnqueueStabilizationEvent(orthogonal.Id));
+                        compound => { if (!stateConfiguration.IsInitialized(compound)) events.EnqueueStabilizationEvent(compound.Id); },
+                        orthogonal => { if (!stateConfiguration.IsInitialized(orthogonal)) events.EnqueueStabilizationEvent(orthogonal.Id); });
             }
             void EnqueueImmediateEvent(IReadOnlyCollection<Microstep> steps)
             {
@@ -229,8 +229,14 @@ namespace Statecharts.NET
                         compound => events.EnqueueDoneEvent(compound.Id),
                         orthogonal => events.EnqueueDoneEvent(orthogonal.Id));
             }
-            void UpdateStateConfiguration(IReadOnlyCollection<Microstep> microSteps) =>
-                stateConfiguration = stateConfiguration.Without(microSteps.GetExitedStateNodes()).With(microSteps.GetEnteredStateNodes());
+            void UpdateStateConfiguration(IReadOnlyCollection<Microstep> microSteps)
+            {
+                foreach (var statenode in microSteps.GetExitedStateNodes())
+                    stateConfiguration.Remove(statenode);
+                foreach (var statenode in microSteps.GetEnteredStateNodes())
+                    stateConfiguration.Add(statenode);
+            }
+
             void AddMicrosteps(IEvent @event, IReadOnlyCollection<Microstep> microsteps)
             {
                 if(!(@event is ImmediateEvent && !microsteps.Any()))
@@ -255,12 +261,12 @@ namespace Statecharts.NET
                 }
 
                 Execute(steps);
+                UpdateStateConfiguration(steps);
                 if (!isRootDoneEvent)
                 {
                     StabilizeIfNecessary(steps);
                     EnqueueImmediateEvent(steps);
                 }
-                UpdateStateConfiguration(steps);
                 if(!(@event is DoneEvent)) EnqueueDoneEvents(); // TODO: sometimes enqueuing happens multiple times
                 AddMicrosteps(@event, steps);
             }

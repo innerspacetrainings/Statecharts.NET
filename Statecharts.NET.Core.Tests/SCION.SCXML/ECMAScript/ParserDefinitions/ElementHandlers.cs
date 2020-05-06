@@ -50,6 +50,8 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions
             => entryActions.AddAction(raiseAction);
         public static void ExitActionsAddLogAction(ExitActions exitActions, LogAction logAction)
             => exitActions.AddAction(logAction);
+        public static void ExitActionsAddAssignAction(ExitActions entryActions, AssignAction assignAction)
+            => entryActions.AddAction(assignAction);
         public static void ExitActionsAddRaiseAction(ExitActions entryActions, RaiseAction raiseAction)
             => entryActions.AddAction(raiseAction);
     }

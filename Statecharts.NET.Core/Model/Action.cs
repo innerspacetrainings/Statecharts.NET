@@ -75,26 +75,31 @@ namespace Statecharts.NET.Model
     {
         public ISendableEvent Event { get; }
         public SendAction(ISendableEvent @event) => Event = @event;
+        public override string ToString() => $"send({Event})";
     }
     public class RaiseAction : Action
     {
         public ISendableEvent Event { get; }
         public RaiseAction(ISendableEvent @event) => Event = @event;
+        public override string ToString() => $"raise({Event})";
     }
     public class LogAction : Action
     {
         public Func<object, object, string> Message { get; }
         public LogAction(Func<object, object, string> message) => Message = message;
+        public override string ToString() => "log";
     }
     public class AssignAction : Action
     {
         public Action<object, object> Mutation { get; }
         public AssignAction(Action<object, object> mutation) => Mutation = mutation;
+        public override string ToString() => "assign";
     }
     public class SideEffectAction : Action
     {
         public Action<object, object> Function { get; }
         public SideEffectAction(Action<object, object> function) => Function = function;
+        public override string ToString() => "side effect";
     }
     public class StartDelayedTransitionAction : Action
     {

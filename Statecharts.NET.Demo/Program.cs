@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Statecharts.NET.Demos.Statecharts;
 using Statecharts.NET.Interfaces;
 using Statecharts.NET.Language;
@@ -151,7 +152,8 @@ namespace Statecharts.NET.Demo
             {"Door", Run(Door.Behaviour)},
             {"SendExample", Run(SendExample.Behaviour)},
             {"RaiseExample", Run(RaiseExample.Behaviour)},
-            {"Assign", Run(DemoDefinition)}
+            {"hier2", Run(Hierarchy.Hier2)},
+            {"Assign", Run(DemoDefinition)},
     };
 
         private static Action Run<TContext>(StatechartDefinition<TContext> definition)
@@ -169,13 +171,13 @@ namespace Statecharts.NET.Demo
                     Console.ForegroundColor = ConsoleColor.DarkCyan;
                     Console.WriteLine();
                     Console.WriteLine(
-                        $" Statenodes: {string.Join(", ", macrostep.State.StateConfiguration.StateNodeIds)}");
+                        $" Statenodes: {string.Join(", ", macrostep.State.StateConfiguration.Ids)}");
                     Console.WriteLine($"    Context: {macrostep.State.Context}");
-                    Console.WriteLine($"Next events: {string.Join(", ", running.NextEvents)}");
+                    Console.WriteLine($"Next events: {string.Join(", ", running.NextEvents.Distinct())}");
                     Console.ResetColor();
                 };
 
-                running.Start().ContinueWith(_ => Environment.Exit(0));
+                running.RunAsync().ContinueWith(_ => Environment.Exit(0));
 
                 while (true)
                 {
@@ -198,7 +200,7 @@ namespace Statecharts.NET.Demo
 
         private static void Main()
         {
-            _statecharts["RaiseExample"]();
+            _statecharts["hier2"]();
         }
     }
 }
