@@ -93,12 +93,8 @@ namespace Statecharts.NET.Model
             EntryActions = entryActions;
             ExitActions = exitActions;
 
-            Id = Parent.Match(
-                p => StatenodeId.DeriveFromParent(p, name),
-                () => new RootStatenodeId(name));
-            Depth = Parent.Match(
-                p => p.Depth + 1,
-                () => 0);
+            Id = new StatenodeId(Parent, name);
+            Depth = Parent.Map(p => p.Depth).ValueOr(0);
         }
 
         public override bool Equals(object other) => other is Statenode statenode && statenode.Id.Equals(Id);
@@ -130,6 +126,8 @@ namespace Statecharts.NET.Model
                 compound => fCompound(compound, compound.Statenodes.Select(Recurse)),
                 orthogonal => fOrthogonal(orthogonal, orthogonal.Statenodes.Select(Recurse)));
         }
+
+        public override string ToString() => $"{Id} ({Match(_ => "A", _ => "F", _ => "C", _ => "O")})";
     }
 
     public class FinalStatenode : Statenode

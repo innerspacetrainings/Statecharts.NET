@@ -17,12 +17,12 @@ namespace Statecharts.NET.Model
 
     public abstract class TaskServiceDefinition : ServiceDefinition
     {
-        public abstract Task Task { get; }
+        public abstract TaskDelegate Task { get; }
         public abstract Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition { get; }
     }
     public abstract class TaskDataServiceDefinition : ServiceDefinition
     {
-        public abstract Task<object> Task { get; }
+        public abstract TaskDelegate<object> TaskDelegate { get; }
         public abstract Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition, UnguardedContextDataTransitionDefinition>> OnSuccessDefinition { get; }
     }
     #endregion
@@ -30,15 +30,15 @@ namespace Statecharts.NET.Model
     public class Service
     {
         public string Id { get; }
-        private readonly Task<object> _task;
+        private readonly TaskDelegate<object> _taskDelegate;
 
-        internal Service(string id, Task<object> task)
+        internal Service(string id, TaskDelegate<object> taskDelegate)
         {
             Id = id;
-            _task = task;
+            _taskDelegate = taskDelegate;
         }
 
-        public System.Threading.Tasks.Task<object> Invoke(CancellationToken cancellationToken) => _task(cancellationToken);
+        public System.Threading.Tasks.Task<object> Invoke(CancellationToken cancellationToken) => _taskDelegate(cancellationToken);
     }
     #endregion
 }

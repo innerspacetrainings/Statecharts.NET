@@ -24,7 +24,7 @@ namespace Statecharts.NET.Language
                 new ActivityService(new Activity(start, stop));
             public static ActivityService Activity(Activity activity) =>
                 new ActivityService(activity);
-            public static TaskService Task(Task task) =>
+            public static TaskService Task(TaskDelegate task) =>
                 new TaskService(task);
         }
         public static class Action
@@ -53,9 +53,9 @@ namespace Statecharts.NET.Language
     public static class Keywords
     {
         public static TaskService Chain(
-            OneOf<Model.Task, TaskServiceDefinition> first,
-            OneOf<Model.Task, TaskServiceDefinition> second,
-            params OneOf<Model.Task, TaskServiceDefinition>[] remaining)
+            OneOf<Model.TaskDelegate, TaskServiceDefinition> first,
+            OneOf<Model.TaskDelegate, TaskServiceDefinition> second,
+            params OneOf<Model.TaskDelegate, TaskServiceDefinition>[] remaining)
             => Define.Service.Task(async token =>
             {
                 foreach (var wrappedTask in first.Append(second).Append(remaining))
@@ -88,8 +88,8 @@ namespace Statecharts.NET.Language
             => new ChildTarget(stateNodeName);
         public static SiblingTarget Sibling(string stateNodeName)
             => new SiblingTarget(stateNodeName);
-        public static AbsoluteTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new AbsoluteTarget(StatenodeId.Absolute(new[] { stateChartName, stateNodeName }.Concat(stateNodeNames)));
+        public static AbsoluteTarget Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames)
+            => new AbsoluteTarget(StatenodeId.Absolute(new[] {stateChartName, stateNodeName}.Concat(stateNodeNames))); // TODO: fix this
 
         public static SendAction Send(string eventName)
             => Send(new NamedEvent(eventName));

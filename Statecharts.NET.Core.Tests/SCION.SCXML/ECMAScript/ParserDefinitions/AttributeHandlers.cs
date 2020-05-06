@@ -18,7 +18,7 @@ namespace Statecharts.NET.Tests.SCION.SCXML.ECMAScript.ParserDefinitions
         public static void SetTransitionEvent(Transition transition, string @event) =>
             transition._eventName = @event;
         public static void SetTransitionTarget(Transition transition, string target) =>
-            transition._target = target;
+            transition._target = target.ToOption();
         public static void SetTransitionCondition(Transition transition, string condition) =>
             transition._condition = condition.ToOption();
         public static void SetContextDataEntryId(ContextDataEntry entry, string id) =>

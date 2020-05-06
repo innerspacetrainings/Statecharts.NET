@@ -63,6 +63,37 @@ namespace Statecharts.NET.Tests.Shared.Definition
         public override Option<DoneTransitionDefinition> DoneTransition { get; }
     }
 
+    internal class TestOrthogonalStatenodeDefinition : OrthogonalStatenodeDefinition
+    {
+        public TestOrthogonalStatenodeDefinition(
+            string name,
+            IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> entryActions,
+            IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> exitActions,
+            IEnumerable<TransitionDefinition> transitions,
+            IEnumerable<ServiceDefinition> services,
+            IEnumerable<StatenodeDefinition> statenodes,
+            Option<DoneTransitionDefinition> doneTransition)
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            EntryActions = entryActions;
+            ExitActions = exitActions;
+            Transitions = transitions;
+            Services = services;
+            Statenodes = statenodes;
+            DoneTransition = doneTransition;
+        }
+
+        public override string Name { get; }
+        public override Option<string> UniqueIdentifier => Name.ToOption();
+
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; }
+        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; }
+        public override IEnumerable<TransitionDefinition> Transitions { get; }
+        public override IEnumerable<ServiceDefinition> Services { get; }
+        public override IEnumerable<StatenodeDefinition> Statenodes { get; }
+        public override Option<DoneTransitionDefinition> DoneTransition { get; }
+    }
+
     internal class TestFinalStatenodeDefinition : FinalStatenodeDefinition
     {
         public TestFinalStatenodeDefinition(

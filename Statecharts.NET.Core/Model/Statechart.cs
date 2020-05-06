@@ -58,7 +58,7 @@ namespace Statecharts.NET.Model
         }
 
         public IEnumerable<Statenode> GetActiveStatenodes(StateConfiguration stateConfiguration) => 
-            stateConfiguration.Select(id => Statenodes[id]);
+            stateConfiguration.FoldL().Select(entry => Statenodes[entry.StatenodeId]);
     }
     #endregion
 }

@@ -139,7 +139,7 @@ namespace Statecharts.NET
                     await task.Task(cancellationToken);
                     return default; // TODO: document why this is used this way
                 }),
-                dataTask => new Service(serviceDefinition.GetId(statenode.Id, index), dataTask.Task)))
+                dataTask => new Service(serviceDefinition.GetId(statenode.Id, index), dataTask.TaskDelegate)))
                 ?? Enumerable.Empty<Service>();
         }
     }

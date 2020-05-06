@@ -5,15 +5,22 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
 {
-    public abstract class StatenodeId : OneOfBase<RootStatenodeId, NamedStatenodeId>, IEquatable<StatenodeId>
+    public class StatenodeId : IEquatable<StatenodeId>
     {
-        public abstract IEnumerable<string> Values { get; }
+        public IEnumerable<string> Values { get; }
         internal string String => string.Join(".", Values);
 
+        public StatenodeId(Option<Statenode> parent, string statenodeName) =>
+            Values = parent.Match(
+                parentStatenode => parentStatenode.Id.Values.Append(statenodeName),
+                statenodeName.Yield);
+        private StatenodeId(IEnumerable<string> values) =>
+            Values = values;
+
         internal static StatenodeId Root(string name) =>
-            new RootStatenodeId(name);
+            new StatenodeId(Option.None<Statenode>(), name);
         internal static StatenodeId DeriveFromParent(Statenode parent, string name) =>
-            new NamedStatenodeId(parent, name);
+            new StatenodeId(parent.ToOption(), name);
 
         public bool Equals(StatenodeId other) => other != null && other.String.Equals(String);
         public override bool Equals(object obj) =>
@@ -24,24 +31,10 @@ namespace Statecharts.NET.Model
         public override string ToString() => String;
 
         public StatenodeId Sibling(string siblingStatenodeName) // TODO: think of rootState
-            => new NamedStatenodeId(Values.Take(Values.Count() - 1).Append(siblingStatenodeName));
+            => new StatenodeId(Values.Take(Values.Count() - 1).Append(siblingStatenodeName));
         public StatenodeId Child(string childStatenodeName) // TODO: think of rootState
-            => new NamedStatenodeId(Values.Append(childStatenodeName));
+            => new StatenodeId(Values.Append(childStatenodeName));
         public static StatenodeId Absolute(IEnumerable<string> statenodeids)
-            => new NamedStatenodeId(statenodeids); // TODO: check this
-    }
-
-    public class RootStatenodeId : StatenodeId {
-        public string StatenodeName { get; }
-        public override IEnumerable<string> Values => new[] {StatenodeName};
-        public RootStatenodeId(string statenodeName) => StatenodeName = statenodeName;
-    }
-    public class NamedStatenodeId : StatenodeId
-    {
-        public override IEnumerable<string> Values { get; }
-        public NamedStatenodeId(Statenode parent, string name) =>
-            Values = parent.Id.Values.Append(name);
-        internal NamedStatenodeId(IEnumerable<string> values) =>
-            Values = values;
+            => new StatenodeId(statenodeids); // TODO: check this
     }
 }

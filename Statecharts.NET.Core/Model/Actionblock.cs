@@ -15,5 +15,7 @@ namespace Statecharts.NET.Model
 
         public IEnumerator<Action> GetEnumerator() => _actions.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public override string ToString() => $"{this.Count()} ({string.Join(", ", _actions)})";
     }
 }

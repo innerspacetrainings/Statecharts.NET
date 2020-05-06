@@ -1,5 +1,4 @@
-﻿using System;
-using Statecharts.NET.Demo;
+﻿using Statecharts.NET.Demo;
 using Statecharts.NET.Language;
 using Statecharts.NET.Model;
 using static Statecharts.NET.Language.Keywords;

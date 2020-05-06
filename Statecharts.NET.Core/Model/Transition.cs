@@ -127,6 +127,8 @@ namespace Statecharts.NET.Model
                 conditionContext => conditionContext.Condition(context),
                 conditionContextData => conditionContextData.Condition(context, eventData)),
             () => true);
+
+        public override string ToString() => $"{Source}: {Event} {(IsForbidden ? "🚫" : Guard.HasValue ? "❓" : "✔")} to [{string.Join(",", Targets)}] ({Actions.Count()} Actions)";
     }
     #endregion
 }

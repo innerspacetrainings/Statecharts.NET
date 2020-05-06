@@ -6,37 +6,83 @@ using Statecharts.NET.Utilities;
 
 namespace Statecharts.NET.Model
 {
-    public class StateConfiguration : IEnumerable<StatenodeId>
+    public class StateConfiguration
     {
-        private static IEnumerable<StatenodeId> Ids(IEnumerable<Statenode> statenodes)
-            => statenodes?.Select(statenode => statenode.Id);
+        private readonly IDictionary<StatenodeId, Entry> _lookup = new Dictionary<StatenodeId, Entry>();
+        private Entry _root = null;
 
-        public IList<StatenodeId> StateNodeIds { get; }
+        public class Entry
+        {
+            public StatenodeId StatenodeId { get; }
+            public string StatenodeName { get; }
+            public ISet<Entry> Children { get; set; }
 
-        public IEnumerable<string> NonRootIds =>
-            StateNodeIds
-                .Select(id => id.Values.Skip(1))
-                .Where(values => values.Any())
-                .Select(values => string.Join(".", values));
+            public Entry(StatenodeId statenodeId, string statenodeName)
+            {
+                StatenodeId = statenodeId ?? throw new NullReferenceException(nameof(statenodeId));
+                StatenodeName = statenodeName;
+                Children = new HashSet<Entry>();
+            }
 
-        private StateConfiguration(IEnumerable<StatenodeId> statenodeIds) =>
-            StateNodeIds = statenodeIds?.ToList() ?? throw new ArgumentNullException(nameof(statenodeIds));
-        public StateConfiguration(IEnumerable<Statenode> statenodes) : this (Ids(statenodes)) { }
-        public static StateConfiguration Empty() => new StateConfiguration(Enumerable.Empty<StatenodeId>());
+            private bool Equals(Entry other) => Equals(StatenodeId, other.StatenodeId);
+            public override bool Equals(object obj) => obj != null && obj.GetType() == GetType() && Equals((Entry) obj);
+            public override int GetHashCode() => StatenodeId.GetHashCode();
+        }
+
+        public Entry Root => _root;
+
+        internal void Add(Statenode statenode)
+        {
+            var entry = new Entry(statenode.Id, statenode.Name);
+            statenode.Parent.Switch(
+                parent => _lookup[parent.Id].Children.Add(entry),
+                () => _root = entry);
+            _lookup.Add(statenode.Id, entry);
+        }
+
+        internal void Remove(Statenode statenode)
+        {
+            var entry = new Entry(statenode.Id, statenode.Name);
+            statenode.Parent.Switch(
+                parent => _lookup[parent.Id].Children.Remove(entry),
+                () => _root = null);
+            _lookup.Remove(statenode.Id);
+        }
 
         public bool Contains(Statenode statenode)
-            => StateNodeIds.Contains(statenode.Id);
+            => _lookup.ContainsKey(statenode.Id);
 
-        public IEnumerator<StatenodeId> GetEnumerator() => StateNodeIds.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public bool IsInitialized(Statenode statenode)
+            => Contains(statenode) && _lookup[statenode.Id].Children.Any();
 
-        public StateConfiguration Without(IEnumerable<Statenode> statenodes) =>
-            new StateConfiguration(StateNodeIds.Except(Ids(statenodes)));
-        public StateConfiguration Without(Statenode statenode) =>
-            Without(statenode.Yield());
-        public StateConfiguration With(IEnumerable<Statenode> statenodes) =>
-            new StateConfiguration(StateNodeIds.Concat(Ids(statenodes)));
-        public StateConfiguration With(Statenode statenode) =>
-            With(statenode.Yield());
+        public IEnumerable<Entry> FoldL()
+        {
+            var entries = new List<Entry>();
+            void Recurse(Entry entry)
+            {
+                foreach (var child in entry.Children)
+                    Recurse(child);
+                entries.Add(entry);
+            }
+
+            _root.ToOption().SwitchSome(Recurse);
+
+            return entries;
+        }
+
+        public IEnumerable<StatenodeId> Ids
+            => _lookup.Values.Select(entry => entry.StatenodeId);
+
+        public static StateConfiguration Empty() => new StateConfiguration();
+
+
+        ////public StateConfiguration Without(IEnumerable<Statenode> statenodes) =>
+        ////    new StateConfiguration(StateNodeIds.Except(Ids(statenodes)));
+        ////public StateConfiguration Without(Statenode statenode) =>
+        ////    Without(statenode.Yield());
+        ////public StateConfiguration With(IEnumerable<Statenode> statenodes) =>
+        ////    new StateConfiguration(StateNodeIds.Concat(Ids(statenodes)));
+        ////public StateConfiguration With(Statenode statenode) =>
+        ////    With(statenode.Yield());
     }
 }
