@@ -75,7 +75,7 @@ namespace Statecharts.NET.Analyzers
                 async System.Threading.Tasks.Task<object> Test()
                 {
                     var options = ScriptOptions.Default
-                        .WithReferences(typeof(Statechart).Assembly.Location)
+                        .WithReferences(typeof(Define.Statechart).Assembly.Location)
                         .WithImports(
                             "Statecharts.NET.Model",
                             "Statecharts.NET.Language",
@@ -85,7 +85,7 @@ namespace Statecharts.NET.Analyzers
                 }
 
                 var rootNode = Test().Result as CompoundStatenodeDefinition;
-                var statechart = Statechart
+                var statechart = Define.Statechart
                     .WithInitialContext(new __StatechartAnalyzer_DummyContext())
                     .WithRootState(rootNode);
                 context.ReportDiagnostic(Diagnostic.Create(StatechartDefinition, invocationOperation.Syntax.GetLocation(), statechart.AsXStateVisualizerV4Definition()));
