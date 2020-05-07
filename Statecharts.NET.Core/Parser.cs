@@ -5,23 +5,22 @@ using System.Threading.Tasks;
 using Statecharts.NET.Interfaces;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
-using Action = Statecharts.NET.Model.Action;
 
 namespace Statecharts.NET
 {
     internal static class ActionDefinitionExtensions
     {
-        private static Actionblock NullsafeConvert(IEnumerable<Action> actions) =>
+        private static Actionblock NullsafeConvert(IEnumerable<ExecutableAction> actions) =>
             actions != null
                 ? Actionblock.From(actions)
                 : Actionblock.Empty();
 
         internal static Actionblock Convert(this IEnumerable<ActionDefinition> actions) =>
-            NullsafeConvert(actions?.Select(Action.From));
+            NullsafeConvert(actions?.Select(ExecutableAction.From));
         internal static Actionblock Convert(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> actions) =>
-            NullsafeConvert(actions?.Select(Action.From));
+            NullsafeConvert(actions?.Select(ExecutableAction.From));
         internal static Actionblock Convert(this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> actions) =>
-            NullsafeConvert(actions?.Select(Action.From));
+            NullsafeConvert(actions?.Select(ExecutableAction.From));
     }
 
     internal static class TargetExtensions
@@ -29,8 +28,8 @@ namespace Statecharts.NET
         private static OneOf<StatenodeId, string> StatenodeIdFor(StatenodeId sourceId, Target target) =>
             target.Match<OneOf<StatenodeId, string>>(
                 absolute => absolute.Id,
-                sibling => sourceId.Sibling(sibling.StatenodeName),
-                child => sourceId.Child(child.StatenodeName),
+                sibling => sourceId.Sibling(sibling.StatenodeName, sibling.ChildStatenodesNames),
+                child => sourceId.Child(child.StatenodeName, child.ChildStatenodesNames),
                 self => sourceId,
                 uniquelyIdentified => uniquelyIdentified.Id);
         internal static IEnumerable<Statenode> GetTargetStatenodes(this IEnumerable<Target> targets, StatenodeId sourceId, Func<OneOf<StatenodeId, string>, Statenode> getStatenode) =>

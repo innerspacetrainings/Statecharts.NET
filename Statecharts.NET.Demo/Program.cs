@@ -154,7 +154,8 @@ namespace Statecharts.NET.Demo
             {"RaiseExample", Run(RaiseExample.Behaviour)},
             {"hier2", Run(Hierarchy.Hier2)},
             {"Assign", Run(DemoDefinition)},
-    };
+            {"Playground", Run(Playground.Behaviour)},
+        };
 
         private static Action Run<TContext>(StatechartDefinition<TContext> definition)
             where TContext : IContext<TContext>, IXStateSerializable => () =>
@@ -200,7 +201,7 @@ namespace Statecharts.NET.Demo
 
         private static void Main()
         {
-            _statecharts["hier2"]();
+            _statecharts["Playground"]();
         }
     }
 }

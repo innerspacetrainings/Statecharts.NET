@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Statecharts.NET.Interfaces;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
-using Action = Statecharts.NET.Model.Action;
 using Task = System.Threading.Tasks.Task;
 
 namespace Statecharts.NET
@@ -124,7 +123,7 @@ namespace Statecharts.NET
             foreach (var statenode in statenodes)
                 _cancellation.TryCancel(statenode.Id);
         }
-        private Option<OneOf<CurrentStep, NextStep>> ExecuteAction(Action action, object context, object eventData)
+        private Option<OneOf<CurrentStep, NextStep>> ExecuteAction(ExecutableAction action, object context, object eventData)
         {
             var result = Option.None<OneOf<CurrentStep, NextStep>>();
             action.Switch(

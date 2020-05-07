@@ -76,12 +76,14 @@ namespace Statecharts.NET.Language.Builders.TaskService
 
         internal WithOnSuccessTransitionTo(WithOnSuccess service) => Service = service.Service;
 
-        public WithOnSuccessTransition Child(string stateName) =>
-            new WithOnSuccessTransition(this, Keywords.Child(stateName));
-        public WithOnSuccessTransition Sibling(string stateName) =>
-            new WithOnSuccessTransition(this, Keywords.Sibling(stateName));
-        public WithOnSuccessTransition Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new WithOnSuccessTransition(this, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public WithOnSuccessTransition Child(string statenodeName, params string[] childStatenodeNames) =>
+            new WithOnSuccessTransition(this, Keywords.Child(statenodeName, childStatenodeNames));
+        public WithOnSuccessTransition Sibling(string statenodeName, params string[] childStatenodeNames) =>
+            new WithOnSuccessTransition(this, Keywords.Sibling(statenodeName, childStatenodeNames));
+        public WithOnSuccessTransition Absolute(string statechartName, params string[] childStatenodeNames) =>
+            new WithOnSuccessTransition(this, Keywords.Absolute(statechartName, childStatenodeNames));
+        public WithOnSuccessTransition Target(Target target) =>
+            new WithOnSuccessTransition(this, target);
         public WithOnSuccessTransition Multiple(Target target, params Target[] targets) =>
             new WithOnSuccessTransition(this, target, targets);
     }
@@ -97,11 +99,11 @@ namespace Statecharts.NET.Language.Builders.TaskService
             Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
         }
 
-        public WithOnSuccessTransitionWithActions WithActions(Action action, params Action[] actions) =>
+        public WithOnSuccessTransitionWithActions WithActions(ActionDefinition action, params ActionDefinition[] actions) =>
             new WithOnSuccessTransitionWithActions(this, action, actions);
         public WithOnSuccessTransitionWithActions<TContext> WithActions<TContext>(
-            OneOf<Action, Action<TContext>> action,
-            params OneOf<Action, Action<TContext>>[] actions)
+            OneOf<ActionDefinition, ActionDefinition<TContext>> action,
+            params OneOf<ActionDefinition, ActionDefinition<TContext>>[] actions)
             where TContext : IContext<TContext> =>
             new WithOnSuccessTransitionWithActions<TContext>(this, action, actions);
 
@@ -115,7 +117,7 @@ namespace Statecharts.NET.Language.Builders.TaskService
         private Language.TaskService Service { get; }
         internal UnguardedWithActions OnSuccessTransition { get; }
 
-        internal WithOnSuccessTransitionWithActions(WithOnSuccessTransition service, Action action, params Action[] actions)
+        internal WithOnSuccessTransitionWithActions(WithOnSuccessTransition service, ActionDefinition action, params ActionDefinition[] actions)
         {
             Service = service.Service;
             OnSuccessTransition = service.OnSuccessTransition.WithActions(action, actions);
@@ -134,8 +136,8 @@ namespace Statecharts.NET.Language.Builders.TaskService
 
         internal WithOnSuccessTransitionWithActions(
             WithOnSuccessTransition service,
-            OneOf<Action, Action<TContext>> action,
-            params OneOf<Action, Action<TContext>>[] actions)
+            OneOf<ActionDefinition, ActionDefinition<TContext>> action,
+            params OneOf<ActionDefinition, ActionDefinition<TContext>>[] actions)
         {
             Service = service.Service;
             OnSuccessTransition = service.OnSuccessTransition.WithActions(action, actions);
@@ -181,12 +183,14 @@ namespace Statecharts.NET.Language.Builders.ActivityService
 
         internal WithOnErrorTransitionTo(WithOnError service) => Service = service.Service;
 
-        public WithOnErrorTransition Child(string stateName) =>
-            new WithOnErrorTransition(this, Keywords.Child(stateName));
-        public WithOnErrorTransition Sibling(string stateName) =>
-            new WithOnErrorTransition(this, Keywords.Sibling(stateName));
-        public WithOnErrorTransition Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new WithOnErrorTransition(this, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
+        public WithOnErrorTransition Child(string stateName, params string[] childStatenodesNames) =>
+            new WithOnErrorTransition(this, Keywords.Child(stateName, childStatenodesNames));
+        public WithOnErrorTransition Sibling(string statenodeName, params string[] childStatenodesNames) =>
+            new WithOnErrorTransition(this, Keywords.Sibling(statenodeName, childStatenodesNames));
+        public WithOnErrorTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new WithOnErrorTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
+        public WithOnErrorTransition Target(Target target) =>
+            new WithOnErrorTransition(this, target);
         public WithOnErrorTransition Multiple(Target target, params Target[] targets) =>
             new WithOnErrorTransition(this, target, targets);
     }

@@ -4,16 +4,16 @@ using System.Linq;
 
 namespace Statecharts.NET.Model
 {
-    public class Actionblock : IEnumerable<Action>
+    public class Actionblock : IEnumerable<ExecutableAction>
     {
-        private readonly IEnumerable<Action> _actions;
-        private Actionblock(IEnumerable<Action> actions = null) => _actions =
-            actions ?? Enumerable.Empty<Action>();
+        private readonly IEnumerable<ExecutableAction> _actions;
+        private Actionblock(IEnumerable<ExecutableAction> actions = null) => _actions =
+            actions ?? Enumerable.Empty<ExecutableAction>();
 
         internal static Actionblock Empty() => new Actionblock();
-        internal static Actionblock From(IEnumerable<Action> actions) => new Actionblock(actions);
+        internal static Actionblock From(IEnumerable<ExecutableAction> actions) => new Actionblock(actions);
 
-        public IEnumerator<Action> GetEnumerator() => _actions.GetEnumerator();
+        public IEnumerator<ExecutableAction> GetEnumerator() => _actions.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public override string ToString() => $"{this.Count()} ({string.Join(", ", _actions)})";

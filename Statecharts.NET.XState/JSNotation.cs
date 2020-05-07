@@ -52,6 +52,7 @@ namespace Statecharts.NET.XState
         public static ObjectValue ObjectValue(params JSProperty[] properties) => new ObjectValue(properties);
         public static ArrayValue ArrayValue(IEnumerable<JSValue> values) => new ArrayValue(values);
         public static ArrayValue ArrayValue(params JSValue[] values) => new ArrayValue(values);
+        public static JSProperty JSProperty(string key, JSValue value) => new JSProperty(key, value);
         public static JSProperty JSProperty(string key, IEnumerable<JSProperty> properties) => new JSProperty(key, ObjectValue(properties));
         public static JSProperty JSProperty(string key, IEnumerable<JSValue> values) => new JSProperty(key, ArrayValue(values));
     }

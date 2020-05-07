@@ -38,7 +38,7 @@ namespace Statecharts.NET.Model
         }
 
         #region Construction Helper Methods
-        public static Option<IEnumerable<OneOf<Action, ContextActionDefinition>>> NoActions => Option.None<IEnumerable<OneOf<Action, ContextActionDefinition>>>();
+        public static Option<IEnumerable<OneOf<ExecutableAction, ContextActionDefinition>>> NoActions => Option.None<IEnumerable<OneOf<ExecutableAction, ContextActionDefinition>>>();
         public static Option<IEnumerable<TransitionDefinition>> NoTransitions => Option.None<IEnumerable<TransitionDefinition>>();
         public static Option<IEnumerable<ServiceDefinition>> NoServices => Option.None<IEnumerable<ServiceDefinition>>();
         public static Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition, GuardedTransitionDefinition, GuardedContextTransitionDefinition>> NoDoneTransition =>
@@ -94,7 +94,7 @@ namespace Statecharts.NET.Model
             ExitActions = exitActions;
 
             Id = new StatenodeId(Parent, name);
-            Depth = Parent.Map(p => p.Depth).ValueOr(0);
+            Depth = Parent.Map(p => p.Depth + 1).ValueOr(0);
         }
 
         public override bool Equals(object other) => other is Statenode statenode && statenode.Id.Equals(Id);

@@ -11,8 +11,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
     internal class DefinitionData
     {
         public string Name { get; }
-        internal IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions { get; set; }
-        internal IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions { get; set; }
+        internal IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions { get; set; }
+        internal IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions { get; set; }
         internal IEnumerable<TransitionDefinition> Transitions { get; set; }
         internal IEnumerable<ServiceDefinition> Services { get; set; }
         internal InitialCompoundTransitionDefinition InitialTransition { get; set; }
@@ -21,8 +21,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public DefinitionData(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            EntryActions = Enumerable.Empty<OneOf<ActionDefinition, ContextActionDefinition>>();
-            ExitActions = Enumerable.Empty<OneOf<ActionDefinition, ContextActionDefinition>>();
+            EntryActions = Enumerable.Empty<OneOf<Model.ActionDefinition, ContextActionDefinition>>();
+            ExitActions = Enumerable.Empty<OneOf<Model.ActionDefinition, ContextActionDefinition>>();
             Transitions = Enumerable.Empty<TransitionDefinition>();
             Services = Enumerable.Empty<ServiceDefinition>();
             States = Enumerable.Empty<StatenodeDefinition>();
@@ -34,19 +34,19 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public WithName(string name) : base(name) { }
 
         public WithEntryActions WithEntryActions(
-            Language.Action action,
-            params Language.Action[] actions)
+            ActionDefinition action,
+            params ActionDefinition[] actions)
         {
             DefinitionData.EntryActions = action.Append(actions)
-                .Select<Language.Action, OneOf<ActionDefinition, ContextActionDefinition>>(a => a.ToDefinitionAction());
+                .Select<ActionDefinition, OneOf<Model.ActionDefinition, ContextActionDefinition>>(a => a.ToDefinitionAction());
             return this;
         }
         public WithEntryActions WithEntryActions<TContext>(
-            OneOf<Language.Action, Language.Action<TContext>> action,
-            params OneOf<Language.Action, Language.Action<TContext>>[] actions)
+            OneOf<ActionDefinition, ActionDefinition<TContext>> action,
+            params OneOf<ActionDefinition, ActionDefinition<TContext>>[] actions)
         {
             DefinitionData.EntryActions = action.Append(actions)
-                .Select(a => a.Match<OneOf<ActionDefinition, ContextActionDefinition>>(
+                .Select(a => a.Match<OneOf<Model.ActionDefinition, ContextActionDefinition>>(
                     contextlessAction => contextlessAction.ToDefinitionAction(),
                     contextAction => contextAction.ToDefinitionAction()));
             return this;
@@ -57,19 +57,19 @@ namespace Statecharts.NET.Language.Builders.StateNode
         internal WithEntryActions(string name) : base(name) { }
 
         public WithExitActions WithExitActions(
-            Language.Action action,
-            params Language.Action[] actions)
+            ActionDefinition action,
+            params ActionDefinition[] actions)
         {
             DefinitionData.ExitActions = action.Append(actions)
-                .Select<Language.Action, OneOf<ActionDefinition, ContextActionDefinition>>(a => a.ToDefinitionAction());
+                .Select<ActionDefinition, OneOf<Model.ActionDefinition, ContextActionDefinition>>(a => a.ToDefinitionAction());
             return this;
         }
         public WithExitActions WithExitActions<TContext>(
-            OneOf<Language.Action, Language.Action<TContext>> action,
-            params OneOf<Language.Action, Language.Action<TContext>>[] actions)
+            OneOf<ActionDefinition, ActionDefinition<TContext>> action,
+            params OneOf<ActionDefinition, ActionDefinition<TContext>>[] actions)
         {
             DefinitionData.ExitActions = action.Append(actions)
-                .Select(a => a.Match<OneOf<ActionDefinition, ContextActionDefinition>>(
+                .Select(a => a.Match<OneOf<Model.ActionDefinition, ContextActionDefinition>>(
                     contextlessAction => contextlessAction.ToDefinitionAction(),
                     contextAction => contextAction.ToDefinitionAction()));
             return this;
@@ -113,8 +113,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public override string Name => DefinitionData.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
         public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
         public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
 
         public Compound AsCompound() => new Compound(DefinitionData);
@@ -130,8 +130,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public override string Name => DefinitionData.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
     }
 
     public class Compound
@@ -155,8 +155,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
             => DefinitionData = compound.DefinitionData;
 
         public CompoundWithInitialActions WithInitialActions(
-            OneOf<ActionDefinition, ContextActionDefinition> action,
-            params OneOf<ActionDefinition, ContextActionDefinition>[] actions)
+            OneOf<Model.ActionDefinition, ContextActionDefinition> action,
+            params OneOf<Model.ActionDefinition, ContextActionDefinition>[] actions)
         {
             DefinitionData.InitialTransition = new InitialCompoundTransitionDefinition(DefinitionData.InitialTransition.Target, action.Append(actions));
             return new CompoundWithInitialActions(this);
@@ -209,8 +209,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public override string Name => DefinitionData.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
         public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
         public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
         public override InitialCompoundTransitionDefinition InitialTransition => DefinitionData.InitialTransition;
         public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
@@ -232,13 +232,15 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public CompoundWithDoneTransitionTo(CompoundWithOnDone compound) => DefinitionData = compound.DefinitionData;
 
-        public CompoundWithDoneTransition Child(string stateName) =>
-            new CompoundWithDoneTransition(this, Keywords.Child(stateName));
-        public CompoundWithDoneTransition Sibling(string stateName) =>
-            new CompoundWithDoneTransition(this, Keywords.Sibling(stateName));
-        public CompoundWithDoneTransition Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new CompoundWithDoneTransition(this, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
-        public CompoundWithDoneTransition Multiple(Model.Target target, params Model.Target[] targets) =>
+        public CompoundWithDoneTransition Child(string stateName, params string[] childStatenodesNames) =>
+            new CompoundWithDoneTransition(this, Keywords.Child(stateName, childStatenodesNames));
+        public CompoundWithDoneTransition Sibling(string stateName, params string[] childStatenodesNames) =>
+            new CompoundWithDoneTransition(this, Keywords.Sibling(stateName, childStatenodesNames));
+        public CompoundWithDoneTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new CompoundWithDoneTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
+        public CompoundWithDoneTransition Target(Target target) =>
+            new CompoundWithDoneTransition(this, target);
+        public CompoundWithDoneTransition Multiple(Target target, params Target[] targets) =>
             new CompoundWithDoneTransition(this, target, targets);
     }
     public class CompoundWithDoneTransition : CompoundStatenodeDefinition
@@ -246,19 +248,19 @@ namespace Statecharts.NET.Language.Builders.StateNode
         internal DefinitionData DefinitionData { get; }
         internal UnguardedWithTarget DoneTransitionBuilder { get; }
 
-        public CompoundWithDoneTransition(CompoundWithDoneTransitionTo compound, Model.Target target, params Model.Target[] targets)
+        public CompoundWithDoneTransition(CompoundWithDoneTransitionTo compound, Target target, params Target[] targets)
         {
             DefinitionData = compound.DefinitionData;
             DoneTransitionBuilder = WithEvent.OnDone().TransitionTo.Multiple(target, targets);
         }
 
-        public CompoundWithDoneTransitionWithActions WithActions(Language.Action action, params Language.Action[] actions) =>
+        public CompoundWithDoneTransitionWithActions WithActions(ActionDefinition action, params ActionDefinition[] actions) =>
             new CompoundWithDoneTransitionWithActions(this, action, actions);
 
         public override string Name => DefinitionData.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
         public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
         public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
         public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
@@ -269,7 +271,7 @@ namespace Statecharts.NET.Language.Builders.StateNode
     {
         internal DefinitionData DefinitionData { get; }
         internal UnguardedWithActions DoneTransitionBuilder { get; }
-        public CompoundWithDoneTransitionWithActions(CompoundWithDoneTransition compound, Language.Action action, Language.Action[] actions)
+        public CompoundWithDoneTransitionWithActions(CompoundWithDoneTransition compound, ActionDefinition action, ActionDefinition[] actions)
         {
             DefinitionData = compound.DefinitionData;
             DoneTransitionBuilder = compound.DoneTransitionBuilder.WithActions(action, actions);
@@ -277,8 +279,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public override string Name => DefinitionData.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
         public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
         public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
         public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
@@ -317,8 +319,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
         public override string Name => DefinitionData.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
         public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
         public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
         public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
         public override Option<DoneTransitionDefinition> DoneTransition => Option.None<DoneTransitionDefinition>();
@@ -338,13 +340,15 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public OrthogonalWithDoneTransitionTo(OrthogonalWithOnDone orthogonal) => DefinitionData = orthogonal.DefinitionData;
 
-        public OrthogonalWithDoneTransition Child(string stateName) =>
-            new OrthogonalWithDoneTransition(this, Keywords.Child(stateName));
-        public OrthogonalWithDoneTransition Sibling(string stateName) =>
-            new OrthogonalWithDoneTransition(this, Keywords.Sibling(stateName));
-        public OrthogonalWithDoneTransition Absolute(string stateChartName, string stateNodeName, params string[] stateNodeNames) =>
-            new OrthogonalWithDoneTransition(this, Keywords.Absolute(stateChartName, stateNodeName, stateNodeNames));
-        public OrthogonalWithDoneTransition Multiple(Model.Target target, params Model.Target[] targets) =>
+        public OrthogonalWithDoneTransition Child(string stateName, params string[] childStatenodesNames) =>
+            new OrthogonalWithDoneTransition(this, Keywords.Child(stateName, childStatenodesNames));
+        public OrthogonalWithDoneTransition Sibling(string stateName, params string[] childStatenodesNames) =>
+            new OrthogonalWithDoneTransition(this, Keywords.Sibling(stateName, childStatenodesNames));
+        public OrthogonalWithDoneTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new OrthogonalWithDoneTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
+        public OrthogonalWithDoneTransition Target(Target target) =>
+            new OrthogonalWithDoneTransition(this, target);
+        public OrthogonalWithDoneTransition Multiple(Target target, params Target[] targets) =>
             new OrthogonalWithDoneTransition(this, target, targets);
     }
     public class OrthogonalWithDoneTransition : OrthogonalStatenodeDefinition
@@ -352,19 +356,19 @@ namespace Statecharts.NET.Language.Builders.StateNode
         internal DefinitionData DefinitionData { get; }
         internal UnguardedWithTarget DoneTransitionBuilder { get; }
 
-        public OrthogonalWithDoneTransition(OrthogonalWithDoneTransitionTo orthogonal, Model.Target target, params Model.Target[] targets)
+        public OrthogonalWithDoneTransition(OrthogonalWithDoneTransitionTo orthogonal, Target target, params Target[] targets)
         {
             DefinitionData = orthogonal.DefinitionData;
             DoneTransitionBuilder = WithEvent.OnDone().TransitionTo.Multiple(target, targets);
         }
 
-        public OrthogonalWithDoneTransitionWithActions WithActions(Language.Action action, params Language.Action[] actions) =>
+        public OrthogonalWithDoneTransitionWithActions WithActions(ActionDefinition action, params ActionDefinition[] actions) =>
             new OrthogonalWithDoneTransitionWithActions(this, action, actions);
 
         public override string Name => DefinitionData.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
         public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
         public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
         public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
@@ -374,7 +378,7 @@ namespace Statecharts.NET.Language.Builders.StateNode
     {
         internal DefinitionData DefinitionData { get; }
         internal UnguardedWithActions DoneTransitionBuilder { get; }
-        public OrthogonalWithDoneTransitionWithActions(OrthogonalWithDoneTransition orthogonal, Language.Action action, Language.Action[] actions)
+        public OrthogonalWithDoneTransitionWithActions(OrthogonalWithDoneTransition orthogonal, ActionDefinition action, ActionDefinition[] actions)
         {
             DefinitionData = orthogonal.DefinitionData;
             DoneTransitionBuilder = orthogonal.DoneTransitionBuilder.WithActions(action, actions);
@@ -382,8 +386,8 @@ namespace Statecharts.NET.Language.Builders.StateNode
 
         public override string Name => DefinitionData.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
         public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
         public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
         public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;

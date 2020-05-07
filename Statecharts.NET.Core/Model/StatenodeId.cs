@@ -30,10 +30,10 @@ namespace Statecharts.NET.Model
 
         public override string ToString() => String;
 
-        public StatenodeId Sibling(string siblingStatenodeName) // TODO: think of rootState
-            => new StatenodeId(Values.Take(Values.Count() - 1).Append(siblingStatenodeName));
-        public StatenodeId Child(string childStatenodeName) // TODO: think of rootState
-            => new StatenodeId(Values.Append(childStatenodeName));
+        public StatenodeId Sibling(string siblingStatenodeName, params string[] childStatenodeNames) // TODO: think of rootState
+            => new StatenodeId(Values.Take(Values.Count() - 1).Concat(siblingStatenodeName.Append(childStatenodeNames)));
+        public StatenodeId Child(string childStatenodeName, params string[] childStatenodeNames) // TODO: think of rootState
+            => new StatenodeId(Values.Append(childStatenodeName).Concat(childStatenodeNames));
         public static StatenodeId Absolute(IEnumerable<string> statenodeids)
             => new StatenodeId(statenodeids); // TODO: check this
     }
