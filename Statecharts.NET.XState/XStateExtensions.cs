@@ -188,15 +188,15 @@ namespace Statecharts.NET.XState
                 ? Option.None<JSProperty>()
                 : JSProperty(key,
                     ArrayValue(SimpleValue(actionsCount == 1 ? "1 Action" : $"{actionsCount} Actions")
-                        .Append(GetVisualizableActions()))).ToOption();
+                        .Append(GetVisualizableActions()).WhereNotNull())).ToOption();
         }
         internal static Option<JSProperty> Serialize(
             this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> actions,
             string key) =>
-            actions.Select(action => action.Match(Functions.Identity, _ => null)).WhereNotNull().Serialize(key);
+            Serialize(actions?.Select(action => action.Match(Functions.Identity, _ => null)).WhereNotNull(), key);
         internal static Option<JSProperty> Serialize(
             this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> actions,
             string key) =>
-            actions.Select(action => action.Match(Functions.Identity, _ => null, _ => null)).WhereNotNull().Serialize(key);
+            Serialize(actions?.Select(action => action.Match(Functions.Identity, _ => null, _ => null)).WhereNotNull(), key);
     }
 }
