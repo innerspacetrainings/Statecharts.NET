@@ -23,7 +23,7 @@ namespace Statecharts.NET.Model
     #endregion
     #region Parsed
     public abstract class ParsedStatechart<TContext>
-        where TContext : IContext<TContext>
+        where TContext : IEquatable<TContext>
     {
         public Statenode Rootnode { get; }
 
@@ -33,13 +33,13 @@ namespace Statecharts.NET.Model
             Rootnode = rootnode ?? throw new ArgumentNullException(nameof(rootnode));
     }
 
-    class InvalidStatechart<TContext> : ParsedStatechart<TContext> where TContext : IContext<TContext>
+    class InvalidStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
     {
         public InvalidStatechart() : base(null) =>
             throw new NotImplementedException();
     }
 
-    class ValidStatechart<TContext> : ParsedStatechart<TContext> where TContext : IContext<TContext>
+    class ValidStatechart<TContext> : ParsedStatechart<TContext> where TContext : IEquatable<TContext>
     {
         public ValidStatechart() : base(null) =>
             throw new NotImplementedException();
