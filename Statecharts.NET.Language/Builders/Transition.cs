@@ -401,10 +401,6 @@ namespace Statecharts.NET.Language.Builders.Transition
         public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> Actions => Enumerable.Empty<OneOf<Model.ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>>();
 
         public ContextDataGuardedWithActions<TContext, TEventData> WithActions(
-            OneOf<ActionDefinition, ActionDefinition<TContext>> action,
-            params OneOf<ActionDefinition, ActionDefinition<TContext>>[] actions) =>
-            new ContextDataGuardedWithActions<TContext, TEventData>(this, action, actions);
-        public ContextDataGuardedWithActions<TContext, TEventData> WithActions(
             OneOf<ActionDefinition, ActionDefinition<TContext>, ActionDefinition<TContext, TEventData>> action,
             params OneOf<ActionDefinition, ActionDefinition<TContext>, ActionDefinition<TContext, TEventData>>[] actions) =>
             new ContextDataGuardedWithActions<TContext, TEventData>(this, action, actions);
