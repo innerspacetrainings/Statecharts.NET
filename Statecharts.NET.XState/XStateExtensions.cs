@@ -49,7 +49,7 @@ namespace Statecharts.NET.XState
             var properties = new List<JSProperty>();
 
             ArrayValue Targets(IEnumerable<Target> targets)
-                => ArrayValue(targets.Select(target => target.Serialize(definition.Name, statechartDefinition)));
+                => ArrayValue(targets.Select(target => target.Serialize(definition.Name)));
             string Event(IEventDefinition @event)
             {
                 switch (@event)
@@ -156,19 +156,15 @@ namespace Statecharts.NET.XState
 
     internal static class Extensions
     {
-        internal static SimpleValue Serialize<TContext>(
+        internal static SimpleValue Serialize(
             this Target target,
-            string sourceStatenodeName,
-            StatechartDefinition<TContext> statechartDefinition)
-            where TContext : IContext<TContext>
+            string sourceStatenodeName)
             => SimpleValue(target.Match(
-                absolute => $"#{statechartDefinition.Id}." + string.Join(".", absolute.Id.Values),
+                absolute => $"#{string.Join(".", absolute.Id.Values)}",
                 sibling => $"{sibling.StatenodeName}",
                 child => $".{child.StatenodeName}",
                 self => sourceStatenodeName,
                 uniqueIdentifier => $"#{uniqueIdentifier.Id}"));
-
-
 
         internal static Option<JSProperty> Serialize(
             this IEnumerable<ActionDefinition> actions,
@@ -190,10 +186,12 @@ namespace Statecharts.NET.XState
                     ArrayValue(SimpleValue(actionsCount == 1 ? "1 Action" : $"{actionsCount} Actions")
                         .Append(GetVisualizableActions()).WhereNotNull())).ToOption();
         }
+
         internal static Option<JSProperty> Serialize(
             this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition>> actions,
             string key) =>
             Serialize(actions?.Select(action => action.Match(Functions.Identity, _ => null)).WhereNotNull(), key);
+
         internal static Option<JSProperty> Serialize(
             this IEnumerable<OneOf<ActionDefinition, ContextActionDefinition, ContextDataActionDefinition>> actions,
             string key) =>
