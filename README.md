@@ -51,7 +51,7 @@ This is one of the mightiest features of the Statecharts Concept.
 *Statecharts.NET.Language* provides a reference implementation of how the core functionality can be wrapped to create a nicely looking syntax for creating Statecharts.
 It is intended to be as functional/composable as possible while preserving the main idea of explicity/clarity.
 
-> :info: **Make sure to add `using static Statecharts.NET.Language.Keywords;` to your usings!**
+> ℹ **Make sure to add `using static Statecharts.NET.Language.Keywords;` to your usings!**
 
 #### Your new best friend: `Define.<...>`
 
@@ -80,7 +80,7 @@ var ActivityService = Define.Service.Activity(() => Console.WriteLine("started")
 
 #### Statechart Definition
 
-> :info: The basic definition of a Statenode is simply a string. The Builder Methods are extension methods for string to reduce character cound and improve readability. Ask your autocompletion with **`.With<...>`** and **`.As<...>`** for help!
+> ℹ The basic definition of a Statenode is simply a string. The Builder Methods are extension methods for string to reduce character cound and improve readability. Ask your autocompletion with **`.With<...>`** and **`.As<...>`** for help!
 
 ```csharp
 // Root Statenode
