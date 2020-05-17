@@ -262,7 +262,7 @@ namespace Statecharts.NET
         }
 
         // TODO: return actual ParsedStatechart based on results from parsing
-        public static ParsedStatechart<TContext> Parse<TContext>(StatechartDefinition<TContext> definition)
+        public static ExecutableStatechart<TContext> Parse<TContext>(StatechartDefinition<TContext> definition)
             where TContext : IContext<TContext>
         {
             var (rootnode, definitions) = ParseStatenode(definition.RootStateNode, null, new Dictionary<StatenodeId, StatenodeDefinition>(),  0);
