@@ -21,10 +21,12 @@ namespace Statecharts.NET.Model
             ChildStatenodesNames = childStatenodesNames;
         }
     }
-    public class SiblingTarget : RelativeTarget {
+    public class SiblingTarget : RelativeTarget
+    {
         public SiblingTarget(string statenodeName, params string[] childStatenodesNames) : base(statenodeName, childStatenodesNames) { }
     }
-    public class ChildTarget : RelativeTarget {
+    public class ChildTarget : RelativeTarget
+    {
         public ChildTarget(string statenodeName, params string[] childStatenodesNames) : base(statenodeName, childStatenodesNames) { }
     }
     public class SelfTarget : Target { }

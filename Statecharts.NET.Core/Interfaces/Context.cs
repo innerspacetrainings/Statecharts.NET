@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Statecharts.NET.Interfaces
+﻿namespace Statecharts.NET.Interfaces
 {
-    public interface IContext<TImplementing> : IEquatable<TImplementing>
+    public interface IContext<TImplementing>
     {
         TImplementing CopyDeep();
     }
