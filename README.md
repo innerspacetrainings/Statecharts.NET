@@ -18,7 +18,7 @@ var behaviour = Define.Statechart
                     On("RESOLVE").TransitionTo.Sibling("success"),
                     On("REJECT").TransitionTo.Sibling("failure")),
                 "failure".WithTransitions(
-					On("RETRY").TransitionTo.Sibling("loading").WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++))),
+                    On("RETRY").TransitionTo.Sibling("loading").WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++))),
                 "success".AsFinal()));
 
 // Usage
@@ -191,6 +191,9 @@ statecharts.OnMacroStep += macrostep => { /* ... */ }; // provides introspection
 - Pass Context to Services
 - Statecharts without TContext
 - OnError on TaskService/ActivityService
+- In State Guards
+- DoneData
+- Nesting Statecharts
 
 ## Roadmap
 - [x] Model the Statechart Types
@@ -218,13 +221,6 @@ statecharts.OnMacroStep += macrostep => { /* ... */ }; // provides introspection
 - [ ] Stricter Types for TargetDefinition and StateNode (child + sibling only on StateNodes with children or siblings)
 - [ ] think about access modifiers
 - [ ] document public things
-- Missing Features
-	- [ ] Deep Initial IDs (https://github.com/davidkpiano/xstate/issues/675)
-	- [ ] In State Guards
-	- [ ] Delayed Events
-	- [ ] ObservableService
-	- [ ] NestedStatechartService
-	- [ ] DoneData
 - Tooling
 	- [ ] Add missing properties to xstate Serialization, and fix it (e.g. same event twice)
 
