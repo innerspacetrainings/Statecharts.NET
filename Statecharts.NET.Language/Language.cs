@@ -36,11 +36,9 @@ namespace Statecharts.NET.Language
                 new SideEffectActionDefinition<TContext>(effect);
             public static SideEffectActionDefinition<TContext, TData> SideEffectWithContextAndData<TContext, TData>(Action<TContext, TData> effect) =>
                 new SideEffectActionDefinition<TContext, TData>(effect);
-            public static AssignActionDefinition Assign(System.Action mutation)
-                => new AssignActionDefinition(mutation);
-            public static AssignActionDefinition<TContext> AssignWithContext<TContext>(Action<TContext> mutation)
+            public static AssignActionDefinition<TContext> Assign<TContext>(Action<TContext> mutation)
                 => new AssignActionDefinition<TContext>(mutation);
-            public static AssignActionDefinition<TContext, TData> AssignWithContextAndData<TContext, TData>(Action<TContext, TData> mutation)
+            public static AssignActionDefinition<TContext, TData> AssignWithData<TContext, TData>(Action<TContext, TData> mutation)
                 => new AssignActionDefinition<TContext, TData>(mutation);
         }
         #region Event
