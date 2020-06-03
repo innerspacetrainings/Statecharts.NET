@@ -6,9 +6,9 @@ using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 using static Statecharts.NET.Language.Keywords;
 
-namespace Statecharts.NET.Language.Builders.StateNode
+namespace Statecharts.NET.Language.Builders
 {
-    internal class DefinitionData
+    internal class StatenodeDefinitionData
     {
         public string Name { get; }
         internal IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions { get; set; }
@@ -18,7 +18,7 @@ namespace Statecharts.NET.Language.Builders.StateNode
         internal InitialCompoundTransitionDefinition InitialTransition { get; set; }
         internal IEnumerable<StatenodeDefinition> States { get; set; }
 
-        public DefinitionData(string name)
+        public StatenodeDefinitionData(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             EntryActions = Enumerable.Empty<OneOf<Model.ActionDefinition, ContextActionDefinition>>();
@@ -29,368 +29,368 @@ namespace Statecharts.NET.Language.Builders.StateNode
         }
     }
 
-    public class WithName : WithEntryActions
+    public class StatenodeWithName : StatenodeWithEntryActions
     {
-        public WithName(string name) : base(name) { }
+        public StatenodeWithName(string name) : base(name) { }
 
-        public WithEntryActions WithEntryActions(
+        public StatenodeWithEntryActions WithEntryActions(
             ActionDefinition action,
             params ActionDefinition[] actions)
         {
-            DefinitionData.EntryActions = action.Append(actions)
+            Definition.EntryActions = action.Append(actions)
                 .Select<ActionDefinition, OneOf<Model.ActionDefinition, ContextActionDefinition>>(a => a.ToDefinitionAction());
             return this;
         }
-        public WithEntryActions WithEntryActions<TContext>(
+        public StatenodeWithEntryActions WithEntryActions<TContext>(
             OneOf<ActionDefinition, ActionDefinition<TContext>> action,
             params OneOf<ActionDefinition, ActionDefinition<TContext>>[] actions)
         {
-            DefinitionData.EntryActions = action.Append(actions)
+            Definition.EntryActions = action.Append(actions)
                 .Select(a => a.Match<OneOf<Model.ActionDefinition, ContextActionDefinition>>(
                     contextlessAction => contextlessAction.ToDefinitionAction(),
                     contextAction => contextAction.ToDefinitionAction()));
             return this;
         }
     }
-    public class WithEntryActions : WithExitActions
+    public class StatenodeWithEntryActions : StatenodeWithExitActions
     {
-        internal WithEntryActions(string name) : base(name) { }
+        internal StatenodeWithEntryActions(string name) : base(name) { }
 
-        public WithExitActions WithExitActions(
+        public StatenodeWithExitActions WithExitActions(
             ActionDefinition action,
             params ActionDefinition[] actions)
         {
-            DefinitionData.ExitActions = action.Append(actions)
+            Definition.ExitActions = action.Append(actions)
                 .Select<ActionDefinition, OneOf<Model.ActionDefinition, ContextActionDefinition>>(a => a.ToDefinitionAction());
             return this;
         }
-        public WithExitActions WithExitActions<TContext>(
+        public StatenodeWithExitActions WithExitActions<TContext>(
             OneOf<ActionDefinition, ActionDefinition<TContext>> action,
             params OneOf<ActionDefinition, ActionDefinition<TContext>>[] actions)
         {
-            DefinitionData.ExitActions = action.Append(actions)
+            Definition.ExitActions = action.Append(actions)
                 .Select(a => a.Match<OneOf<Model.ActionDefinition, ContextActionDefinition>>(
                     contextlessAction => contextlessAction.ToDefinitionAction(),
                     contextAction => contextAction.ToDefinitionAction()));
             return this;
         }
     }
-    public class WithExitActions : WithTransitions
+    public class StatenodeWithExitActions : StatenodeWithTransitions
     {
-        internal WithExitActions(string name) : base(name) { }
+        internal StatenodeWithExitActions(string name) : base(name) { }
 
-        public WithTransitions WithTransitions(
+        public StatenodeWithTransitions WithTransitions(
             TransitionDefinition transitionDefinition,
             params TransitionDefinition[] transitionDefinitions) =>
             WithTransitions(transitionDefinition.Append(transitionDefinitions));
 
-        public WithTransitions WithTransitions(IEnumerable<TransitionDefinition> transitionDefinitions)
+        public StatenodeWithTransitions WithTransitions(IEnumerable<TransitionDefinition> transitionDefinitions)
         {
-            DefinitionData.Transitions = transitionDefinitions;
+            Definition.Transitions = transitionDefinitions;
             return this;
         }
 
-        public Final AsFinal() => new Final(DefinitionData);
+        public FinalStatenode AsFinal() => new FinalStatenode(Definition);
     }
-    public class WithTransitions : WithInvocations
+    public class StatenodeWithTransitions : StatenodeWithInvocations
     {
-        internal WithTransitions(string name) : base(name) { }
+        internal StatenodeWithTransitions(string name) : base(name) { }
 
-        public WithInvocations WithInvocations(
+        public StatenodeWithInvocations WithInvocations(
             ServiceDefinition service,
             params ServiceDefinition[] services)
         {
-            DefinitionData.Services = service.Append(services);
+            Definition.Services = service.Append(services);
             return this;
         }
     }
-    public class WithInvocations : AtomicStatenodeDefinition
+    public class StatenodeWithInvocations : AtomicStatenodeDefinition
     {
-        private protected DefinitionData DefinitionData { get; }
+        private protected StatenodeDefinitionData Definition { get; }
 
-        internal WithInvocations(string name) => DefinitionData = new DefinitionData(name);
+        internal StatenodeWithInvocations(string name) => Definition = new StatenodeDefinitionData(name);
 
-        public override string Name => DefinitionData.Name;
+        public override string Name => Definition.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
+        public override IEnumerable<TransitionDefinition> Transitions => Definition.Transitions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => Definition.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => Definition.ExitActions;
+        public override IEnumerable<ServiceDefinition> Services => Definition.Services;
 
-        public Compound AsCompound() => new Compound(DefinitionData);
-        public Orthogonal AsOrthogonal() => new Orthogonal(DefinitionData);
+        public CompoundStatenode AsCompound() => new CompoundStatenode(Definition);
+        public OrthogonalStatenode AsOrthogonal() => new OrthogonalStatenode(Definition);
     }
 
-    public class Final : FinalStatenodeDefinition
+    public class FinalStatenode : FinalStatenodeDefinition
     {
-        private DefinitionData DefinitionData { get; }
+        private StatenodeDefinitionData Definition { get; }
 
-        internal Final(DefinitionData data)
-            => DefinitionData = data;
+        internal FinalStatenode(StatenodeDefinitionData data)
+            => Definition = data;
 
-        public override string Name => DefinitionData.Name;
+        public override string Name => Definition.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => Definition.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => Definition.ExitActions;
     }
 
-    public class Compound
+    public class CompoundStatenode
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
 
-        internal Compound(DefinitionData data)
-            => DefinitionData = data;
+        internal CompoundStatenode(StatenodeDefinitionData data)
+            => Definition = data;
 
-        public CompoundWithInitialState WithInitialState(string stateName)
+        public CompoundStatenodeWithInitialState WithInitialState(string stateName)
         {
-            DefinitionData.InitialTransition = new InitialCompoundTransitionDefinition(Child(stateName));
-            return new CompoundWithInitialState(this);
+            Definition.InitialTransition = new InitialCompoundTransitionDefinition(Child(stateName));
+            return new CompoundStatenodeWithInitialState(this);
         }
     }
-    public class CompoundWithInitialState
+    public class CompoundStatenodeWithInitialState
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
 
-        internal CompoundWithInitialState(Compound compound)
-            => DefinitionData = compound.DefinitionData;
+        internal CompoundStatenodeWithInitialState(CompoundStatenode compound)
+            => Definition = compound.Definition;
 
-        public CompoundWithInitialActions WithInitialActions(
+        public CompoundStatenodeWithInitialActions WithInitialActions(
             OneOf<Model.ActionDefinition, ContextActionDefinition> action,
             params OneOf<Model.ActionDefinition, ContextActionDefinition>[] actions)
         {
-            DefinitionData.InitialTransition = new InitialCompoundTransitionDefinition(DefinitionData.InitialTransition.Target, action.Append(actions));
-            return new CompoundWithInitialActions(this);
+            Definition.InitialTransition = new InitialCompoundTransitionDefinition(Definition.InitialTransition.Target, action.Append(actions));
+            return new CompoundStatenodeWithInitialActions(this);
         }
 
-        public CompoundWithStates WithStates(
+        public CompoundStatenodeWithSubstates WithStates(
             OneOf<string, StatenodeDefinition> state,
             params OneOf<string, StatenodeDefinition>[] states) =>
             WithStates(state.Append(states));
-        public CompoundWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states) =>
-            WithStates(states.Select(definition => definition.Match(name => new WithName(name), valid => valid)));
-        public CompoundWithStates WithStates(IEnumerable<string> states) =>
-            WithStates(states.Select(name => new WithName(name)));
-        public CompoundWithStates WithStates(IEnumerable<StatenodeDefinition> states)
+        public CompoundStatenodeWithSubstates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states) =>
+            WithStates(states.Select(definition => definition.Match(name => new StatenodeWithName(name), valid => valid)));
+        public CompoundStatenodeWithSubstates WithStates(IEnumerable<string> states) =>
+            WithStates(states.Select(name => new StatenodeWithName(name)));
+        public CompoundStatenodeWithSubstates WithStates(IEnumerable<StatenodeDefinition> states)
         {
-            DefinitionData.States = states;
-            return new CompoundWithStates(this);
+            Definition.States = states;
+            return new CompoundStatenodeWithSubstates(this);
         }
     }
-    public class CompoundWithInitialActions
+    public class CompoundStatenodeWithInitialActions
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
 
-        internal CompoundWithInitialActions(CompoundWithInitialState compound)
-            => DefinitionData = compound.DefinitionData;
+        internal CompoundStatenodeWithInitialActions(CompoundStatenodeWithInitialState compound)
+            => Definition = compound.Definition;
 
-        public CompoundWithStates WithStates(
+        public CompoundStatenodeWithSubstates WithStates(
             OneOf<string, StatenodeDefinition> state,
             params OneOf<string, StatenodeDefinition>[] states) =>
             WithStates(state.Append(states));
-        public CompoundWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states) =>
-            WithStates(states.Select(definition => definition.Match(name => new WithName(name), valid => valid)));
-        public CompoundWithStates WithStates(IEnumerable<string> states) =>
-            WithStates(states.Select(name => new WithName(name)));
-        public CompoundWithStates WithStates(IEnumerable<StatenodeDefinition> states)
+        public CompoundStatenodeWithSubstates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states) =>
+            WithStates(states.Select(definition => definition.Match(name => new StatenodeWithName(name), valid => valid)));
+        public CompoundStatenodeWithSubstates WithStates(IEnumerable<string> states) =>
+            WithStates(states.Select(name => new StatenodeWithName(name)));
+        public CompoundStatenodeWithSubstates WithStates(IEnumerable<StatenodeDefinition> states)
         {
-            DefinitionData.States = states;
-            return new CompoundWithStates(this);
+            Definition.States = states;
+            return new CompoundStatenodeWithSubstates(this);
         }
     }
-    public class CompoundWithStates : CompoundStatenodeDefinition
+    public class CompoundStatenodeWithSubstates : CompoundStatenodeDefinition
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
 
-        internal CompoundWithStates(CompoundWithInitialState compoundWithInitialState)
-            => DefinitionData = compoundWithInitialState.DefinitionData;
-        internal CompoundWithStates(CompoundWithInitialActions compoundWithInitialActions)
-            => DefinitionData = compoundWithInitialActions.DefinitionData;
+        internal CompoundStatenodeWithSubstates(CompoundStatenodeWithInitialState compoundWithInitialState)
+            => Definition = compoundWithInitialState.Definition;
+        internal CompoundStatenodeWithSubstates(CompoundStatenodeWithInitialActions compoundWithInitialActions)
+            => Definition = compoundWithInitialActions.Definition;
 
-        public override string Name => DefinitionData.Name;
+        public override string Name => Definition.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
-        public override InitialCompoundTransitionDefinition InitialTransition => DefinitionData.InitialTransition;
-        public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
+        public override IEnumerable<TransitionDefinition> Transitions => Definition.Transitions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => Definition.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => Definition.ExitActions;
+        public override IEnumerable<ServiceDefinition> Services => Definition.Services;
+        public override InitialCompoundTransitionDefinition InitialTransition => Definition.InitialTransition;
+        public override IEnumerable<StatenodeDefinition> Statenodes => Definition.States;
         public override Option<DoneTransitionDefinition> DoneTransition => Option.None<DoneTransitionDefinition>();
 
-        public CompoundWithOnDone OnDone => new CompoundWithOnDone(this);
+        public CompoundStatenodeWithOnDone OnDone => new CompoundStatenodeWithOnDone(this);
     }
-    public class CompoundWithOnDone
+    public class CompoundStatenodeWithOnDone
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
 
-        public CompoundWithOnDone(CompoundWithStates compound) => DefinitionData = compound.DefinitionData;
+        public CompoundStatenodeWithOnDone(CompoundStatenodeWithSubstates compound) => Definition = compound.Definition;
 
-        public CompoundWithDoneTransitionTo TransitionTo => new CompoundWithDoneTransitionTo(this);
+        public CompoundStatenodeWithDoneTransitionTo TransitionTo => new CompoundStatenodeWithDoneTransitionTo(this);
     }
-    public class CompoundWithDoneTransitionTo
+    public class CompoundStatenodeWithDoneTransitionTo
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
 
-        public CompoundWithDoneTransitionTo(CompoundWithOnDone compound) => DefinitionData = compound.DefinitionData;
+        public CompoundStatenodeWithDoneTransitionTo(CompoundStatenodeWithOnDone compound) => Definition = compound.Definition;
 
-        public CompoundWithDoneTransition Child(string stateName, params string[] childStatenodesNames) =>
-            new CompoundWithDoneTransition(this, Keywords.Child(stateName, childStatenodesNames));
-        public CompoundWithDoneTransition Sibling(string stateName, params string[] childStatenodesNames) =>
-            new CompoundWithDoneTransition(this, Keywords.Sibling(stateName, childStatenodesNames));
-        public CompoundWithDoneTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
-            new CompoundWithDoneTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
-        public CompoundWithDoneTransition Target(Target target) =>
-            new CompoundWithDoneTransition(this, target);
-        public CompoundWithDoneTransition Multiple(Target target, params Target[] targets) =>
-            new CompoundWithDoneTransition(this, target, targets);
+        public CompoundStatenodeWithDoneTransition Child(string stateName, params string[] childStatenodesNames) =>
+            new CompoundStatenodeWithDoneTransition(this, Keywords.Child(stateName, childStatenodesNames));
+        public CompoundStatenodeWithDoneTransition Sibling(string stateName, params string[] childStatenodesNames) =>
+            new CompoundStatenodeWithDoneTransition(this, Keywords.Sibling(stateName, childStatenodesNames));
+        public CompoundStatenodeWithDoneTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new CompoundStatenodeWithDoneTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
+        public CompoundStatenodeWithDoneTransition Target(Target target) =>
+            new CompoundStatenodeWithDoneTransition(this, target);
+        public CompoundStatenodeWithDoneTransition Multiple(Target target, params Target[] targets) =>
+            new CompoundStatenodeWithDoneTransition(this, target, targets);
     }
-    public class CompoundWithDoneTransition : CompoundStatenodeDefinition
+    public class CompoundStatenodeWithDoneTransition : CompoundStatenodeDefinition
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
         internal UnguardedWithTarget DoneTransitionBuilder { get; }
 
-        public CompoundWithDoneTransition(CompoundWithDoneTransitionTo compound, Target target, params Target[] targets)
+        public CompoundStatenodeWithDoneTransition(CompoundStatenodeWithDoneTransitionTo compound, Target target, params Target[] targets)
         {
-            DefinitionData = compound.DefinitionData;
+            Definition = compound.Definition;
             DoneTransitionBuilder = WithEvent.OnDone().TransitionTo.Multiple(target, targets);
         }
 
-        public CompoundWithDoneTransitionWithActions WithActions(ActionDefinition action, params ActionDefinition[] actions) =>
-            new CompoundWithDoneTransitionWithActions(this, action, actions);
+        public CompoundStatenodeWithDoneTransitionWithActions WithActions(ActionDefinition action, params ActionDefinition[] actions) =>
+            new CompoundStatenodeWithDoneTransitionWithActions(this, action, actions);
 
-        public override string Name => DefinitionData.Name;
+        public override string Name => Definition.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
-        public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
-        public override InitialCompoundTransitionDefinition InitialTransition => DefinitionData.InitialTransition;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => Definition.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => Definition.ExitActions;
+        public override IEnumerable<TransitionDefinition> Transitions => Definition.Transitions;
+        public override IEnumerable<ServiceDefinition> Services => Definition.Services;
+        public override IEnumerable<StatenodeDefinition> Statenodes => Definition.States;
+        public override InitialCompoundTransitionDefinition InitialTransition => Definition.InitialTransition;
         public override Option<DoneTransitionDefinition> DoneTransition => new DoneTransitionDefinition(DoneTransitionBuilder.Targets).ToOption(); // TODO: improve this
     }
-    public class CompoundWithDoneTransitionWithActions : CompoundStatenodeDefinition
+    public class CompoundStatenodeWithDoneTransitionWithActions : CompoundStatenodeDefinition
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
         internal UnguardedWithActions DoneTransitionBuilder { get; }
-        public CompoundWithDoneTransitionWithActions(CompoundWithDoneTransition compound, ActionDefinition action, ActionDefinition[] actions)
+        public CompoundStatenodeWithDoneTransitionWithActions(CompoundStatenodeWithDoneTransition compound, ActionDefinition action, ActionDefinition[] actions)
         {
-            DefinitionData = compound.DefinitionData;
+            Definition = compound.Definition;
             DoneTransitionBuilder = compound.DoneTransitionBuilder.WithActions(action, actions);
         }
 
-        public override string Name => DefinitionData.Name;
+        public override string Name => Definition.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
-        public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
-        public override InitialCompoundTransitionDefinition InitialTransition => DefinitionData.InitialTransition;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => Definition.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => Definition.ExitActions;
+        public override IEnumerable<TransitionDefinition> Transitions => Definition.Transitions;
+        public override IEnumerable<ServiceDefinition> Services => Definition.Services;
+        public override IEnumerable<StatenodeDefinition> Statenodes => Definition.States;
+        public override InitialCompoundTransitionDefinition InitialTransition => Definition.InitialTransition;
         public override Option<DoneTransitionDefinition> DoneTransition => new DoneTransitionDefinition(DoneTransitionBuilder.Targets).ToOption(); // TODO: improve this
     }
 
-    public class Orthogonal
+    public class OrthogonalStatenode
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
 
-        internal Orthogonal(DefinitionData data)
-            => DefinitionData = data;
+        internal OrthogonalStatenode(StatenodeDefinitionData data)
+            => Definition = data;
 
-        public OrthogonalWithStates WithStates(
+        public OrthogonalStatenodeWithStates WithStates(
             OneOf<string, StatenodeDefinition> state,
             params OneOf<string, StatenodeDefinition>[] states) =>
             WithStates(state.Append(states));
-        public OrthogonalWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states) =>
-            WithStates(states.Select(definition => definition.Match(name => new WithName(name), valid => valid)));
-        public OrthogonalWithStates WithStates(IEnumerable<string> states) =>
-            WithStates(states.Select(name => new WithName(name)));
-        public OrthogonalWithStates WithStates(IEnumerable<StatenodeDefinition> states)
+        public OrthogonalStatenodeWithStates WithStates(IEnumerable<OneOf<string, StatenodeDefinition>> states) =>
+            WithStates(states.Select(definition => definition.Match(name => new StatenodeWithName(name), valid => valid)));
+        public OrthogonalStatenodeWithStates WithStates(IEnumerable<string> states) =>
+            WithStates(states.Select(name => new StatenodeWithName(name)));
+        public OrthogonalStatenodeWithStates WithStates(IEnumerable<StatenodeDefinition> states)
         {
-            DefinitionData.States = states;
-            return new OrthogonalWithStates(this);
+            Definition.States = states;
+            return new OrthogonalStatenodeWithStates(this);
         }
     }
-    public class OrthogonalWithStates : OrthogonalStatenodeDefinition
+    public class OrthogonalStatenodeWithStates : OrthogonalStatenodeDefinition
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
 
-        internal OrthogonalWithStates(Orthogonal orthogonal)
-            => DefinitionData = orthogonal.DefinitionData;
+        internal OrthogonalStatenodeWithStates(OrthogonalStatenode orthogonal)
+            => Definition = orthogonal.Definition;
 
-        public override string Name => DefinitionData.Name;
+        public override string Name => Definition.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
-        public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
+        public override IEnumerable<TransitionDefinition> Transitions => Definition.Transitions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => Definition.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => Definition.ExitActions;
+        public override IEnumerable<ServiceDefinition> Services => Definition.Services;
+        public override IEnumerable<StatenodeDefinition> Statenodes => Definition.States;
         public override Option<DoneTransitionDefinition> DoneTransition => Option.None<DoneTransitionDefinition>();
-        public OrthogonalWithOnDone OnDone => new OrthogonalWithOnDone(this);
+        public OrthogonalStatenodeWithOnDone OnDone => new OrthogonalStatenodeWithOnDone(this);
     }
-    public class OrthogonalWithOnDone
+    public class OrthogonalStatenodeWithOnDone
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
 
-        public OrthogonalWithOnDone(OrthogonalWithStates orthogonal) => DefinitionData = orthogonal.DefinitionData;
+        public OrthogonalStatenodeWithOnDone(OrthogonalStatenodeWithStates orthogonal) => Definition = orthogonal.Definition;
 
-        public OrthogonalWithDoneTransitionTo TransitionTo => new OrthogonalWithDoneTransitionTo(this);
+        public OrthogonalStatenodeWithDoneTransitionTo TransitionTo => new OrthogonalStatenodeWithDoneTransitionTo(this);
     }
-    public class OrthogonalWithDoneTransitionTo
+    public class OrthogonalStatenodeWithDoneTransitionTo
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
 
-        public OrthogonalWithDoneTransitionTo(OrthogonalWithOnDone orthogonal) => DefinitionData = orthogonal.DefinitionData;
+        public OrthogonalStatenodeWithDoneTransitionTo(OrthogonalStatenodeWithOnDone orthogonal) => Definition = orthogonal.Definition;
 
-        public OrthogonalWithDoneTransition Child(string stateName, params string[] childStatenodesNames) =>
-            new OrthogonalWithDoneTransition(this, Keywords.Child(stateName, childStatenodesNames));
-        public OrthogonalWithDoneTransition Sibling(string stateName, params string[] childStatenodesNames) =>
-            new OrthogonalWithDoneTransition(this, Keywords.Sibling(stateName, childStatenodesNames));
-        public OrthogonalWithDoneTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
-            new OrthogonalWithDoneTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
-        public OrthogonalWithDoneTransition Target(Target target) =>
-            new OrthogonalWithDoneTransition(this, target);
-        public OrthogonalWithDoneTransition Multiple(Target target, params Target[] targets) =>
-            new OrthogonalWithDoneTransition(this, target, targets);
+        public OrthogonalStatenodeWithDoneTransition Child(string stateName, params string[] childStatenodesNames) =>
+            new OrthogonalStatenodeWithDoneTransition(this, Keywords.Child(stateName, childStatenodesNames));
+        public OrthogonalStatenodeWithDoneTransition Sibling(string stateName, params string[] childStatenodesNames) =>
+            new OrthogonalStatenodeWithDoneTransition(this, Keywords.Sibling(stateName, childStatenodesNames));
+        public OrthogonalStatenodeWithDoneTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new OrthogonalStatenodeWithDoneTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
+        public OrthogonalStatenodeWithDoneTransition Target(Target target) =>
+            new OrthogonalStatenodeWithDoneTransition(this, target);
+        public OrthogonalStatenodeWithDoneTransition Multiple(Target target, params Target[] targets) =>
+            new OrthogonalStatenodeWithDoneTransition(this, target, targets);
     }
-    public class OrthogonalWithDoneTransition : OrthogonalStatenodeDefinition
+    public class OrthogonalStatenodeWithDoneTransition : OrthogonalStatenodeDefinition
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
         internal UnguardedWithTarget DoneTransitionBuilder { get; }
 
-        public OrthogonalWithDoneTransition(OrthogonalWithDoneTransitionTo orthogonal, Target target, params Target[] targets)
+        public OrthogonalStatenodeWithDoneTransition(OrthogonalStatenodeWithDoneTransitionTo orthogonal, Target target, params Target[] targets)
         {
-            DefinitionData = orthogonal.DefinitionData;
+            Definition = orthogonal.Definition;
             DoneTransitionBuilder = WithEvent.OnDone().TransitionTo.Multiple(target, targets);
         }
 
-        public OrthogonalWithDoneTransitionWithActions WithActions(ActionDefinition action, params ActionDefinition[] actions) =>
-            new OrthogonalWithDoneTransitionWithActions(this, action, actions);
+        public OrthogonalStatenodeWithDoneTransitionWithActions WithActions(ActionDefinition action, params ActionDefinition[] actions) =>
+            new OrthogonalStatenodeWithDoneTransitionWithActions(this, action, actions);
 
-        public override string Name => DefinitionData.Name;
+        public override string Name => Definition.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
-        public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => Definition.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => Definition.ExitActions;
+        public override IEnumerable<TransitionDefinition> Transitions => Definition.Transitions;
+        public override IEnumerable<ServiceDefinition> Services => Definition.Services;
+        public override IEnumerable<StatenodeDefinition> Statenodes => Definition.States;
         public override Option<DoneTransitionDefinition> DoneTransition => new DoneTransitionDefinition(DoneTransitionBuilder.Targets).ToOption(); // TODO: improve this
     }
-    public class OrthogonalWithDoneTransitionWithActions : OrthogonalStatenodeDefinition
+    public class OrthogonalStatenodeWithDoneTransitionWithActions : OrthogonalStatenodeDefinition
     {
-        internal DefinitionData DefinitionData { get; }
+        internal StatenodeDefinitionData Definition { get; }
         internal UnguardedWithActions DoneTransitionBuilder { get; }
-        public OrthogonalWithDoneTransitionWithActions(OrthogonalWithDoneTransition orthogonal, ActionDefinition action, ActionDefinition[] actions)
+        public OrthogonalStatenodeWithDoneTransitionWithActions(OrthogonalStatenodeWithDoneTransition orthogonal, ActionDefinition action, ActionDefinition[] actions)
         {
-            DefinitionData = orthogonal.DefinitionData;
+            Definition = orthogonal.Definition;
             DoneTransitionBuilder = orthogonal.DoneTransitionBuilder.WithActions(action, actions);
         }
 
-        public override string Name => DefinitionData.Name;
+        public override string Name => Definition.Name;
         public override Option<string> UniqueIdentifier => Option.None<string>();
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => DefinitionData.EntryActions;
-        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => DefinitionData.ExitActions;
-        public override IEnumerable<TransitionDefinition> Transitions => DefinitionData.Transitions;
-        public override IEnumerable<ServiceDefinition> Services => DefinitionData.Services;
-        public override IEnumerable<StatenodeDefinition> Statenodes => DefinitionData.States;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> EntryActions => Definition.EntryActions;
+        public override IEnumerable<OneOf<Model.ActionDefinition, ContextActionDefinition>> ExitActions => Definition.ExitActions;
+        public override IEnumerable<TransitionDefinition> Transitions => Definition.Transitions;
+        public override IEnumerable<ServiceDefinition> Services => Definition.Services;
+        public override IEnumerable<StatenodeDefinition> Statenodes => Definition.States;
         public override Option<DoneTransitionDefinition> DoneTransition => new DoneTransitionDefinition(DoneTransitionBuilder.Targets).ToOption(); // TODO: improve this
     }
 }

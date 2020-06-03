@@ -66,9 +66,9 @@ namespace Statecharts.NET.Model
     }
     #endregion
 
-    public abstract class Statenode : OneOfBase<AtomicStatenode, FinalStatenode, CompoundStatenode, OrthogonalStatenode>
+    public abstract class ParsedStatenode : OneOfBase<ParsedAtomicStatenode, ParsedFinalStatenode, ParsedCompoundStatenode, ParsedOrthogonalStatenode>
     {
-        public Option<Statenode> Parent { get; }
+        public Option<ParsedStatenode> Parent { get; }
         public string Name { get; }
         public Option<string> UniqueIdentifier { get; }
         public int DocumentIndex { get; }
@@ -78,8 +78,8 @@ namespace Statecharts.NET.Model
         public StatenodeId Id { get; }
         internal int Depth { get; }
 
-        protected Statenode(
-            Statenode parent,
+        protected ParsedStatenode(
+            ParsedStatenode parent,
             string name,
             Option<string> uniqueIdentifier,
             int documentIndex,
@@ -97,27 +97,27 @@ namespace Statecharts.NET.Model
             Depth = Parent.Map(p => p.Depth + 1).ValueOr(0);
         }
 
-        public override bool Equals(object other) => other is Statenode statenode && statenode.Id.Equals(Id);
+        public override bool Equals(object other) => other is ParsedStatenode statenode && statenode.Id.Equals(Id);
         public override int GetHashCode() => Id.GetHashCode() ^ 217;
 
         internal void AddDelayedTransitionAction(IEnumerable<StartDelayedTransitionAction> actions) =>
             EntryActions = Actionblock.From(EntryActions.Concat(actions));
 
-        internal TResult Match<TResult>(Func<FinalStatenode, TResult> fFinalStatenode,
-            Func<NonFinalStatenode, TResult> fNonFinalStatenode) =>
+        internal TResult Match<TResult>(Func<ParsedFinalStatenode, TResult> fFinalStatenode,
+            Func<ParsedNonFinalStatenode, TResult> fNonFinalStatenode) =>
             Match(fNonFinalStatenode, fFinalStatenode, fNonFinalStatenode, fNonFinalStatenode);
 
-        internal void Switch(Action<FinalStatenode> fFinalStatenode,
-            Action<NonFinalStatenode> fNonFinalStatenode) =>
+        internal void Switch(Action<ParsedFinalStatenode> fFinalStatenode,
+            Action<ParsedNonFinalStatenode> fNonFinalStatenode) =>
             Switch(fNonFinalStatenode, fFinalStatenode, fNonFinalStatenode, fNonFinalStatenode);
 
         internal TResult CataFold<TResult>(
-            Func<AtomicStatenode, TResult> fAtomic,
-            Func<FinalStatenode, TResult> fFinal,
-            Func<CompoundStatenode, IEnumerable<TResult>, TResult> fCompound,
-            Func<OrthogonalStatenode, IEnumerable<TResult>, TResult> fOrthogonal)
+            Func<ParsedAtomicStatenode, TResult> fAtomic,
+            Func<ParsedFinalStatenode, TResult> fFinal,
+            Func<ParsedCompoundStatenode, IEnumerable<TResult>, TResult> fCompound,
+            Func<ParsedOrthogonalStatenode, IEnumerable<TResult>, TResult> fOrthogonal)
         {
-            TResult Recurse(Statenode recursedStateNode) =>
+            TResult Recurse(ParsedStatenode recursedStateNode) =>
                 recursedStateNode.CataFold(fAtomic, fFinal, fCompound, fOrthogonal);
 
             return Match(
@@ -130,10 +130,10 @@ namespace Statecharts.NET.Model
         public override string ToString() => $"{Id} ({Match(_ => "A", _ => "F", _ => "C", _ => "O")})";
     }
 
-    public class FinalStatenode : Statenode
+    public class ParsedFinalStatenode : ParsedStatenode
     {
-        public FinalStatenode(
-            Statenode parent,
+        public ParsedFinalStatenode(
+            ParsedStatenode parent,
             string name,
             Option<string> uniqueIdentifier,
             int documentIndex,
@@ -143,13 +143,13 @@ namespace Statecharts.NET.Model
         }
     }
 
-    public abstract class NonFinalStatenode : Statenode
+    public abstract class ParsedNonFinalStatenode : ParsedStatenode
     {
         public IEnumerable<Transition> Transitions { get; internal set; }
         public IEnumerable<Service> Services { get; internal set; }
 
-        protected NonFinalStatenode(
-            Statenode parent,
+        protected ParsedNonFinalStatenode(
+            ParsedStatenode parent,
             string name,
             Option<string> uniqueIdentifier,
             int documentIndex,
@@ -157,10 +157,10 @@ namespace Statecharts.NET.Model
             Actionblock exitActions) : base(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions) { }
     }
 
-    public class AtomicStatenode : NonFinalStatenode
+    public class ParsedAtomicStatenode : ParsedNonFinalStatenode
     {
-        public AtomicStatenode(
-            Statenode parent,
+        public ParsedAtomicStatenode(
+            ParsedStatenode parent,
             string name,
             Option<string> uniqueIdentifier,
             int documentIndex,
@@ -168,24 +168,24 @@ namespace Statecharts.NET.Model
             Actionblock exitActions) : base(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions) { }
     }
 
-    public class CompoundStatenode : NonFinalStatenode
+    public class ParsedCompoundStatenode : ParsedNonFinalStatenode
     {
-        public IEnumerable<Statenode> Statenodes { get; internal set; }
+        public IEnumerable<ParsedStatenode> Statenodes { get; internal set; }
 
-        public CompoundStatenode(
-            Statenode parent,
+        public ParsedCompoundStatenode(
+            ParsedStatenode parent,
             string name,
             Option<string> uniqueIdentifier,
             int documentIndex,
             Actionblock entryActions,
             Actionblock exitActions) : base(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions) { }
     }
-    public class OrthogonalStatenode : NonFinalStatenode
+    public class ParsedOrthogonalStatenode : ParsedNonFinalStatenode
     {
-        public IEnumerable<Statenode> Statenodes { get; internal set; }
+        public IEnumerable<ParsedStatenode> Statenodes { get; internal set; }
 
-        public OrthogonalStatenode(
-            Statenode parent,
+        public ParsedOrthogonalStatenode(
+            ParsedStatenode parent,
             string name,
             Option<string> uniqueIdentifier,
             int documentIndex,

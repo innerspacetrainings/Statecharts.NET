@@ -31,7 +31,7 @@ namespace Statecharts.NET.Model
 
         public Entry Root => _root;
 
-        internal void Add(Statenode statenode)
+        internal void Add(ParsedStatenode statenode)
         {
             var entry = new Entry(statenode.Id, statenode.Name);
             statenode.Parent.Switch(
@@ -40,7 +40,7 @@ namespace Statecharts.NET.Model
             _lookup.Add(statenode.Id, entry);
         }
 
-        internal void Remove(Statenode statenode)
+        internal void Remove(ParsedStatenode statenode)
         {
             var entry = new Entry(statenode.Id, statenode.Name);
             statenode.Parent.Switch(
@@ -49,10 +49,10 @@ namespace Statecharts.NET.Model
             _lookup.Remove(statenode.Id);
         }
 
-        public bool Contains(Statenode statenode)
+        public bool Contains(ParsedStatenode statenode)
             => _lookup.ContainsKey(statenode.Id);
 
-        public bool IsInitialized(Statenode statenode)
+        public bool IsInitialized(ParsedStatenode statenode)
             => Contains(statenode) && _lookup[statenode.Id].Children.Any();
 
         public IEnumerable<Entry> FoldL()

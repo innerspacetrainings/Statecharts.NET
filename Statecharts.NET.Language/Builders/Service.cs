@@ -1,211 +1,203 @@
 ﻿using System;
 using Statecharts.NET.Interfaces;
-using Statecharts.NET.Language.Builders.Service;
 using Statecharts.NET.Language.Builders.Transition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
 
-namespace Statecharts.NET.Language
+namespace Statecharts.NET.Language.Builders
 {
-    public class TaskService : TaskServiceDefinition
-    {
-        internal DefinitionData DefinitionData { get; }
-
-        public TaskService(Model.TaskDelegate task)
-        {
-            DefinitionData = new DefinitionData();
-            Task = task;
-        }
-
-        public override Model.TaskDelegate Task { get; }
-        public override Option<string> Id => DefinitionData.Id;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => DefinitionData.OnErrorTransition;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => DefinitionData.OnSuccessDefinition;
-
-        public object WithId => throw new NotImplementedException();
-        public Builders.TaskService.WithOnSuccess OnSuccess => new Builders.TaskService.WithOnSuccess(this);
-        public object OnError => throw new NotImplementedException();
-    }
-    public class ActivityService : ActivityServiceDefinition
-    {
-        internal DefinitionData DefinitionData { get; }
-
-        public ActivityService(Activity activity)
-        {
-            DefinitionData = new DefinitionData();
-            Activity = activity;
-        }
-
-        public override Activity Activity { get; }
-        public override Option<string> Id => DefinitionData.Id;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => DefinitionData.OnErrorTransition;
-
-        public Builders.ActivityService.WithId WithId(string id) => new Builders.ActivityService.WithId(this, id);
-        public Builders.ActivityService.WithOnError OnError => new Builders.ActivityService.WithOnError(this);
-    }
-}
-namespace Statecharts.NET.Language.Builders.Service
-{
-    internal class DefinitionData
+    internal class ServiceDefinitionData
     {
         public Option<string> Id { get; set; }
         public Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition { get; set; }
         public Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition { get; set; }
 
-        public DefinitionData()
+        public ServiceDefinitionData()
         {
             Id = Option.None<string>();
             OnErrorTransition = Option.None<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>();
             OnSuccessDefinition = Option.None<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>();
         }
     }
-}
-namespace Statecharts.NET.Language.Builders.TaskService
-{
-    public class WithOnSuccess
+
+    public class TaskService : TaskServiceDefinition
     {
-        internal Language.TaskService Service { get; }
+        internal ServiceDefinitionData Definition { get; }
 
-        internal WithOnSuccess(Language.TaskService service) => Service = service;
+        public TaskService(TaskDelegate task)
+        {
+            Definition = new ServiceDefinitionData();
+            Task = task;
+        }
 
-        public WithOnSuccessTransitionTo TransitionTo => new WithOnSuccessTransitionTo(this);
+        public override TaskDelegate Task { get; }
+        public override Option<string> Id => Definition.Id;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Definition.OnErrorTransition;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Definition.OnSuccessDefinition;
+
+        public object WithId => throw new NotImplementedException();
+        public TaskServiceWithOnSuccess OnSuccess => new TaskServiceWithOnSuccess(this);
+        public object OnError => throw new NotImplementedException();
     }
-    public class WithOnSuccessTransitionTo
+    public class TaskServiceWithOnSuccess
     {
-        internal Language.TaskService Service { get; }
+        internal TaskService Service { get; }
 
-        internal WithOnSuccessTransitionTo(WithOnSuccess service) => Service = service.Service;
+        internal TaskServiceWithOnSuccess(TaskService service) => Service = service;
 
-        public WithOnSuccessTransition Child(string statenodeName, params string[] childStatenodeNames) =>
-            new WithOnSuccessTransition(this, Keywords.Child(statenodeName, childStatenodeNames));
-        public WithOnSuccessTransition Sibling(string statenodeName, params string[] childStatenodeNames) =>
-            new WithOnSuccessTransition(this, Keywords.Sibling(statenodeName, childStatenodeNames));
-        public WithOnSuccessTransition Absolute(string statechartName, params string[] childStatenodeNames) =>
-            new WithOnSuccessTransition(this, Keywords.Absolute(statechartName, childStatenodeNames));
-        public WithOnSuccessTransition Target(Target target) =>
-            new WithOnSuccessTransition(this, target);
-        public WithOnSuccessTransition Multiple(Target target, params Target[] targets) =>
-            new WithOnSuccessTransition(this, target, targets);
+        public TaskServiceWithOnSuccessTransitionTo TransitionTo => new TaskServiceWithOnSuccessTransitionTo(this);
     }
-    public class WithOnSuccessTransition : TaskServiceDefinition
+    public class TaskServiceWithOnSuccessTransitionTo
     {
-        internal Language.TaskService Service { get; }
+        internal TaskService Service { get; }
+
+        internal TaskServiceWithOnSuccessTransitionTo(TaskServiceWithOnSuccess service) => Service = service.Service;
+
+        public TaskServiceWithOnSuccessTransition Child(string statenodeName, params string[] childStatenodeNames) =>
+            new TaskServiceWithOnSuccessTransition(this, Keywords.Child(statenodeName, childStatenodeNames));
+        public TaskServiceWithOnSuccessTransition Sibling(string statenodeName, params string[] childStatenodeNames) =>
+            new TaskServiceWithOnSuccessTransition(this, Keywords.Sibling(statenodeName, childStatenodeNames));
+        public TaskServiceWithOnSuccessTransition Absolute(string statechartName, params string[] childStatenodeNames) =>
+            new TaskServiceWithOnSuccessTransition(this, Keywords.Absolute(statechartName, childStatenodeNames));
+        public TaskServiceWithOnSuccessTransition Target(Target target) =>
+            new TaskServiceWithOnSuccessTransition(this, target);
+        public TaskServiceWithOnSuccessTransition Multiple(Target target, params Target[] targets) =>
+            new TaskServiceWithOnSuccessTransition(this, target, targets);
+    }
+    public class TaskServiceWithOnSuccessTransition : TaskServiceDefinition
+    {
+        internal TaskService Service { get; }
         internal UnguardedWithTarget OnSuccessTransition { get; }
 
-        internal WithOnSuccessTransition(WithOnSuccessTransitionTo service, Target target, params Target[] targets)
+        internal TaskServiceWithOnSuccessTransition(TaskServiceWithOnSuccessTransitionTo service, Target target, params Target[] targets)
         {
             Service = service.Service;
             OnSuccessTransition = WithEvent.OnServiceSuccess().TransitionTo.Multiple(target, targets);
-            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
+            Service.Definition.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
         }
 
-        public WithOnSuccessTransitionWithActions WithActions(ActionDefinition action, params ActionDefinition[] actions) =>
-            new WithOnSuccessTransitionWithActions(this, action, actions);
-        public WithOnSuccessTransitionWithActions<TContext> WithActions<TContext>(
+        public TaskServiceWithOnSuccessTransitionWithActions WithActions(ActionDefinition action, params ActionDefinition[] actions) =>
+            new TaskServiceWithOnSuccessTransitionWithActions(this, action, actions);
+        public TaskServiceWithOnSuccessTransitionWithActions<TContext> WithActions<TContext>(
             OneOf<ActionDefinition, ActionDefinition<TContext>> action,
             params OneOf<ActionDefinition, ActionDefinition<TContext>>[] actions)
             where TContext : IContext<TContext> =>
-            new WithOnSuccessTransitionWithActions<TContext>(this, action, actions);
+            new TaskServiceWithOnSuccessTransitionWithActions<TContext>(this, action, actions);
 
-        public override Model.TaskDelegate Task => Service.Task;
-        public override Option<string> Id => Service.DefinitionData.Id;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.DefinitionData.OnSuccessDefinition;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
+        public override TaskDelegate Task => Service.Task;
+        public override Option<string> Id => Service.Definition.Id;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.Definition.OnSuccessDefinition;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.Definition.OnErrorTransition;
     }
-    public class WithOnSuccessTransitionWithActions : TaskServiceDefinition
+    public class TaskServiceWithOnSuccessTransitionWithActions : TaskServiceDefinition
     {
-        private Language.TaskService Service { get; }
+        private TaskService Service { get; }
         internal UnguardedWithActions OnSuccessTransition { get; }
 
-        internal WithOnSuccessTransitionWithActions(WithOnSuccessTransition service, ActionDefinition action, params ActionDefinition[] actions)
+        internal TaskServiceWithOnSuccessTransitionWithActions(TaskServiceWithOnSuccessTransition service, ActionDefinition action, params ActionDefinition[] actions)
         {
             Service = service.Service;
             OnSuccessTransition = service.OnSuccessTransition.WithActions(action, actions);
-            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
+            Service.Definition.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
         }
 
-        public override Model.TaskDelegate Task => Service.Task;
-        public override Option<string> Id => Service.DefinitionData.Id;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.DefinitionData.OnSuccessDefinition;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
+        public override TaskDelegate Task => Service.Task;
+        public override Option<string> Id => Service.Definition.Id;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.Definition.OnSuccessDefinition;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.Definition.OnErrorTransition;
     }
-    public class WithOnSuccessTransitionWithActions<TContext> : TaskServiceDefinition where TContext : IContext<TContext>
+    public class TaskServiceWithOnSuccessTransitionWithActions<TContext> : TaskServiceDefinition where TContext : IContext<TContext>
     {
-        private Language.TaskService Service { get; }
+        private TaskService Service { get; }
         internal ContextUnguardedWithActions<TContext> OnSuccessTransition { get; }
 
-        internal WithOnSuccessTransitionWithActions(
-            WithOnSuccessTransition service,
+        internal TaskServiceWithOnSuccessTransitionWithActions(
+            TaskServiceWithOnSuccessTransition service,
             OneOf<ActionDefinition, ActionDefinition<TContext>> action,
             params OneOf<ActionDefinition, ActionDefinition<TContext>>[] actions)
         {
             Service = service.Service;
             OnSuccessTransition = service.OnSuccessTransition.WithActions(action, actions);
-            Service.DefinitionData.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
+            Service.Definition.OnSuccessDefinition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(OnSuccessTransition);
         }
 
-        public override Model.TaskDelegate Task => Service.Task;
-        public override Option<string> Id => Service.DefinitionData.Id;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.DefinitionData.OnSuccessDefinition;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
+        public override TaskDelegate Task => Service.Task;
+        public override Option<string> Id => Service.Definition.Id;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnSuccessDefinition => Service.Definition.OnSuccessDefinition;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.Definition.OnErrorTransition;
     }
-}
-namespace Statecharts.NET.Language.Builders.ActivityService
-{
-    public class WithId : ActivityServiceDefinition
-    {
-        internal Language.ActivityService Service { get; }
 
-        internal WithId(Language.ActivityService service, string id)
+    public class ActivityService : ActivityServiceDefinition
+    {
+        internal ServiceDefinitionData Definition { get; }
+
+        public ActivityService(Activity activity)
+        {
+            Definition = new ServiceDefinitionData();
+            Activity = activity;
+        }
+
+        public override Activity Activity { get; }
+        public override Option<string> Id => Definition.Id;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Definition.OnErrorTransition;
+
+        public ActivityServiceWithId WithId(string id) => new ActivityServiceWithId(this, id);
+        public ActivityServiceWithOnError OnError => new ActivityServiceWithOnError(this);
+    }
+    public class ActivityServiceWithId : ActivityServiceDefinition
+    {
+        internal ActivityService Service { get; }
+
+        internal ActivityServiceWithId(ActivityService service, string id)
         {
             Service = service;
-            Service.DefinitionData.Id = id.ToOption();
+            Service.Definition.Id = id.ToOption();
         }
 
         public override Activity Activity => Service.Activity;
-        public override Option<string> Id => Service.DefinitionData.Id;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
+        public override Option<string> Id => Service.Definition.Id;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.Definition.OnErrorTransition;
 
-        public WithOnError OnError => new WithOnError(this);
+        public ActivityServiceWithOnError OnError => new ActivityServiceWithOnError(this);
     }
-    public class WithOnError
+    public class ActivityServiceWithOnError
     {
-        internal Language.ActivityService Service { get; }
+        internal ActivityService Service { get; }
 
-        internal WithOnError(Language.ActivityService service) => Service = service;
-        internal WithOnError(WithId service) => Service = service.Service;
+        internal ActivityServiceWithOnError(ActivityService service) => Service = service;
+        internal ActivityServiceWithOnError(ActivityServiceWithId service) => Service = service.Service;
 
-        public WithOnErrorTransitionTo TransitionTo => new WithOnErrorTransitionTo(this);
+        public ActivityServiceWithOnErrorTransitionTo TransitionTo => new ActivityServiceWithOnErrorTransitionTo(this);
     }
-    public class WithOnErrorTransitionTo
+    public class ActivityServiceWithOnErrorTransitionTo
     {
-        internal Language.ActivityService Service { get; }
+        internal ActivityService Service { get; }
 
-        internal WithOnErrorTransitionTo(WithOnError service) => Service = service.Service;
+        internal ActivityServiceWithOnErrorTransitionTo(ActivityServiceWithOnError service) => Service = service.Service;
 
-        public WithOnErrorTransition Child(string stateName, params string[] childStatenodesNames) =>
-            new WithOnErrorTransition(this, Keywords.Child(stateName, childStatenodesNames));
-        public WithOnErrorTransition Sibling(string statenodeName, params string[] childStatenodesNames) =>
-            new WithOnErrorTransition(this, Keywords.Sibling(statenodeName, childStatenodesNames));
-        public WithOnErrorTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
-            new WithOnErrorTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
-        public WithOnErrorTransition Target(Target target) =>
-            new WithOnErrorTransition(this, target);
-        public WithOnErrorTransition Multiple(Target target, params Target[] targets) =>
-            new WithOnErrorTransition(this, target, targets);
+        public ActivityServiceWithOnErrorTransition Child(string stateName, params string[] childStatenodesNames) =>
+            new ActivityServiceWithOnErrorTransition(this, Keywords.Child(stateName, childStatenodesNames));
+        public ActivityServiceWithOnErrorTransition Sibling(string statenodeName, params string[] childStatenodesNames) =>
+            new ActivityServiceWithOnErrorTransition(this, Keywords.Sibling(statenodeName, childStatenodesNames));
+        public ActivityServiceWithOnErrorTransition Absolute(string statechartName, params string[] childStatenodesNames) =>
+            new ActivityServiceWithOnErrorTransition(this, Keywords.Absolute(statechartName, childStatenodesNames));
+        public ActivityServiceWithOnErrorTransition Target(Target target) =>
+            new ActivityServiceWithOnErrorTransition(this, target);
+        public ActivityServiceWithOnErrorTransition Multiple(Target target, params Target[] targets) =>
+            new ActivityServiceWithOnErrorTransition(this, target, targets);
     }
-    public class WithOnErrorTransition : ActivityServiceDefinition
+    public class ActivityServiceWithOnErrorTransition : ActivityServiceDefinition
     {
-        private Language.ActivityService Service { get; }
+        private ActivityService Service { get; }
 
-        internal WithOnErrorTransition(WithOnErrorTransitionTo service, Target target, params Target[] targets)
+        internal ActivityServiceWithOnErrorTransition(ActivityServiceWithOnErrorTransitionTo service, Target target, params Target[] targets)
         {
             Service = service.Service;
-            Service.DefinitionData.OnErrorTransition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(WithEvent.OnServiceError().TransitionTo.Multiple(target, targets));
+            Service.Definition.OnErrorTransition = Option.From<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>>(WithEvent.OnServiceError().TransitionTo.Multiple(target, targets));
         }
 
         public override Activity Activity => Service.Activity;
-        public override Option<string> Id => Service.DefinitionData.Id;
-        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.DefinitionData.OnErrorTransition;
+        public override Option<string> Id => Service.Definition.Id;
+        public override Option<OneOfUnion<TransitionDefinition, UnguardedTransitionDefinition, UnguardedContextTransitionDefinition>> OnErrorTransition => Service.Definition.OnErrorTransition;
     }
 }

@@ -10,7 +10,7 @@ namespace Statecharts.NET.Model
         public IEnumerable<string> Values { get; }
         internal string String => string.Join(".", Values);
 
-        public StatenodeId(Option<Statenode> parent, string statenodeName) =>
+        public StatenodeId(Option<ParsedStatenode> parent, string statenodeName) =>
             Values = parent.Match(
                 parentStatenode => parentStatenode.Id.Values.Append(statenodeName),
                 statenodeName.Yield);
@@ -18,8 +18,8 @@ namespace Statecharts.NET.Model
             Values = values;
 
         internal static StatenodeId Root(string name) =>
-            new StatenodeId(Option.None<Statenode>(), name);
-        internal static StatenodeId DeriveFromParent(Statenode parent, string name) =>
+            new StatenodeId(Option.None<ParsedStatenode>(), name);
+        internal static StatenodeId DeriveFromParent(ParsedStatenode parent, string name) =>
             new StatenodeId(parent.ToOption(), name);
 
         public bool Equals(StatenodeId other) => other != null && other.String.Equals(String);

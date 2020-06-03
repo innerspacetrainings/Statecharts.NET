@@ -10,41 +10,41 @@ namespace Statecharts.NET
 {
     internal static class StatenodeExtensions
     {
-        internal static IEnumerable<Statenode> GetParents(
-            this Statenode statenode) =>
+        internal static IEnumerable<ParsedStatenode> GetParents(
+            this ParsedStatenode statenode) =>
             statenode.Parent
                 .Map(parent => parent.Append(parent.GetParents()))
-                .ValueOr(Enumerable.Empty<Statenode>());
-        internal static Option<Statenode> LeastCommonAncestor(
-            this (Statenode first, Statenode second) pair) =>
+                .ValueOr(Enumerable.Empty<ParsedStatenode>());
+        internal static Option<ParsedStatenode> LeastCommonAncestor(
+            this (ParsedStatenode first, ParsedStatenode second) pair) =>
             Enumerable.Intersect(pair.first.GetParents(), pair.second.GetParents()).FirstOrDefault().ToOption();
 
-        internal static Statenode OneBeneath(
-            this Statenode statenode, Statenode beneath)
+        internal static ParsedStatenode OneBeneath(
+            this ParsedStatenode statenode, ParsedStatenode beneath)
             => statenode.Append(statenode.GetParents())
                 .FirstOrDefault(parentStateNode => parentStateNode.Parent.Equals(beneath.ToOption()));
-        internal static IEnumerable<Statenode> GetDescendants(
-            this Statenode stateNode)
+        internal static IEnumerable<ParsedStatenode> GetDescendants(
+            this ParsedStatenode stateNode)
             => stateNode.CataFold(
-                atomic => atomic.Yield() as IEnumerable<Statenode>,
-                final => final.Yield() as IEnumerable<Statenode>,
+                atomic => atomic.Yield() as IEnumerable<ParsedStatenode>,
+                final => final.Yield() as IEnumerable<ParsedStatenode>,
                 (compound, subStates) =>
                     compound.Append(subStates.SelectMany(a => a)),
                 (orthogonal, subStates) =>
                     orthogonal.Append(subStates.SelectMany(a => a))).Except(stateNode.Yield());
-        internal static IEnumerable<Statenode> AncestorsUntil(
-            this Statenode stateNode, Statenode until)
+        internal static IEnumerable<ParsedStatenode> AncestorsUntil(
+            this ParsedStatenode stateNode, ParsedStatenode until)
             => stateNode.GetParents().TakeWhile(parentStateNode => !parentStateNode.Equals(until));
 
-        internal static IEnumerable<Transition> GetTransitions(this Statenode statenode)
+        internal static IEnumerable<Transition> GetTransitions(this ParsedStatenode statenode)
             => statenode.Match(final => Enumerable.Empty<Transition>(), nonFinal => nonFinal.Transitions);
     }
 
     internal static class MicrostepExtensions
     {
-        internal static IEnumerable<Statenode> GetEnteredStateNodes(this IEnumerable<Microstep> microSteps)
+        internal static IEnumerable<ParsedStatenode> GetEnteredStateNodes(this IEnumerable<Microstep> microSteps)
             => microSteps.SelectMany(step => step.EnteredStatenodes);
-        internal static IEnumerable<Statenode> GetExitedStateNodes(this IEnumerable<Microstep> microSteps)
+        internal static IEnumerable<ParsedStatenode> GetExitedStateNodes(this IEnumerable<Microstep> microSteps)
             => microSteps.SelectMany(step => step.ExitedStatenodes);
     }
 
@@ -57,7 +57,7 @@ namespace Statecharts.NET
             IEvent @event)
             where TContext : IContext<TContext>
         {
-            Option<Transition> FirstMatchingTransition(Statenode node) =>
+            Option<Transition> FirstMatchingTransition(ParsedStatenode node) =>
                 node.GetTransitions()
                     .Where(transition => @event.Equals(transition.Event))
                     .FirstOrDefault(transition => transition.IsEnabled(context, @event.Data)).ToOption();
@@ -66,7 +66,7 @@ namespace Statecharts.NET
                 .GetActiveStatenodes(stateConfiguration)
                 .OrderByDescending(statenode => statenode.Depth)
                 .Aggregate(
-                    (excluded: Enumerable.Empty<Statenode>(), transitions: Enumerable.Empty<Transition>()),
+                    (excluded: Enumerable.Empty<ParsedStatenode>(), transitions: Enumerable.Empty<Transition>()),
                      (tuple, current) =>
                          tuple.excluded.Contains(current)
                              ? tuple
@@ -124,7 +124,7 @@ namespace Statecharts.NET
         private static EventList Apply(
             Microstep microStep,
             object context,
-            (Func<ExecutableAction, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopExitedStatenodes) functions)
+            (Func<ExecutableAction, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<ParsedStatenode>> stopExitedStatenodes) functions)
         {
             EventList ExecuteActionBlock(Actionblock actions)
             {
@@ -178,7 +178,7 @@ namespace Statecharts.NET
             ExecutableStatechart<TContext> statechart,
             State<TContext> sourceState,
             IEvent macrostepEvent,
-            (Func<ExecutableAction, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<Statenode>> stopExitedStatenodes) functions)
+            (Func<ExecutableAction, object, object, Option<OneOf<CurrentStep, NextStep>>> executeAction, Action<IEnumerable<ParsedStatenode>> stopExitedStatenodes) functions)
             where TContext : IContext<TContext>
         {
             var occuredEvents = new List<(IEvent @event, IEnumerable<Microstep> causedMicrosteps)>();
@@ -215,7 +215,7 @@ namespace Statecharts.NET
                     .GetActiveStatenodes(stateConfiguration)
                     .OrderByDescending(statenode => statenode.Depth)
                     .ThenBy(statenode => statenode.DocumentIndex)
-                    .Aggregate(Enumerable.Empty<Statenode>(),
+                    .Aggregate(Enumerable.Empty<ParsedStatenode>(),
                     (done, statenode) => statenode.Match(
                         atomic => done, 
                         done.Append,

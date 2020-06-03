@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Statecharts.NET.Interfaces;
 using Statecharts.NET.Language.Builders;
-using Statecharts.NET.Language.Builders.StateNode;
 using Statecharts.NET.Language.Builders.Transition;
 using Statecharts.NET.Model;
 using Statecharts.NET.Utilities;
@@ -119,47 +118,47 @@ namespace Statecharts.NET.Language
     }
     public static class Helpers
     {
-        public static WithEntryActions WithEntryActions(
+        public static StatenodeWithEntryActions WithEntryActions(
             this string name,
             ActionDefinition action,
             params ActionDefinition[] entryActions)
-            => new WithName(name).WithEntryActions(action, entryActions);
-        public static WithEntryActions WithEntryActions<TContext>(
+            => new StatenodeWithName(name).WithEntryActions(action, entryActions);
+        public static StatenodeWithEntryActions WithEntryActions<TContext>(
             this string name,
             OneOf<ActionDefinition, ActionDefinition<TContext>> action,
             params OneOf<ActionDefinition, ActionDefinition<TContext>>[] entryActions)
-            => new WithName(name).WithEntryActions(action, entryActions);
-        public static WithExitActions WithExitActions(
+            => new StatenodeWithName(name).WithEntryActions(action, entryActions);
+        public static StatenodeWithExitActions WithExitActions(
             this string name,
             ActionDefinition action,
             params ActionDefinition[] exitActions)
-            => new WithName(name).WithExitActions(action, exitActions);
-        public static WithExitActions WithExitActions<TContext>(
+            => new StatenodeWithName(name).WithExitActions(action, exitActions);
+        public static StatenodeWithExitActions WithExitActions<TContext>(
             this string name,
             OneOf<ActionDefinition, ActionDefinition<TContext>> action,
             params OneOf<ActionDefinition, ActionDefinition<TContext>>[] exitActions)
-            => new WithName(name).WithExitActions(action, exitActions);
-        public static WithTransitions WithTransitions(
+            => new StatenodeWithName(name).WithExitActions(action, exitActions);
+        public static StatenodeWithTransitions WithTransitions(
             this string name,
             TransitionDefinition transition,
             params TransitionDefinition[] transitions)
-            => new WithName(name).WithTransitions(transition, transitions);
-        public static WithTransitions WithTransitions(
+            => new StatenodeWithName(name).WithTransitions(transition, transitions);
+        public static StatenodeWithTransitions WithTransitions(
             this string name,
             IEnumerable<TransitionDefinition> transitions)
-            => new WithName(name).WithTransitions(transitions);
-        public static WithInvocations WithInvocations(
+            => new StatenodeWithName(name).WithTransitions(transitions);
+        public static StatenodeWithInvocations WithInvocations(
             this string name,
             ServiceDefinition service,
             params ServiceDefinition[] services)
-            => new WithName(name).WithInvocations(service, services);
+            => new StatenodeWithName(name).WithInvocations(service, services);
         public static StatenodeDefinition AsStatenodeDefinition(this string name)
-            => new WithName(name);
-        public static Final AsFinal(this string name)
-            => new WithName(name).AsFinal();
-        public static Compound AsCompound(this string name)
-            => new WithName(name).AsCompound();
-        public static Orthogonal AsOrthogonal(this string name)
-            => new WithName(name).AsOrthogonal();
+            => new StatenodeWithName(name);
+        public static FinalStatenode AsFinal(this string name)
+            => new StatenodeWithName(name).AsFinal();
+        public static CompoundStatenode AsCompound(this string name)
+            => new StatenodeWithName(name).AsCompound();
+        public static OrthogonalStatenode AsOrthogonal(this string name)
+            => new StatenodeWithName(name).AsOrthogonal();
     }
 }

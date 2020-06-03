@@ -12,9 +12,9 @@ namespace Statecharts.NET
 {
     internal static class ReadabilityExtensions
     {
-        internal static void CancelAll(this Dictionary<Statenode, CancellationTokenSource> cancellationTokens)
+        internal static void CancelAll(this Dictionary<ParsedStatenode, CancellationTokenSource> cancellationTokens)
             => cancellationTokens.Values.ToList().ForEach(token => token.Cancel());
-        internal static IEnumerable<Statenode> GetEnteredStateNodes<TContext>(this Macrostep<TContext> macrostep) where TContext : IContext<TContext> =>
+        internal static IEnumerable<ParsedStatenode> GetEnteredStateNodes<TContext>(this Macrostep<TContext> macrostep) where TContext : IContext<TContext> =>
             macrostep.Microsteps.SelectMany(microstep => microstep.EnteredStatenodes);
     }
 
@@ -74,11 +74,11 @@ namespace Statecharts.NET
             _isFinished = false;
         }
 
-        public IEnumerable<string> NextEvents => _statechart
+        public IEnumerable<ISendableEvent> NextEvents => _statechart
             .GetActiveStatenodes(_currentState.StateConfiguration)
             .SelectMany(statenode => statenode.GetTransitions())
-            .Select(transition => transition.Event is ISendableEvent @event ? @event.Name : null)
-            .WhereNotNull();
+            .Select(transition => transition.Event)
+            .OfType<ISendableEvent>();
 
         public Task RunAsync() => RunAsync(
             StateConfiguration.Empty(),
@@ -118,7 +118,7 @@ namespace Statecharts.NET
 
         public void Send(ISendableEvent @event) => HandleEvent(@event);
 
-        private void StopExitedStatenodes(IEnumerable<Statenode> statenodes)
+        private void StopExitedStatenodes(IEnumerable<ParsedStatenode> statenodes)
         {
             foreach (var statenode in statenodes)
                 _cancellation.TryCancel(statenode.Id);
@@ -143,7 +143,7 @@ namespace Statecharts.NET
                 });
             return result;
         }
-        private async void StartServices(IEnumerable<Statenode> statenodes)
+        private async void StartServices(IEnumerable<ParsedStatenode> statenodes)
         {
             var entered = statenodes
                 .Select(statenode => (statenode, services: statenode.Match(final => Enumerable.Empty<Service>(), nonFinal => nonFinal.Services)))

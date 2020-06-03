@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Statecharts.NET.Demos.Statecharts;
 using Statecharts.NET.Interfaces;
@@ -79,8 +80,8 @@ namespace Statecharts.NET.Demo
         ////                            () => Console.WriteLine("started"),
         ////                            () => Console.WriteLine("stopped")))));
 
-        private static NamedEvent Increment => Define.Event("INCREMENT");
-        private static NamedDataEventFactory<int> IncrementBy => Define.EventWithData<int>("INCREMENTBY");
+        private static NamedEvent Increment => Define.Event(nameof(Increment));
+        private static NamedDataEventFactory<int> IncrementBy => Define.EventWithData<int>(nameof(IncrementBy));
 
         private static readonly StatechartDefinition<FetchContext> DemoDefinition = Define.Statechart
             .WithInitialContext(new FetchContext {Retries = 0})
@@ -91,31 +92,30 @@ namespace Statecharts.NET.Demo
                     .WithInitialState("initial")
                     .WithStates(
                         "initial"
-                            .WithEntryActions<FetchContext>(Assign<FetchContext>(context => context.Retries += 20))
+                            //.WithEntryActions<FetchContext>(Assign<FetchContext>(context => context.Retries += 20))
                             .WithTransitions(
-                            On("START").TransitionTo.Sibling("multiplechoice"),
-                            On(IncrementBy).TransitionTo.Self
-                                .WithActions<FetchContext>(Assign<FetchContext, int>((context, amount) =>
-                                    context.Retries += amount)),
-                            On(Increment).TransitionTo.Self
-                                .WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++)))
-                            .AsCompound()
-                            .WithInitialState("1")
-                            .WithStates(
-                                "1".WithTransitions(Ignore(Increment)),
-                                "2"),
+                                On("START").TransitionTo.Sibling("multiplechoice"),
+                                On(IncrementBy).If<FetchContext>((_, amount) => amount == 42).TransitionTo.Sibling("multiplechoice"),
+                                On(IncrementBy).TransitionTo.Self.WithActions<FetchContext>(Assign<FetchContext, int>((context, amount) => context.Retries += amount)),
+                                On(Increment).TransitionTo.Self.WithActions<FetchContext>(Assign<FetchContext>(context => context.Retries++)))
+                            ////.AsCompound()
+                            ////.WithInitialState("1")
+                            ////.WithStates(
+                            ////    "1".WithTransitions(Ignore(Increment)),
+                            ////    "2"),
+                        ,
                         "multiplechoice".WithTransitions(On("RETRY").TransitionTo.Child("initial"))
-                            .AsCompound().WithInitialState("initial").WithStates(
-                                "initial".WithTransitions(
-                                        On("START").TransitionTo.Sibling("selecting"))
-                                    .WithInvocations(Define.Service.Activity(() => Console.WriteLine("start"),
-                                        () => Console.WriteLine("stop"))),
-                                "selecting".WithTransitions(
-                                    On("CORRECT").TransitionTo.Sibling("solved")),
+                            .AsCompound()
+                            .WithInitialState("initial")
+                            .WithStates(
+                                "initial"
+                                    .WithTransitions(On("START").TransitionTo.Sibling("selecting"))
+                                    .WithInvocations(Define.Service.Activity(() => Console.WriteLine("start"), () => Console.WriteLine("stop"))),
+                                "selecting"
+                                    .WithTransitions(On("CORRECT").TransitionTo.Sibling("solved")),
                                 "solved".AsFinal())
                             .OnDone.TransitionTo.Sibling("final"),
-                        "timeout".WithTransitions(
-                            On("COMPLETE").TransitionTo.Sibling("final")),
+                        "timeout".WithTransitions(On("COMPLETE").TransitionTo.Sibling("final")),
                         "final".AsFinal()));
 
         private static readonly StatechartDefinition<FetchContext> TestDefinition = Define.Statechart
@@ -153,7 +153,7 @@ namespace Statecharts.NET.Demo
             {"SendExample", Run(SendExample.Behaviour)},
             {"RaiseExample", Run(RaiseExample.Behaviour)},
             {"hier2", Run(Hierarchy.Hier2)},
-            {"Assign", Run(DemoDefinition)},
+            {"DemoDefinition", Run(DemoDefinition)},
             {"Playground", Run(Playground.Behaviour)},
         };
 
@@ -186,7 +186,7 @@ namespace Statecharts.NET.Demo
                     var eventType = Console.ReadLine();
                     switch (eventType)
                     {
-                        case { } when eventType.StartsWith("INCREMENTBY"):
+                        case { } when eventType.StartsWith(nameof(IncrementBy)):
                             running.Send(IncrementBy(int.Parse(eventType.Substring(11))));
                             break;
                         case null: break;
@@ -201,7 +201,7 @@ namespace Statecharts.NET.Demo
 
         private static void Main()
         {
-            _statecharts["Playground"]();
+            _statecharts["DemoDefinition"]();
         }
     }
 }

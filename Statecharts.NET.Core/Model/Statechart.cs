@@ -25,11 +25,11 @@ namespace Statecharts.NET.Model
     public abstract class ParsedStatechart<TContext>
         where TContext : IContext<TContext>
     {
-        public Statenode Rootnode { get; }
+        public ParsedStatenode Rootnode { get; }
 
         public string Id => Rootnode.Name;
 
-        protected ParsedStatechart(Statenode rootnode) =>
+        protected ParsedStatechart(ParsedStatenode rootnode) =>
             Rootnode = rootnode ?? throw new ArgumentNullException(nameof(rootnode));
     }
 
@@ -49,15 +49,15 @@ namespace Statecharts.NET.Model
     {
         internal Action<TContext, object> Done { get; set; }
         public TContext InitialContext { get; }
-        public IDictionary<StatenodeId, Statenode> Statenodes { get; }
+        public IDictionary<StatenodeId, ParsedStatenode> Statenodes { get; }
 
-        public ExecutableStatechart(Statenode rootnode, TContext initialContext, IDictionary<StatenodeId, Statenode> statenodes) : base(rootnode)
+        public ExecutableStatechart(ParsedStatenode rootnode, TContext initialContext, IDictionary<StatenodeId, ParsedStatenode> statenodes) : base(rootnode)
         {
             InitialContext = initialContext;
             Statenodes = statenodes;
         }
 
-        public IEnumerable<Statenode> GetActiveStatenodes(StateConfiguration stateConfiguration) => 
+        public IEnumerable<ParsedStatenode> GetActiveStatenodes(StateConfiguration stateConfiguration) => 
             stateConfiguration.FoldL().Select(entry => Statenodes[entry.StatenodeId]);
     }
     #endregion

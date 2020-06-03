@@ -32,15 +32,15 @@ namespace Statecharts.NET
                 child => sourceId.Child(child.StatenodeName, child.ChildStatenodesNames),
                 self => sourceId,
                 uniquelyIdentified => uniquelyIdentified.Id);
-        internal static IEnumerable<Statenode> GetTargetStatenodes(this IEnumerable<Target> targets, StatenodeId sourceId, Func<OneOf<StatenodeId, string>, Statenode> getStatenode) =>
+        internal static IEnumerable<ParsedStatenode> GetTargetStatenodes(this IEnumerable<Target> targets, StatenodeId sourceId, Func<OneOf<StatenodeId, string>, ParsedStatenode> getStatenode) =>
             targets.Select(target => getStatenode(StatenodeIdFor(sourceId, target)));
-        internal static Statenode GetTargetStatenode(this Target target, StatenodeId sourceId, Func<OneOf<StatenodeId, string>, Statenode> getStatenode) =>
+        internal static ParsedStatenode GetTargetStatenode(this Target target, StatenodeId sourceId, Func<OneOf<StatenodeId, string>, ParsedStatenode> getStatenode) =>
             getStatenode(StatenodeIdFor(sourceId, target));
     }
 
     internal static class EventDefinitionExtensions
     {
-        internal static IEvent Convert(this IEventDefinition eventDefinition, Statenode source, ServiceDefinition serviceDefinition, int serviceIndex)
+        internal static IEvent Convert(this IEventDefinition eventDefinition, ParsedStatenode source, ServiceDefinition serviceDefinition, int serviceIndex)
         {
             switch (eventDefinition)
             {
@@ -58,21 +58,21 @@ namespace Statecharts.NET
 
     internal static class TransitionDefinitionExtensions
     {
-        private static Transition Convert(this TransitionDefinition definition, Statenode source, Func<OneOf<StatenodeId, string>, Statenode> getStatenode, ServiceDefinition serviceDefinition, int serviceIndex) =>
+        private static Transition Convert(this TransitionDefinition definition, ParsedStatenode source, Func<OneOf<StatenodeId, string>, ParsedStatenode> getStatenode, ServiceDefinition serviceDefinition, int serviceIndex) =>
             definition.Match(
-                forbidden => new Transition(forbidden.Event, source, Enumerable.Empty<Statenode>(), Actionblock.Empty(), Option.None<Guard>(), true),
+                forbidden => new Transition(forbidden.Event, source, Enumerable.Empty<ParsedStatenode>(), Actionblock.Empty(), Option.None<Guard>(), true),
                 unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>(), false),
                 unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>(), false),
                 unguarded => new Transition(unguarded.Event.Convert(source, serviceDefinition, serviceIndex), source, unguarded.Targets.GetTargetStatenodes(source.Id, getStatenode), unguarded.Actions.Convert(), Option.None<Guard>(), false),
                 guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), (guarded.Guard as Guard).ToOption(), false),
                 guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption(), false),
                 guarded => new Transition(guarded.Event.Convert(source, serviceDefinition, serviceIndex), source, guarded.Targets.GetTargetStatenodes(source.Id, getStatenode), guarded.Actions.Convert(), guarded.Guard.AsBase().ToOption(), false));
-        private static Transition Convert(this InitialCompoundTransitionDefinition definition, Statenode source, Func<OneOf<StatenodeId, string>, Statenode> getStatenode) =>
+        private static Transition Convert(this InitialCompoundTransitionDefinition definition, ParsedStatenode source, Func<OneOf<StatenodeId, string>, ParsedStatenode> getStatenode) =>
             new Transition(new InitializeEvent(source.Id), source, definition.Target.GetTargetStatenode(source.Id, getStatenode).Yield(), definition.Actions.Convert(), Option.None<Guard>(), false);
-        private static Transition Convert(this DoneTransitionDefinition definition, Statenode source, Func<OneOf<StatenodeId, string>, Statenode> getStatenode) =>
+        private static Transition Convert(this DoneTransitionDefinition definition, ParsedStatenode source, Func<OneOf<StatenodeId, string>, ParsedStatenode> getStatenode) =>
             new Transition(new DoneEvent(source.Id), source, definition.Targets.GetTargetStatenodes(source.Id, getStatenode), definition.Actions.Convert(), definition.Guard.Map(guard => guard.AsBase()), false);
 
-        private static IEnumerable<Transition> GetNonFinalStatenodeTransitions(this NonFinalStatenodeDefinition definition, Statenode source, Func<OneOf<StatenodeId, string>, Statenode> getStatenode)
+        private static IEnumerable<Transition> GetNonFinalStatenodeTransitions(this NonFinalStatenodeDefinition definition, ParsedStatenode source, Func<OneOf<StatenodeId, string>, ParsedStatenode> getStatenode)
         {
             IEnumerable<(ServiceDefinition serviceDefinition, TransitionDefinition transitionDefinition, int serviceIndex)> GetServiceTransitionDefinitions(IEnumerable<ServiceDefinition> serviceDefinitions) =>
                 serviceDefinitions?.SelectMany((serviceDefinition, index) =>
@@ -96,9 +96,9 @@ namespace Statecharts.NET
             return regularTransitions.Concat(serviceTransitions);
         }
 
-        internal static IEnumerable<Transition> ConvertTransitions(this AtomicStatenodeDefinition definition, Statenode source, Func<OneOf<StatenodeId, string>, Statenode> getStatenode) =>
+        internal static IEnumerable<Transition> ConvertTransitions(this AtomicStatenodeDefinition definition, ParsedStatenode source, Func<OneOf<StatenodeId, string>, ParsedStatenode> getStatenode) =>
             definition.GetNonFinalStatenodeTransitions(source, getStatenode);
-        internal static IEnumerable<Transition> ConvertTransitions(this CompoundStatenodeDefinition definition, Statenode source, Func<OneOf<StatenodeId, string>, Statenode> getStatenode)
+        internal static IEnumerable<Transition> ConvertTransitions(this CompoundStatenodeDefinition definition, ParsedStatenode source, Func<OneOf<StatenodeId, string>, ParsedStatenode> getStatenode)
         {
             var initial = definition.InitialTransition.Convert(source, getStatenode);
             var done = definition.DoneTransition.Map(doneTransitionDefinition => doneTransitionDefinition.Convert(source, getStatenode)).Yield().WhereSome();
@@ -106,14 +106,14 @@ namespace Statecharts.NET
 
             return initial.Append(done).Concat(transitions);
         }
-        internal static IEnumerable<Transition> ConvertTransitions(this OrthogonalStatenodeDefinition definition, Statenode source, Func<OneOf<StatenodeId, string>, Statenode> getStatenode)
+        internal static IEnumerable<Transition> ConvertTransitions(this OrthogonalStatenodeDefinition definition, ParsedStatenode source, Func<OneOf<StatenodeId, string>, ParsedStatenode> getStatenode)
         {
             var done = definition.DoneTransition.Map(doneTransitionDefinition => doneTransitionDefinition.Convert(source, getStatenode)).Yield().WhereSome();
             var transitions = definition.GetNonFinalStatenodeTransitions(source, getStatenode);
 
             return done.Concat(transitions);
         }
-        internal static Transition GetInitialTransition(this OrthogonalStatenode statenode) =>
+        internal static Transition GetInitialTransition(this ParsedOrthogonalStatenode statenode) =>
             new Transition(new InitializeEvent(statenode.Id), statenode, statenode.Statenodes, Actionblock.Empty(), Option.None<Guard>(), false);
     }
 
@@ -121,7 +121,7 @@ namespace Statecharts.NET
     {
         internal static string GetId(this ServiceDefinition serviceDefinition, StatenodeId statenodeId, int serviceIndex)
             => serviceDefinition.Id.ValueOr($"{statenodeId.String}:service#{serviceIndex}");
-        internal static IEnumerable<Service> Convert(this IEnumerable<ServiceDefinition> serviceDefinitions, NonFinalStatenode statenode)
+        internal static IEnumerable<Service> Convert(this IEnumerable<ServiceDefinition> serviceDefinitions, ParsedNonFinalStatenode statenode)
         {
             Service CreateServiceFromActivity(ActivityServiceDefinition service, string id) =>
                 new Service(id, token =>
@@ -145,15 +145,15 @@ namespace Statecharts.NET
 
     public static class Parser
     {
-        private static (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) ParseStatenode(
+        private static (ParsedStatenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) ParseStatenode(
             StatenodeDefinition definition,
-            Statenode parent,
+            ParsedStatenode parent,
             IDictionary<StatenodeId, StatenodeDefinition> definitions,
             int documentIndex)
         {
-            IEnumerable<(Statenode statenode, StatenodeDefinition definition)> ParseChildren(
+            IEnumerable<(ParsedStatenode statenode, StatenodeDefinition definition)> ParseChildren(
                 IEnumerable<StatenodeDefinition> substateNodeDefinitions,
-                Statenode recursedParent) =>
+                ParsedStatenode recursedParent) =>
                 substateNodeDefinitions.Select((substateDefinition, index) =>
                     (ParseStatenode(substateDefinition, recursedParent, definitions, index).root, substateDefinition));
 
@@ -162,22 +162,22 @@ namespace Statecharts.NET
             var entryActions = definition.EntryActions.Convert();
             var exitActions = definition.ExitActions.Convert();
 
-            (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateAtomicStatenode(AtomicStatenodeDefinition atomicDefinition)
+            (ParsedStatenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateAtomicStatenode(AtomicStatenodeDefinition atomicDefinition)
             {
-                var statenode = new AtomicStatenode(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions);
+                var statenode = new ParsedAtomicStatenode(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions);
                 statenode.Services = atomicDefinition.Services.Convert(statenode);
                 definitions.Add(statenode.Id, atomicDefinition);
                 return (statenode, definitions);
             }
-            (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateFinalStatenode(FinalStatenodeDefinition finalDefinition)
+            (ParsedStatenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateFinalStatenode(FinalStatenodeDefinition finalDefinition)
             {
-                var statenode = new FinalStatenode(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions);
+                var statenode = new ParsedFinalStatenode(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions);
                 definitions.Add(statenode.Id, finalDefinition);
                 return (statenode, definitions);
             }
-            (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateCompoundStatenode(CompoundStatenodeDefinition compoundDefinition)
+            (ParsedStatenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateCompoundStatenode(CompoundStatenodeDefinition compoundDefinition)
             {
-                var statenode = new CompoundStatenode(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions);
+                var statenode = new ParsedCompoundStatenode(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions);
                 var children = ParseChildren(compoundDefinition.Statenodes, statenode).ToList();
                 var statenodes = children.Select(child => child.statenode);
 
@@ -187,9 +187,9 @@ namespace Statecharts.NET
 
                 return (statenode, definitions);
             }
-            (Statenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateOrthogonalStatenode(OrthogonalStatenodeDefinition orthogonalDefinition)
+            (ParsedStatenode root, IDictionary<StatenodeId, StatenodeDefinition> definitions) CreateOrthogonalStatenode(OrthogonalStatenodeDefinition orthogonalDefinition)
             {
-                var statenode = new OrthogonalStatenode(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions);
+                var statenode = new ParsedOrthogonalStatenode(parent, name, uniqueIdentifier, documentIndex, entryActions, exitActions);
                 var children = ParseChildren(orthogonalDefinition.Statenodes, statenode).ToList();
                 var statenodes = children.Select(child => child.statenode);
 
@@ -207,20 +207,20 @@ namespace Statecharts.NET
                 CreateOrthogonalStatenode);
         }
 
-        private static IDictionary<StatenodeId, (StatenodeDefinition definition, Statenode statenode)> CreateLookup(
-            Statenode rootnode,
+        private static IDictionary<StatenodeId, (StatenodeDefinition definition, ParsedStatenode statenode)> CreateLookup(
+            ParsedStatenode rootnode,
             IDictionary<StatenodeId, StatenodeDefinition> definitions) =>
             rootnode
-                .CataFold<IEnumerable<Statenode>>(
+                .CataFold<IEnumerable<ParsedStatenode>>(
                     atomic => atomic.Yield(),
                     final => final.Yield(),
                     (compound, children) => compound.Append(children.SelectMany(Functions.Identity)),
                     (orthogonal, children) => orthogonal.Append(children.SelectMany(Functions.Identity)))
                 .ToDictionary(statenode => statenode.Id, statenode => (definitions[statenode.Id], statenode));
 
-        private static void ParseAndSetTransitions(IDictionary<StatenodeId, (StatenodeDefinition definition, Statenode statenode)> lookup)
+        private static void ParseAndSetTransitions(IDictionary<StatenodeId, (StatenodeDefinition definition, ParsedStatenode statenode)> lookup)
         {
-            Statenode GetStatenode(OneOf<StatenodeId, string> id) => id.Match(
+            ParsedStatenode GetStatenode(OneOf<StatenodeId, string> id) => id.Match(
                 statenodeId => lookup[statenodeId].statenode,
                 uniqueId => lookup.Values.FirstOrDefault(tuple => tuple.statenode.UniqueIdentifier.Equals(uniqueId.ToOption())).statenode);
 
@@ -235,9 +235,9 @@ namespace Statecharts.NET
             }
         }
 
-        private static void ParseAndSetDelayedTransitions(IEnumerable<Statenode> statenodes)
+        private static void ParseAndSetDelayedTransitions(IEnumerable<ParsedStatenode> statenodes)
         {
-            IEnumerable<StartDelayedTransitionAction> GetDelayedActions(NonFinalStatenode nonFinalStatenode) =>
+            IEnumerable<StartDelayedTransitionAction> GetDelayedActions(ParsedNonFinalStatenode nonFinalStatenode) =>
                 nonFinalStatenode.Transitions.Select(transition =>
                     transition.Event is DelayedEvent delayed
                         ? new StartDelayedTransitionAction(nonFinalStatenode.Id, (TimeSpan)delayed.Data)

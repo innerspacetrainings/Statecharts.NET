@@ -105,13 +105,13 @@ namespace Statecharts.NET.Model
     public class Transition
     {
         public IEvent Event { get; }
-        public Statenode Source { get; }
-        public IEnumerable<Statenode> Targets { get; }
+        public ParsedStatenode Source { get; }
+        public IEnumerable<ParsedStatenode> Targets { get; }
         public Actionblock Actions { get; }
         public Option<Guard> Guard { get; }
         public bool IsForbidden { get; }
 
-        internal Transition(IEvent @event, Statenode source, IEnumerable<Statenode> targets, Actionblock actions, Option<Guard> guard, bool isForbidden)
+        internal Transition(IEvent @event, ParsedStatenode source, IEnumerable<ParsedStatenode> targets, Actionblock actions, Option<Guard> guard, bool isForbidden)
         {
             Event = @event;
             Source = source;
